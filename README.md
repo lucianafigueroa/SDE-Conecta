@@ -10,5 +10,5 @@
 2. `npm install` para instalar las dependencias actuales, siempre y cuando haya una actualizacion en el package.json
 3. `npm start` para ejecutar el proyecto una vez terminada la instalacion/actualizacion de las dependencias
 
-> [!IMPORTANTE]
+> [!IMPORTANT]
 > Leer siempre la consola. Tener en cuenta que ahi se expresan los errores de ejecucion. Tambien sirve de ayuda para ejecutar la app en los distintos entornos (web, android, iOS).
