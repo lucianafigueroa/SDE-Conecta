@@ -37,7 +37,7 @@ export default function Bienvenida({ navigation }) {
           title="Registrarse"
           buttonStyle={buttonStyles.secondary}
           textStyle={textStyles.mainText}
-          onPress={() => navigation.navigate('Registro')}
+          onPress={() => navigation.navigate('Seleccion')}
         />
 
         <View style={{ flexDirection: "row", marginBottom: 67, justifyContent: "space-between" }}>
