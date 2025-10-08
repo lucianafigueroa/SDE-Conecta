@@ -22,8 +22,7 @@ export default function VerificarNumero({ navigation }) {
 
   const handleContinuar = () => {
     if (!error && numero) {
-      console.log("Número válido: +54" + numero);
-      // Aquí podrías navegar a la siguiente pantalla o actualizar estado
+      navigation.navigate("VerificarCodigo");
     }
   };
 
@@ -56,8 +55,8 @@ export default function VerificarNumero({ navigation }) {
           onPress={handleContinuar}
           buttonStyle={[
             buttonStyles.main,
-            { width: "90%" }, // hace el botón más ancho
-            numero && !error ? {} : { backgroundColor: "#ccc" } // gris si no válido
+            { width: "90%" }, //
+            numero && !error ? {} : { backgroundColor: "#ccc" }
           ]}
           textStyle={textStyles.mainText}
           disabled={!numero || error}
