@@ -6,6 +6,8 @@ import Registro from './src/screens/Registro.js';
 import Seleccion from './src/screens/Seleccion.js';
 import Registrarse1 from './src/screens/Registrarse1.js';
 import VerificarNumero from './src/screens/VerificarNumero.js';
+import VerificarCodigo from './src/screens/VerificarCodigo.js';
+import InicioCliente from './src/screens/InicioCliente.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +21,8 @@ export default function App() {
         <Stack.Screen name="Seleccion" component={Seleccion} />
         <Stack.Screen name="Registrarse1" component={Registrarse1} />
         <Stack.Screen name="VerificarNumero" component={VerificarNumero} />
+        <Stack.Screen name="VerificarCodigo" component={VerificarCodigo} />
+        <Stack.Screen name="InicioCliente" component={InicioCliente} />
       </Stack.Navigator>
     </NavigationContainer>
   );
