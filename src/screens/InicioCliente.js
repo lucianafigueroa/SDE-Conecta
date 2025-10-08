@@ -7,72 +7,126 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  Dimensions, // Necesario para estilos sensibles como los que usamos antes
 } from "react-native";
-import Button from "../components/Button";
+// import Button from "../components/Button"; // Componente externo no definido, lo comentamos por ahora
 
 import placeholder from "../assets/images/placeholder.png";
 import banner from "../assets/images/banner.png";
 import limpieza from "../assets/images/limpieza.png";
 import mujer from "../assets/images/mujer.png";
 
+const { width } = Dimensions.get('window'); // Definimos width para estilos
+
 export default function InicioCliente({ navigation }) {
+  // Datos de navegación inferior
+  const navTabs = [
+    { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
+    { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
+    { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
+    { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' }, // ¡Aquí está el cambio!
+  ];
+
+  const handleNavigation = (screenName) => {
+    // Solo navegamos si la pantalla no es la actual (o si queremos recargarla)
+    if (screenName && screenName !== 'InicioCliente') {
+        navigation.navigate(screenName);
+    }
+    // Si es "Inicio", podrías hacer un scroll to top o no hacer nada,
+    // ya que probablemente ya estás en esta pantalla.
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
 
+        {/* --- Header --- */}
         <View style={styles.header}>
+          {/* El diseño anterior tenía el header naranja y el saludo en blanco/crema */}
           <Text style={styles.headerText}>Hola Luciana</Text>
           <Text style={styles.locationText}>Av. Belgrano Sur 281</Text>
+          {/* Faltaría el botón de menú que estaba en la esquina superior derecha */}
         </View>
 
+        {/* --- Search Bar (Simulación de barra flotante) --- */}
         <View style={styles.searchContainer}>
           <Text style={styles.searchText}>Buscar categoría</Text>
         </View>
 
 
+        {/* --- Banner --- */}
         <View style={styles.bannerContainer}>
           <Image source={banner} style={styles.bannerImage} resizeMode="cover" />
+          {/* Aquí faltarían los puntos del carrusel y el texto del banner */}
         </View>
 
+        {/* --- Servicios --- */}
         <View style={styles.servicesSection}>
-          <Text style={styles.sectionTitle}>Servicios</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Servicios</Text>
+            <TouchableOpacity onPress={() => console.log('Ver más servicios')}>
+               <Text style={styles.verMasLink}>Ver más ›</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.servicesContainer}>
+            {/* Limitamos a 4 elementos por fila para el grid */}
             {["Limpieza", "Albañil", "Electricista", "Gasista"].map((service, index) => (
-              <View key={index} style={styles.serviceCard}>
+              <TouchableOpacity key={index} style={styles.serviceCard}>
                 <Image source={limpieza} style={styles.serviceIcon} />
                 <Text style={styles.serviceName}>{service}</Text>
-                <TouchableOpacity>
-                  <Text style={styles.verMas}>Ver más</Text>
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
 
+        {/* --- Recomendados --- */}
         <View style={styles.recommendedSection}>
-          <Text style={styles.sectionTitle}>Recomendados</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recomendados</Text>
+            <TouchableOpacity onPress={() => console.log('Ver más recomendados')}>
+               <Text style={styles.verMasLink}>Ver más ›</Text>
+            </TouchableOpacity>
+          </View>
+
           {[
             { name: "Lucía Pérez", rating: 5, reviews: 150, service: "Servicio de Limpieza" },
-            { name: "Pablo Mendoza", rating: 5, reviews: 150, service: "Servicio de Limpieza" },
+            { name: "Pablo Mendoza", rating: 4, reviews: 90, service: "Servicio de Limpieza" },
           ].map((provider, index) => (
-            <View key={index} style={styles.providerCard}>
+            <TouchableOpacity key={index} style={styles.providerCard}>
               <Image source={mujer} style={styles.providerImage} />
               <View style={styles.providerInfo}>
                 <Text style={styles.providerName}>{provider.name}</Text>
                 <Text style={styles.providerRating}>⭐ {provider.rating} ({provider.reviews})</Text>
                 <Text style={styles.providerService}>{provider.service}</Text>
               </View>
-            </View>
+              <Text style={styles.providerArrow}>›</Text>
+            </TouchableOpacity>
           ))}
         </View>
 
       </ScrollView>
 
+      {/* --- Barra de Navegación Inferior (bottomNav) --- */}
       <View style={styles.bottomNav}>
-        {["Inicio", "Prestadores", "Calificaciones", "Perfil"].map((tab, index) => (
-          <TouchableOpacity key={index} style={styles.navItem}>
-            <Image source={placeholder} style={styles.navIcon} />
-            <Text style={styles.navText}>{tab}</Text>
+        {navTabs.map((tab, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => handleNavigation(tab.screen)} // Uso de la función de navegación
+          >
+            <Image
+              source={tab.icon}
+              style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
+            />
+            <Text
+              style={[
+                styles.navText,
+                tab.name === 'Inicio' && styles.navTextActive // 'Inicio' como activo
+              ]}
+            >
+              {tab.name}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
