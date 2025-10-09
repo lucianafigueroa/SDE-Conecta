@@ -110,7 +110,7 @@ export default function Registrarse({ navigation }) {
         {/* Botón Registrarse */}
         <TouchableOpacity
           style={[buttonStyles.main, registerStyles.registerButtonOverride]}
-          onPress={() => console.log("Registrarse")}
+          onPress={() => navigation.navigate('Seleccion')}
         >
           <Text style={textStyles.mainText}>Registrarse</Text>
         </TouchableOpacity>
