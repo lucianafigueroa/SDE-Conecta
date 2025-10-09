@@ -14,6 +14,8 @@ import {
 // Importaciones de assets (usaremos placeholder para simular todos los SVG/PNG)
 import placeholder from "../assets/images/placeholder.png"; // Usaremos uno general
 const ArrowPrevSmall = placeholder; // Simulación
+
+// --- Componente CustomerReviews (Filtro) ---
 const CustomerReviews = ({ text, text1, style }) => (
   <View style={[styles.customerReviewsContainer, style]}>
     <Text style={styles.customerReviewsTitle}>{text}</Text>
@@ -95,18 +97,17 @@ const reviewsData = [
 
 
 export default function Calificaciones({ navigation }) {
-    // Definimos las pestañas de navegación para la barra inferior (Tab Bar)
-    const navTabs = [
+
+      const navTabs = [
         { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
         { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
         { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
-        { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' },
-    ];
+        { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' }, // ¡Aquí está el cambio!
+      ];
 
     const handleNavigation = (screenName) => {
         if (screenName) {
-            // navigation.navigate(screenName);
-            console.log(`Navegando a: ${screenName}`);
+            navigation.navigate(screenName)
         }
     };
 
@@ -115,12 +116,6 @@ export default function Calificaciones({ navigation }) {
 
             {/* --- Header Fijo Blanco --- */}
             <View style={styles.headerBackground} />
-
-            {/* --- Barra de Estado (Simulación) --- */}
-            <View style={styles.statusBar}>
-                <Text style={styles.timeText}>9:41</Text>
-                <View style={styles.statusIcons} />
-            </View>
 
             {/* --- Título de la Vista --- */}
             <View style={styles.titleContainer}>
@@ -141,6 +136,7 @@ export default function Calificaciones({ navigation }) {
             </View>
 
             {/* ScrollView para el contenido listado */}
+            {/* Se usa FlatList dentro de ScrollView con scrollEnabled={false} para evitar problemas de anidamiento */}
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
                 {/* Lista de Calificaciones */}
@@ -170,32 +166,29 @@ export default function Calificaciones({ navigation }) {
 
             </ScrollView>
 
-            {/* --- Barra de Navegación Inferior (Tab Bar) --- */}
-            <View style={styles.bottomNav}>
-                {navTabs.map((tab, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={styles.navItem}
-                        onPress={() => handleNavigation(tab.screen)}
-                    >
-                        <Image
-                            source={tab.icon}
-                            style={[
-                                styles.navIcon,
-                                tab.name === 'Calificaciones' && styles.navIconActive
-                            ]}
-                        />
-                        <Text
-                            style={[
-                                styles.navText,
-                                tab.name === 'Calificaciones' && styles.navTextActive
-                            ]}
-                        >
-                            {tab.name}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+           {/* --- Barra de Navegación Inferior (bottomNav) --- */}
+                 <View style={styles.bottomNav}>
+                   {navTabs.map((tab, index) => (
+                     <TouchableOpacity
+                       key={index}
+                       style={styles.navItem}
+                       onPress={() => handleNavigation(tab.screen)} // Uso de la función de navegación
+                     >
+                       <Image
+                         source={tab.icon}
+                         style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
+                       />
+                       <Text
+                         style={[
+                           styles.navText,
+                           tab.name === 'Inicio' && styles.navTextActive // 'Inicio' como activo
+                         ]}
+                       >
+                         {tab.name}
+                       </Text>
+                     </TouchableOpacity>
+                   ))}
+                 </View>
         </SafeAreaView>
     );
 }
@@ -214,6 +207,7 @@ const reviewStyles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        marginTop: 5
     },
     contentContainer: {
         flexDirection: 'row',
@@ -242,6 +236,7 @@ const reviewStyles = StyleSheet.create({
         width: '100%',
     },
     name: {
+        // Asumiendo que tienes una fuente 'Poppins-Bold' cargada
         fontFamily: 'Poppins-Bold',
         fontWeight: 'bold',
         fontSize: 20,
@@ -262,6 +257,7 @@ const reviewStyles = StyleSheet.create({
         marginRight: 2,
     },
     dateText: {
+        // Asumiendo que tienes una fuente 'Inter-Medium' cargada
         fontFamily: 'Inter-Medium',
         fontWeight: '500',
         fontSize: 12,
@@ -269,6 +265,7 @@ const reviewStyles = StyleSheet.create({
         order: 1, // Mueve la fecha a la izquierda
     },
     reviewText: {
+        // Asumiendo que tienes una fuente 'Poppins-Medium' cargada
         fontFamily: 'Poppins-Medium',
         fontWeight: '500',
         fontSize: 10,
@@ -278,6 +275,7 @@ const reviewStyles = StyleSheet.create({
         textAlign: 'left',
     },
     readMore: {
+        // Asumiendo que tienes una fuente 'Inter-Medium' cargada
         fontFamily: 'Inter-Medium',
         fontWeight: '500',
         fontSize: 14,
@@ -301,26 +299,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         zIndex: 1,
     },
-    statusBar: {
-        position: 'absolute',
-        top: 10,
-        left: 20,
-        right: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        zIndex: 10,
-    },
-    timeText: {
-        fontSize: 17,
-        fontWeight: '500',
-        color: 'black',
-        fontFamily: 'Inter-Medium',
-    },
     statusIcons: {},
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 73,
+        marginTop: 50,
         paddingHorizontal: 32,
         zIndex: 10,
         width: '100%',
@@ -344,8 +327,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        paddingHorizontal: 32,
-        marginTop: 20,
+        paddingHorizontal: 50,
         zIndex: 5,
         width: '100%',
     },
@@ -373,8 +355,8 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         flexGrow: 1,
-        paddingTop: HEADER_HEIGHT + 30,
-        paddingBottom: 100,
+        paddingTop: 10, // Ajuste para espacio debajo del filtro
+        paddingBottom: 100, // Espacio para el Tab Bar
     },
     paginationContainer: {
         flexDirection: 'row',
@@ -393,11 +375,12 @@ const styles = StyleSheet.create({
     dotActive: {
         backgroundColor: '#2c3e50',
     },
+    // --- ESTILOS DEL TAB BAR (Ya completos y estilizados) ---
     bottomNav: {
         position: 'absolute',
         bottom: 0,
         width: width,
-        height: 84,
+        height: 84, // Altura mayor que el otro ejemplo
         backgroundColor: 'white',
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -433,6 +416,7 @@ const styles = StyleSheet.create({
         opacity: 1,
         fontWeight: '600',
         color: '#2c3e50',
+        // Asumiendo que tienes una fuente 'Roboto-Medium' cargada
         fontFamily: 'Roboto-Medium',
-    },
+    }
 });
