@@ -83,7 +83,7 @@ export default function IniciarSesion({ navigation }) {
 
         <TouchableOpacity
           style={[buttonStyles.main, styles.loginButtonOverride]}
-          onPress={() => console.log("Iniciar Sesión")}
+          onPress={() => navigation.navigate('InicioCliente')}
         >
           <Text style={textStyles.mainText}>Iniciar Sesión</Text>
         </TouchableOpacity>
