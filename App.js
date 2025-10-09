@@ -10,6 +10,7 @@ import VerificarCodigo from './src/screens/VerificarCodigo.js';
 import InicioCliente from './src/screens/InicioCliente.js';
 import MenuUsuario from './src/screens/MenuUsuario.js';
 import Prestadores from './src/screens/Prestadores.js';
+import Calificaciones from './src/screens/Calificaciones.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="InicioCliente" component={InicioCliente} />
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="Prestadores" component={Prestadores} />
+        <Stack.Screen name="Calificaciones" component={Calificaciones} />
       </Stack.Navigator>
     </NavigationContainer>
   );
