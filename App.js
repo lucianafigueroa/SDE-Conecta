@@ -11,13 +11,18 @@ import InicioCliente from './src/screens/InicioCliente.js';
 import MenuUsuario from './src/screens/MenuUsuario.js';
 import Prestadores from './src/screens/Prestadores.js';
 import Calificaciones from './src/screens/Calificaciones.js';
+import MenuProfesional from './src/screens/MenuProfesional.js';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        // ➡️ CAMBIA ESTO: Establece la pantalla que quieres ver
+        initialRouteName="Bienvenida"
+      >
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Registro" component={Registro} />
@@ -29,6 +34,7 @@ export default function App() {
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="Prestadores" component={Prestadores} />
         <Stack.Screen name="Calificaciones" component={Calificaciones} />
+        <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
       </Stack.Navigator>
     </NavigationContainer>
   );
