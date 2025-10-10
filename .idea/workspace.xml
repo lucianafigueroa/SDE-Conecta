@@ -5,19 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="307f4c9f-4e43-48fb-8848-d0d8cd1ea64e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/assets/images/facebook.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/instagram.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/linkedin.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/mail.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/phone.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/twitter.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/whatsapp.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/Contactanos.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/MiPerfil.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/MariaCarrizo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/arrow.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/localizacion.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/servicio1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/servicio2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/servicio3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/star.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/tiempo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/screens/VerPerfil.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/screens/InicioCliente.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/InicioCliente.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/screens/MenuUsuario.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/MenuUsuario.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +27,6 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="ProjectErrors" />
