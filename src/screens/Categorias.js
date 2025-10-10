@@ -14,48 +14,48 @@ import { useNavigation } from '@react-navigation/native'; // Para la flecha de a
 import Svg, { Path } from 'react-native-svg';
 
 
-const group427321957 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321958 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321961 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321963 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321959 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321962 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321966 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321964 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321965 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321969 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321967 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321968 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321972 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321970 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321971 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321975 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321973 = require('../assets/images/placeholder.png'); // Placeholder
-const group427321974 = require('../assets/images/placeholder.png'); // Placeholder
+const group427321957 = require('../assets/images/limpiezaIcono.png'); // Placeholder
+const group427321958 = require('../assets/images/albañilIcono.png'); // Placeholder
+const group427321961 = require('../assets/images/electricistaIcono.png'); // Placeholder
+const group427321963 = require('../assets/images/gasistaIcono.png'); // Placeholder
+const group427321959 = require('../assets/images/cerrajeroIcono.png'); // Placeholder
+const group427321962 = require('../assets/images/plomeroIcono.png'); // Placeholder
+const group427321966 = require('../assets/images/pintorIcono.png'); // Placeholder
+const group427321964 = require('../assets/images/pileteroIcono.png'); // Placeholder
+const group427321965 = require('../assets/images/durlockIcono.png'); // Placeholder
+const group427321969 = require('../assets/images/carpinteroIcono.png'); // Placeholder
+const group427321967 = require('../assets/images/herreroIcono.png'); // Placeholder
+const group427321968 = require('../assets/images/aireIcono.png'); // Placeholder
+const group427321972 = require('../assets/images/limpiezaIcono.png'); // Placeholder
+const group427321970 = require('../assets/images/albañilIcono.png'); // Placeholder
+const group427321971 = require('../assets/images/electricistaIcono.png'); // Placeholder
+const group427321975 = require('../assets/images/gasistaIcono.png'); // Placeholder
+const group427321973 = require('../assets/images/cerrajeroIcono.png'); // Placeholder
+const group427321974 = require('../assets/images/plomeroIcono.png'); // Placeholder
 
 
 // -----------------------------------------------------------------------------
 //  2. DATOS DE CATEGORÍAS
 // -----------------------------------------------------------------------------
 const categories = [
-  { id: 1, image: group427321957, label: 'Cleaning' },
-  { id: 2, image: group427321958, label: 'Repairing' },
-  { id: 3, image: group427321961, label: 'Electrician' },
-  { id: 4, image: group427321963, label: 'Carpenter' },
-  { id: 5, image: group427321959, label: 'Repairing' },
-  { id: 6, image: group427321962, label: 'Electrician' },
-  { id: 7, image: group427321966, label: 'Carpenter' },
-  { id: 8, image: group427321964, label: 'Repairing' },
-  { id: 9, image: group427321965, label: 'Electrician' },
-  { id: 10, image: group427321969, label: 'Carpenter' },
-  { id: 11, image: group427321967, label: 'Repairing' },
-  { id: 12, image: group427321968, label: 'Electrician' },
-  { id: 13, image: group427321972, label: 'Carpenter' },
-  { id: 14, image: group427321970, label: 'Repairing' },
-  { id: 15, image: group427321971, label: 'Electrician' },
-  { id: 16, image: group427321975, label: 'Carpenter' },
-  { id: 17, image: group427321973, label: 'Repairing' },
-  { id: 18, image: group427321974, label: 'Electrician' },
+  { id: 1, image: group427321957, label: 'Limpieza' },
+  { id: 2, image: group427321958, label: 'Albañil' },
+  { id: 3, image: group427321961, label: 'Electricista' },
+  { id: 4, image: group427321963, label: 'Gasista' },
+  { id: 5, image: group427321959, label: 'Cerrajero' },
+  { id: 6, image: group427321962, label: 'Plomero' },
+  { id: 7, image: group427321966, label: 'Pintor' },
+  { id: 8, image: group427321964, label: 'Piletero' },
+  { id: 9, image: group427321965, label: 'Durlock' },
+  { id: 10, image: group427321969, label: 'Carpintero' },
+  { id: 11, image: group427321967, label: 'Herrero' },
+  { id: 12, image: group427321968, label: 'AireAcondicionado' },
+  { id: 13, image: group427321972, label: 'Limpieza' },
+  { id: 14, image: group427321970, label: 'Albañil' },
+  { id: 15, image: group427321971, label: 'Electricista' },
+  { id: 16, image: group427321975, label: 'Gasista' },
+  { id: 17, image: group427321973, label: 'Cerrajero' },
+  { id: 18, image: group427321974, label: 'Plomero' },
 ];
 
 const { width } = Dimensions.get('window');
