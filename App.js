@@ -49,7 +49,7 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
         // ➡️ CAMBIA ESTO: Establece la pantalla que quieres ver
-        initialRouteName="Bienvenida"
+        initialRouteName="PerfilInfoPersonal"
       >
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
         <Stack.Screen name="Login" component={Login} />
