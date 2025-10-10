@@ -1,10 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
+
 const PADDING_HORIZONTAL = 20;
 const USER_COLOR = '#2c3e50';
 const ALERT_COLOR = '#FF8C00';
 const LOGOUT_COLOR = 'red';
+
+// --- ICONOS ---
 const ChevronLeft = ({ color = USER_COLOR, size = 28 }) => (
 	<Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 		<Polyline points="15 18 9 12 15 6"/>
@@ -40,11 +43,15 @@ const LogOutIcon = ({ color, size = 22 }) => (
 		<Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><Path d="M16 17l5-5-5-5M21 12H9"/>
 	</Svg>
 );
+
+// --- DATOS DEL USUARIO ---
 const userData = {
 	name: 'Maria Carrizo',
 	email: 'mariacarrizo@gmail.com',
 	profilePic: 'https://via.placeholder.com/150/F08080/FFFFFF?text=MC'
 };
+
+// --- MENÚ ---
 const menuItems = [
 	{ id: 'info', Icon: UserIcon, label: 'Información personal', action: 'personalInfo', color: USER_COLOR },
 	{ id: 'security', Icon: SecurityIcon, label: 'Cuenta y seguridad', action: 'security', color: USER_COLOR },
@@ -52,6 +59,8 @@ const menuItems = [
 	{ id: 'support', Icon: SupportIcon, label: 'Ayuda y soporte', action: 'support', color: USER_COLOR },
 	{ id: 'logout', Icon: LogOutIcon, label: 'Cerrar Sesión', action: 'logout', color: LOGOUT_COLOR }
 ];
+
+// --- ITEM DE MENÚ ---
 const MenuItem = ({ Icon, label, color, onPress }) => (
 	<TouchableOpacity style={styles.menuItemContainer} onPress={onPress}>
 		<View style={styles.menuItemLeft}>
@@ -61,25 +70,45 @@ const MenuItem = ({ Icon, label, color, onPress }) => (
 		<ChevronRight color="#A0A0A0" size={24} />
 	</TouchableOpacity>
 );
+
+// --- ACCIONES ---
 const handleAction = (action, navigation) => {
 	console.log(`Action taken: ${action}`);
-	if (action === 'logout') {
-		if (navigation) navigation.navigate('CerrarSesionProfesional');
-		else console.warn('Error de Navegación: El objeto navigation es indefinido.');
-	} else if (action === 'goBack' && navigation) {
-		navigation.goBack();
+	if (!navigation) {
+		console.warn('Error de Navegación: El objeto navigation es indefinido.');
+		return;
+	}
+
+	switch (action) {
+		case 'personalInfo':
+			navigation.navigate('PerfilInfoPersonal');
+			break;
+		case 'logout':
+			navigation.navigate('CerrarSesionProfesional');
+			break;
+		case 'goBack':
+			navigation.goBack();
+			break;
+		default:
+			console.log(`No se definió una acción para: ${action}`);
+			break;
 	}
 };
+
+// --- COMPONENTE PRINCIPAL ---
 export const PerfilProfesional = ({ navigation }) => {
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<View style={styles.container}>
+				{/* Encabezado */}
 				<View style={styles.header}>
 					<TouchableOpacity onPress={() => handleAction('goBack', navigation)}>
 						<ChevronLeft />
 					</TouchableOpacity>
 					<Text style={styles.headerTitle}>Mi perfil</Text>
 				</View>
+
+				{/* Información del usuario */}
 				<View style={styles.userInfoCard}>
 					<Image source={{ uri: userData.profilePic }} style={styles.profileImage}/>
 					<View style={styles.userInfoText}>
@@ -87,22 +116,34 @@ export const PerfilProfesional = ({ navigation }) => {
 						<Text style={styles.userEmail}>{userData.email}</Text>
 					</View>
 				</View>
+
+				{/* Lista de opciones */}
 				<View style={styles.menuList}>
 					{menuItems.map((item) => (
-						<MenuItem key={item.id} Icon={item.Icon} label={item.label} color={item.color} onPress={() => handleAction(item.action, navigation)} />
+						<MenuItem 
+							key={item.id} 
+							Icon={item.Icon} 
+							label={item.label} 
+							color={item.color} 
+							onPress={() => handleAction(item.action, navigation)} 
+						/>
 					))}
 				</View>
+
+				{/* Pie */}
 				<View style={styles.footer}>
 					<View style={styles.teamInfo}>
 						<UserIcon color="#666" size={16}/>
 						<Text style={styles.teamText}>Los más copados team</Text>
 					</View>
-					<Text style={styles.versionText}>Version 1.0</Text>
+					<Text style={styles.versionText}>Versión 1.0</Text>
 				</View>
 			</View>
 		</SafeAreaView>
 	);
 };
+
+// --- ESTILOS ---
 const styles = StyleSheet.create({
 	safeArea: { flex: 1, backgroundColor: '#EAEAEA' },
 	container: { flex: 1, paddingHorizontal: PADDING_HORIZONTAL, backgroundColor: '#EAEAEA' },
@@ -123,4 +164,5 @@ const styles = StyleSheet.create({
 	teamText: { fontSize: 12, color: '#666', marginLeft: 5 },
 	versionText: { fontSize: 12, color: '#666' }
 });
+
 export default PerfilProfesional;
