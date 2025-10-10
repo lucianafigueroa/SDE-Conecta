@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, ScrollView, Modal, KeyboardAvoidingView, Platform 
+  View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, ScrollView, Modal, KeyboardAvoidingView, Platform, Dimensions 
 } from 'react-native';
 import Svg, { Path, Circle, Polyline } from 'react-native-svg';
 
@@ -8,6 +8,7 @@ const USER_COLOR = '#2c3e50';
 const ALERT_COLOR = '#FF8C00';
 const RED_ERROR = '#FF0000';
 const PADDING_HORIZONTAL = 20;
+const screenWidth = Dimensions.get('window').width;
 
 // --- ICONOS ---
 const ChevronLeft = ({ color = USER_COLOR, size = 28 }) => (
@@ -131,17 +132,17 @@ export const PerfilInfoPersonal = () => {
           <View style={styles.modalCenteredView}>
             <TouchableWithoutFeedback>
               <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'}>
-                <View style={styles.editModalView}>
+                <View style={[styles.editModalView, { width: screenWidth * 0.9 }]}>
                   <Text style={styles.editModalLabel}>
                     Editar {currentField==='name'?'Nombre':currentField==='phone'?'Teléfono':'Dirección'}
                   </Text>
                   <TextInput 
                     value={currentValue} 
                     onChangeText={setCurrentValue} 
-                    style={[styles.editTextInput, {minHeight: currentField==='address'?100:50}]} 
-                    autoFocus 
-                    multiline={currentField==='address'} 
-                    keyboardType={currentField==='phone'?'phone-pad':'default'} 
+                    style={[styles.editTextInput, { height: 45 }]}
+                    multiline={false} // ✅ Dirección ya no puede hacer salto de línea
+                    keyboardType={currentField==='phone'?'phone-pad':'default'}
+                    autoFocus
                   />
                   <TouchableOpacity style={styles.modalButtonPrimary} onPress={() => { handleUpdate(currentField, currentValue); setEditModalVisible(false); }}>
                     <Text style={styles.modalButtonPrimaryText}>Guardar</Text>
@@ -192,26 +193,39 @@ export const PerfilInfoPersonal = () => {
   );
 };
 
-// --- ESTILOS ---
 const styles = StyleSheet.create({
-  safeArea:{flex:1,backgroundColor:'#EAEAEA'}, scrollContent:{paddingBottom:40}, container:{flex:1,paddingHorizontal:PADDING_HORIZONTAL,backgroundColor:'#EAEAEA'},
-  header:{flexDirection:'row',alignItems:'center',paddingTop:50,paddingBottom:20}, headerTitle:{fontSize:24,fontWeight:'bold',color:USER_COLOR,marginLeft:15},
-  profileSection:{alignItems:'center',marginBottom:30}, profileImage:{width:100,height:100,borderRadius:50,borderWidth:3,borderColor:'#FFF'}, cameraIconBadge:{position:'absolute',bottom:0,right:0,backgroundColor:'#357C45',width:25,height:25,borderRadius:12.5,justifyContent:'center',alignItems:'center',borderWidth:2,borderColor:'#FFF'},
-  fieldsContainer:{paddingHorizontal:0}, fieldContainer:{marginBottom:20}, fieldLabel:{fontSize:16,color:USER_COLOR,marginBottom:8,fontWeight:'500'},
-  fieldInputWrapper:{flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',borderRadius:8,paddingHorizontal:15,height:50}, readOnlyInput:{borderWidth:1,borderColor:'#F0F0F0'}, textInput:{flex:1,fontSize:16,color:USER_COLOR,paddingVertical:0}, fieldIcon:{marginLeft:10,padding:5},
-  addNewAddress:{flexDirection:'row',alignItems:'center',marginTop:15,paddingHorizontal:15}, addNewAddressText:{marginLeft:8,fontSize:16,color:ALERT_COLOR,fontWeight:'bold'},
-  modalCenteredView:{flex:1,justifyContent:'center',alignItems:'center',backgroundColor:'rgba(0,0,0,0.5)'}, modalBottomView:{flex:1,justifyContent:'flex-end',backgroundColor:'rgba(0,0,0,0.5)'},
-  editModalView:{width:350,backgroundColor:'white',borderRadius:20,paddingVertical:25,paddingHorizontal:20,alignItems:'center'},
-  editModalLabel:{fontSize:20,fontWeight:'bold',marginBottom:20,color:USER_COLOR,textAlign:'center'},
-  editTextInput:{width:'100%',borderWidth:1,borderColor:'#CCC',borderRadius:8,padding:12,fontSize:16,color:USER_COLOR,marginBottom:15},
+  safeArea:{flex:1,backgroundColor:'#EAEAEA'}, 
+  scrollContent:{paddingBottom:40}, 
+  container:{flex:1,paddingHorizontal:PADDING_HORIZONTAL,backgroundColor:'#EAEAEA'},
+  header:{flexDirection:'row',alignItems:'center',paddingTop:50,paddingBottom:20}, 
+  headerTitle:{fontSize:24,fontWeight:'bold',color:USER_COLOR,marginLeft:15},
+  profileSection:{alignItems:'center',marginBottom:30}, 
+  profileImage:{width:100,height:100,borderRadius:50,borderWidth:3,borderColor:'#FFF'}, 
+  cameraIconBadge:{position:'absolute',bottom:0,right:0,backgroundColor:'#357C45',width:25,height:25,borderRadius:12.5,justifyContent:'center',alignItems:'center',borderWidth:2,borderColor:'#FFF'},
+  fieldsContainer:{paddingHorizontal:0}, 
+  fieldContainer:{marginBottom:20}, 
+  fieldLabel:{fontSize:16,color:USER_COLOR,marginBottom:8,fontWeight:'500'},
+  fieldInputWrapper:{flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',borderRadius:8,paddingHorizontal:15,height:50}, 
+  readOnlyInput:{borderWidth:1,borderColor:'#F0F0F0'}, 
+  textInput:{flex:1,fontSize:16,color:USER_COLOR,paddingVertical:0}, 
+  fieldIcon:{marginLeft:10,padding:5},
+  addNewAddress:{flexDirection:'row',alignItems:'center',marginTop:15,paddingHorizontal:15}, 
+  addNewAddressText:{marginLeft:8,fontSize:16,color:ALERT_COLOR,fontWeight:'bold'},
+  modalCenteredView:{flex:1,justifyContent:'center',alignItems:'center',backgroundColor:'rgba(0,0,0,0.5)'}, 
+  modalBottomView:{flex:1,justifyContent:'flex-end',backgroundColor:'rgba(0,0,0,0.5)'},
+  editModalView:{backgroundColor:'white',borderRadius:20,paddingVertical:20,paddingHorizontal:20,alignItems:'center'},
+  editModalLabel:{fontSize:18,fontWeight:'bold',marginBottom:15,color:USER_COLOR,textAlign:'center'},
+  editTextInput:{width:'100%',borderWidth:1,borderColor:'#CCC',borderRadius:8,padding:10,fontSize:16,color:USER_COLOR,marginBottom:15,textAlignVertical:'center'},
   photoModalView:{width:'100%',backgroundColor:'white',borderTopLeftRadius:20,borderTopRightRadius:20,paddingVertical:20,paddingHorizontal:25,alignItems:'center'},
-  photoModalCloseButton:{position:'absolute',top:15,right:20,padding:5,zIndex:1}, photoModalOption:{width:'100%',paddingVertical:18,borderBottomWidth:1,borderBottomColor:'#EEE',alignItems:'center'}, photoModalOptionText:{fontSize:18,color:USER_COLOR,fontWeight:'500'},
+  photoModalCloseButton:{position:'absolute',top:15,right:20,padding:5,zIndex:1}, 
+  photoModalOption:{width:'100%',paddingVertical:18,borderBottomWidth:1,borderBottomColor:'#EEE',alignItems:'center'}, 
+  photoModalOptionText:{fontSize:18,color:USER_COLOR,fontWeight:'500'},
   errorModalView:{width:'90%',backgroundColor:'white',borderRadius:20,padding:30,alignItems:'center'},
   errorModalIconCircle:{width:80,height:80,borderRadius:40,backgroundColor:RED_ERROR,justifyContent:'center',alignItems:'center',marginBottom:20},
   exclamationMark:{color:'white',fontSize:40,fontWeight:'bold',lineHeight:50},
   errorModalTitle:{fontSize:20,fontWeight:'bold',marginBottom:20,textAlign:'center',color:USER_COLOR},
   modalButtonPrimary:{backgroundColor:USER_COLOR,borderRadius:8,padding:15,width:'100%',alignItems:'center'},
-  modalButtonPrimaryText:{color:'white',fontWeight:'bold',fontSize:16}
+  modalButtonPrimaryText:{color:'white',fontWeight:'bold',fontSize:16},
 });
 
 export default PerfilInfoPersonal;
