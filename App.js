@@ -16,6 +16,10 @@ import Prestadores from './src/screens/Prestadores.js';
 import Calificaciones from './src/screens/Calificaciones.js';
 import MenuProfesional from './src/screens/MenuProfesional.js';
 import NotificacionesProfesional from './src/screens/NotificacionesProfesional.js';
+import Contactanos from './src/screens/Contactanos.js';
+
+import MiPerfil from './src/screens/MiPerfil.js';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -40,7 +44,7 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
         // ➡️ CAMBIA ESTO: Establece la pantalla que quieres ver
-        initialRouteName="NotificacionesProfesional"
+        initialRouteName="InicioCliente"
       >
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
         <Stack.Screen name="Login" component={Login} />
@@ -57,6 +61,9 @@ export default function App() {
         <Stack.Screen name="Calificaciones" component={Calificaciones} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
         <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional} />
+        <Stack.Screen name="MiPerfil" component={MiPerfil} />
+        <Stack.Screen name="Contactanos" component={Contactanos} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
