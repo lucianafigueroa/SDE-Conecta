@@ -15,6 +15,11 @@ import placeholder from "../assets/images/placeholder.png";
 import banner from "../assets/images/banner.png";
 import limpieza from "../assets/images/limpieza.png";
 import mujer from "../assets/images/mujer.png";
+import iconoLimpieza from "../assets/images/placeholder.png";
+import iconoAlbanil from "../assets/images/placeholder.png";
+import iconoElectricista from "../assets/images/placeholder.png";
+import iconoGasista from "../assets/images/placeholder.png";
+
 
 const { width } = Dimensions.get('window'); // Definimos width para estilos
 
