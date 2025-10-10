@@ -5,17 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="307f4c9f-4e43-48fb-8848-d0d8cd1ea64e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/assets/images/MariaCarrizo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/arrow.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/localizacion.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/servicio1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/servicio2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/servicio3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/star.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/tiempo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/VerPerfil.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/clip.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/mic.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/phone.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/send.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/siluetastar.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/images/subir.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/screens/Calificar.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/screens/Chat.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/ChatMessage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/InicioCliente.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/InicioCliente.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/Prestadores.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/Prestadores.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screens/VerPerfil.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/VerPerfil.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +31,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "dgeraldinediaz"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/lucianafigueroa/SDE-Conecta.git",
+    "accountId": "6d630c9d-ca70-40c0-a911-8cce62759590"
+  }
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="ProjectErrors" />
   </component>

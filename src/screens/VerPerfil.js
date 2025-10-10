@@ -14,15 +14,14 @@ import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
 
 // Ajusta las rutas de importación de imágenes según tu estructura de carpetas.
-// **Asegúrate de que estas rutas sean correctas para tu proyecto.**
 
 // Íconos y imágenes específicos de la pantalla VerPerfil
-import group33437 from "../assets/images/MariaCarrizo.png";
+import group33437 from "../assets/images/MariaCarrizo.png"; // Imagen principal
 import locationOnIcon from "../assets/images/localizacion.png";
 import alarmIcon from "../assets/images/tiempo.png";
 import arrowForwardIosIcon from "../assets/images/arrow.png";
-import starIcon from "../assets/images/star.png"; // Usamos un solo ícono de estrella
-import userProfilePlaceholder from "../assets/images/placeholder.png"; // Placeholder para la imagen del reviewer
+import starIcon from "../assets/images/star.png";
+import userProfilePlaceholder from "../assets/images/placeholder.png"; // Imagen del reviewer
 
 // Imágenes de servicios
 import rectangle196 from "../assets/images/servicio1.png";
@@ -32,31 +31,36 @@ import rectangle242 from "../assets/images/servicio2.png";
 const { width, height } = Dimensions.get("window");
 
 // --- Componente de Tarjeta de Opinión Simplificada (Inline) ---
-// Reemplaza la lógica de ReviewCard
 const SimpleReviewCard = ({ name, date, reviewText }) => (
     <View style={reviewStyles.card}>
         <View style={reviewStyles.header}>
             <Image
-                source={userProfilePlaceholder} // Asume un placeholder de perfil
+                source={userProfilePlaceholder}
                 style={reviewStyles.profileImage}
             />
-            <View>
+            <View style={{ flex: 1, marginRight: 10 }}>
                 <Text style={reviewStyles.nameText}>{name}</Text>
-                <View style={reviewStyles.ratingContainer}>
-                    {/* Estrellas Duras (5 estrellas llenas) */}
-                    {[...Array(5)].map((_, i) => (
-                        <Image key={i} source={starIcon} style={reviewStyles.starIcon} />
-                    ))}
-                </View>
+                <Text style={reviewStyles.dateTextSmall}>{date}</Text>
             </View>
-            <Text style={reviewStyles.dateText}>{date}</Text>
+            <View style={reviewStyles.ratingContainer}>
+                {/* Estrellas Duras (5 estrellas llenas) */}
+                {[...Array(5)].map((_, i) => (
+                    <Image key={i} source={starIcon} style={reviewStyles.starIcon} />
+                ))}
+            </View>
         </View>
-        <Text style={reviewStyles.reviewText} numberOfLines={3}>
+        <Text style={reviewStyles.reviewText} numberOfLines={5}>
             {reviewText}
         </Text>
-        <Text style={reviewStyles.readMoreText}>Leer más</Text>
+        <Text style={reviewStyles.readMoreText}>Leer menos</Text>
     </View>
 );
+
+// --- ESTILO DE TEXTO PARA CENTRAR BOTONES ---
+const centeredButtonText = {
+    textAlign: 'center',       // Centrado horizontal
+    lineHeight: 51,            // Centrado vertical (Igual a la altura del botón: 51)
+};
 
 const VerPerfil = ({ navigation }) => {
   const handleGoBack = () => {
@@ -70,7 +74,6 @@ const VerPerfil = ({ navigation }) => {
         {/* Header con flecha de retroceso y nombre */}
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            {/* Reemplazo de ArrowPrevSmall por un Text simple estilizado */}
             <Text style={styles.backIcon}>&lt;</Text>
           </TouchableOpacity>
           <Text style={styles.profileNameHeader}>Maria Carrizo</Text>
@@ -91,8 +94,8 @@ const VerPerfil = ({ navigation }) => {
                 <Image key={i} source={starIcon} style={styles.starIcon} />
               ))}
             </View>
+            <Text style={styles.distanceText}>700 m</Text>
           </View>
-          <Text style={styles.distanceText}>700 m</Text>
 
           {/* Ubicación */}
           <View style={styles.locationContainer}>
@@ -102,10 +105,26 @@ const VerPerfil = ({ navigation }) => {
 
           {/* Descripción del perfil */}
           <Text style={styles.descriptionText}>
-            Lorem ipsum dolor sit amet consectetur. Dui dignissim massa magna urna
-            augue cursus tempor vitae. Nulla mus urna.
-            <Text style={styles.readMoreText}> Leer más</Text>
+            Especialista en limpieza profunda y detallada de hogares y
+            departamentos. Brindo un servicio de alta calidad, con un servicio
+            de confianza, garantizando ambientes impecables y ordenados.
           </Text>
+          <Text style={styles.descriptionText}>
+            Me encargo de todo, desde la limpieza diaria hasta la
+            organización de espacios, para que te quedes tranquilo y
+            disfrutes de tu hogar.
+          </Text>
+            <Text style={[styles.descriptionText, styles.serviceListTitle]}>
+                Servicios:
+            </Text>
+            {/* Lista de servicios (Simulada con Text) */}
+            <View style={styles.serviceListContainer}>
+                <Text style={styles.serviceListItem}>• Limpieza general de casas y departamentos.</Text>
+                <Text style={styles.serviceListItem}>• Limpieza profunda y fin de obra.</Text>
+                <Text style={styles.serviceListItem}>• Organización de interiores.</Text>
+                <Text style={styles.serviceListItem}>• Limpieza de oficinas y comercios.</Text>
+            </View>
+
 
           {/* Disponibilidad */}
           <View style={styles.availabilityContainer}>
@@ -116,7 +135,7 @@ const VerPerfil = ({ navigation }) => {
             <Text style={styles.hoursText}>9:00 Am - 6:00 Pm</Text>
           </View>
 
-          {/* Sección de Servicios */}
+          {/* Sección de Servicios Imágenes */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
             <TouchableOpacity style={styles.viewMoreButton}>
@@ -141,7 +160,14 @@ const VerPerfil = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Tarjeta de Reseña Simplificada */}
+          {/* Tarjeta de Reseña 1 */}
+          <SimpleReviewCard
+            name="Nicole"
+            date="1 day ago"
+            reviewText="Hi, Booking the task was quick and easy. The professional arrived on time and did an excellent job. I’ll definitely use this app again! I’ll definitely use this app again! I’ll definitely use this app again! I’ll definitely use this app again! I’ll definitely use this app again!"
+          />
+
+          {/* Tarjeta de Reseña 2 (Duplicada para replicar la imagen) */}
           <SimpleReviewCard
             name="Nicole"
             date="1 day ago"
@@ -155,16 +181,20 @@ const VerPerfil = ({ navigation }) => {
       <View style={styles.bottomButtonsContainer}>
         <Button
           title="Calificar"
-          onPress={() => console.log("Calificar")}
+          onPress={() => navigation.navigate('Calificar')}
           // El color secundario simulado con opacidad o un gris
           buttonStyle={[styles.bottomButton, styles.calificarButton]}
-          textStyle={textStyles.mainText}
+          // APLICA EL CENTRADO
+          textStyle={[textStyles.mainText, centeredButtonText]}
         />
         <Button
           title="Contactarse"
-          onPress={() => console.log("Contactarse")}
-          buttonStyle={[buttonStyles.main, styles.bottomButton]} // Usar main para el naranja
-          textStyle={textStyles.mainText}
+          onPress={() => navigation.navigate('Chat')}
+          buttonStyle={[buttonStyles.main, styles.bottomButton]} // Usar main (naranja)
+          // APLICA CENTRADO Y FUERZA EL COLOR BLANCO
+          textStyle={[
+            textStyles.mainText
+          ]}
         />
       </View>
     </SafeAreaView>
@@ -178,25 +208,23 @@ const reviewStyles = StyleSheet.create({
         padding: 15,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
-        marginBottom: 20,
+        marginBottom: 10,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 3,
-        elevation: 1,
+        elevation: 1
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 8,
+        marginBottom: 8
     },
     profileImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 35,
+        height: 35,
+        borderRadius: 17.5,
         marginRight: 10,
-        // Si la imagen de perfil no existe, muestra un color de fondo
         backgroundColor: '#C4C4C4',
     },
     nameText: {
@@ -204,25 +232,25 @@ const reviewStyles = StyleSheet.create({
         fontWeight: '600',
         color: '#2C3E50',
     },
+    dateTextSmall: {
+        fontSize: 10,
+        color: '#606060',
+    },
     ratingContainer: {
         flexDirection: 'row',
-        marginTop: 2,
+        marginLeft: 'auto',
     },
     starIcon: {
         width: 10,
         height: 10,
         resizeMode: 'contain',
-        tintColor: '#D26E00', // Color de estrella de opinión (Naranja)
+        tintColor: '#D26E00',
         marginRight: 2,
-    },
-    dateText: {
-        fontSize: 12,
-        color: '#606060',
     },
     reviewText: {
         fontSize: 12,
         color: '#606060',
-        lineHeight: 18,
+        lineHeight: 16,
         marginBottom: 5,
     },
     readMoreText: {
@@ -240,49 +268,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#e5e8ec",
   },
-  // --- Estilos de la Barra de Estado ---
-  statusBarBackground: {
-    width: '100%',
-    height: 49,
-    backgroundColor: 'white',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-  },
-  statusBarContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-  },
-  timeText: {
-    fontSize: 17,
-    color: 'black',
-    fontWeight: '500',
-  },
-  rightIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusBarIcon: {
-    width: 18,
-    height: 12,
-    resizeMode: 'contain',
-    marginLeft: 8,
-  },
-  batteryFillIcon: {
-    width: 21,
-    height: 10,
-    resizeMode: 'contain',
-    marginLeft: 8,
-  },
-
   // --- Estilos del Header ---
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 40,
+    paddingBottom: 150,
     backgroundColor: 'white',
     width: '100%',
   },
@@ -301,44 +293,45 @@ const styles = StyleSheet.create({
     color: '#2c3e50',
     marginLeft: 5,
   },
-
   // --- ScrollView y Contenido ---
   scrollViewContent: {
     alignItems: 'center',
-    paddingBottom: 100, // Espacio para los botones inferiores
+    paddingBottom: 100,
   },
   profileImage: {
-    width: width * 0.9,
-    height: width * 0.9 * (238 / 390),
-    resizeMode: 'cover',
-    position: 'absolute',
-    top: 100,
-    zIndex: 1,
-    borderRadius: 15,
+      width: width * 0.9,
+      height: width * 0.9 * (238 / 390),
+      resizeMode: 'cover',
+      position: 'absolute',
+      top: 100,
+      zIndex: 1,
+      borderRadius: 15,
   },
   contentCard: {
-    backgroundColor: 'white',
-    width: '100%',
-    minHeight: height * 0.7,
-    marginTop: height * 0.15,
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    paddingHorizontal: 25,
-    paddingTop: 80,
-    alignItems: 'flex-start',
+      backgroundColor: 'white',
+      width: '100%',
+      minHeight: height * 0.7,
+      marginTop: 60,
+      borderTopLeftRadius: 35,
+      borderTopRightRadius: 35,
+      paddingHorizontal: 25,
+      paddingTop: 20,
+      alignItems: 'flex-start',
+      zIndex: 2,
   },
   nameRatingContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 10,
-    marginTop: -40, // Superposición con la imagen
+    paddingHorizontal: 0,
+    marginTop: 10,
   },
   nameText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#2c3e50',
+    marginRight: 10,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -354,24 +347,23 @@ const styles = StyleSheet.create({
     width: 13,
     height: 13,
     resizeMode: 'contain',
-    tintColor: '#D26E00', // Color de estrella de perfil (Naranja)
+    tintColor: '#D26E00',
   },
   distanceText: {
     fontSize: 12,
     fontWeight: '500',
     color: '#606060',
     textAlign: 'right',
-    width: '100%',
-    paddingRight: 10,
-    marginTop: 5,
+    marginLeft: 'auto',
+    marginTop: 0,
   },
 
   // --- Ubicación y Descripción ---
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginLeft: 10,
+    marginTop: 5,
+    marginLeft: 0,
   },
   locationIcon: {
     width: 15,
@@ -388,24 +380,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#606060',
     lineHeight: 18,
-    marginTop: 20,
-    marginHorizontal: 10,
+    marginTop: 10,
+    marginHorizontal: 0,
   },
-  readMoreText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#d26e00',
+  serviceListTitle: {
+      fontWeight: '600',
+  },
+  serviceListContainer: {
+      paddingLeft: 10,
+  },
+  serviceListItem: {
+      fontSize: 12,
+      color: '#606060',
+      lineHeight: 20,
+      marginTop: 2,
   },
 
   // --- Disponibilidad ---
   availabilityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginLeft: 10,
+    marginTop: 15,
+    marginLeft: 0,
     width: '100%',
     justifyContent: 'space-between',
-    paddingRight: 10,
+    paddingRight: 0,
   },
   availabilityRow: {
     flexDirection: 'row',
@@ -437,12 +436,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginTop: 30,
-    marginBottom: 15,
-    paddingHorizontal: 10,
+    marginBottom: 10,
+    paddingHorizontal: 0,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#2c3e50',
   },
   viewMoreButton: {
@@ -462,17 +461,17 @@ const styles = StyleSheet.create({
     tintColor: '#2c3e50',
   },
   servicesImageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 30,
-    paddingHorizontal: 10,
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+      paddingHorizontal: 10,
+      marginBottom: 30,
   },
   serviceImage: {
-    width: (width * 0.9 - 40) / 3,
-    height: 100,
-    resizeMode: 'cover',
-    borderRadius: 8,
+      width: (width * 0.9 - 40) / 3,
+      height: 100,
+      resizeMode: 'cover',
+      borderRadius: 8,
   },
 
   // --- Botones Inferiores Fijos ---
@@ -481,11 +480,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     position: 'absolute',
-    bottom: 0, // Pegado al borde inferior
+    bottom: 0,
     paddingHorizontal: 20,
-    backgroundColor: 'white', // Un color que se mezcle o un color de fondo claro
+    backgroundColor: 'white',
     paddingTop: 10,
-    paddingBottom: 20, // Espacio para el padding inferior del safeArea
+    paddingBottom: 20,
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
   },
@@ -495,7 +494,6 @@ const styles = StyleSheet.create({
     height: 51,
   },
   calificarButton: {
-      // Simula el botón secundario gris/opacidad que estaba en el código original
       backgroundColor: '#282828',
       opacity: 0.3,
   }

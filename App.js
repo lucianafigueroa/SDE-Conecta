@@ -23,8 +23,8 @@ import PerfilInfoPersonal from './src/screens/PerfilInfoPersonal.js';
 import Contactanos from './src/screens/Contactanos.js';
 import MiPerfil from './src/screens/MiPerfil.js';
 import VerPerfil from './src/screens/VerPerfil.js';
-
-
+import Calificar from './src/screens/Calificar.js';
+import Chat from './src/screens/Chat.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,7 +49,7 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
         // ➡️ CAMBIA ESTO: Establece la pantalla que quieres ver
-        initialRouteName="PerfilProfesional"
+        initialRouteName="Calificar"
       >
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
         <Stack.Screen name="Login" component={Login} />
@@ -73,7 +73,8 @@ export default function App() {
         <Stack.Screen name="MiPerfil" component={MiPerfil} />
         <Stack.Screen name="Contactanos" component={Contactanos} />
         <Stack.Screen name="VerPerfil" component={VerPerfil} />
-
+        <Stack.Screen name="Calificar" component={Calificar} />
+        <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
     </NavigationContainer>
   );
