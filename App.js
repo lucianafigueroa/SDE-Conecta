@@ -20,6 +20,11 @@ import NotificacionesProfesionalCargada from './src/screens/NotificacionesProfes
 import CerrarSesionProfesional from './src/screens/CerrarSesionProfesional.js';
 import PerfilProfesional from './src/screens/PerfilProfesional.js';
 import PerfilInfoPersonal from './src/screens/PerfilInfoPersonal.js';
+import Contactanos from './src/screens/Contactanos.js';
+import MiPerfil from './src/screens/MiPerfil.js';
+import VerPerfil from './src/screens/VerPerfil.js';
+
+
 
 const Stack = createNativeStackNavigator();
 
@@ -65,6 +70,10 @@ export default function App() {
         <Stack.Screen name="CerrarSesionProfesional" component={CerrarSesionProfesional} />
         <Stack.Screen name="PerfilProfesional" component={PerfilProfesional} />
         <Stack.Screen name="PerfilInfoPersonal" component={PerfilInfoPersonal} />
+        <Stack.Screen name="MiPerfil" component={MiPerfil} />
+        <Stack.Screen name="Contactanos" component={Contactanos} />
+        <Stack.Screen name="VerPerfil" component={VerPerfil} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
