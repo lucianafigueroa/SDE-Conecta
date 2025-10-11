@@ -24,7 +24,8 @@ const ChevronRight = ({ color = "#A0A0A0" }) => (
 // 2. Icono de Perfil (User)
 const UserIcon = ({ color }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
-    <Path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><Path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+    <Path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+    <Path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
   </Svg>
 );
 
@@ -38,7 +39,8 @@ const PhoneIcon = ({ color }) => (
 // 4. Icono de Cerrar Sesión (LogOut)
 const LogOutIcon = ({ color }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
-    <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><Path d="M16 17l5-5-5-5M21 12H9"/>
+    <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <Path d="M16 17l5-5-5-5M21 12H9"/>
   </Svg>
 );
 
@@ -50,28 +52,24 @@ const CrossIcon = ({ color = "#2c3e50" }) => (
 );
 
 // --- ARREGLOS DE DATOS Y LÓGICA ---
-const handleAction = (action) => {
-  console.log(`Action taken: ${action}`);
-};
-
 const menuItems = [
   { 
     id: "profile", 
-    IconComponent: UserIcon, // Ahora usamos el componente SVG
+    IconComponent: UserIcon,
     label: "Mi Perfil", 
     color: "#2c3e50", 
     action: "profile" 
   },
   { 
     id: "contact", 
-    IconComponent: PhoneIcon, // Ahora usamos el componente SVG
+    IconComponent: PhoneIcon,
     label: "Contáctanos", 
     color: "#2c3e50", 
     action: "contact" 
   },
   { 
     id: "logout", 
-    IconComponent: LogOutIcon, // Ahora usamos el componente SVG
+    IconComponent: LogOutIcon,
     label: "Cerrar Sesión", 
     color: "#D21818", 
     action: "logout" 
@@ -79,35 +77,45 @@ const menuItems = [
 ];
 
 // Helper Component for a single menu item
-const MenuItem = ({ IconComponent, label, color, action }) => (
+const MenuItem = ({ IconComponent, label, color, action, handleAction }) => (
   <TouchableOpacity style={styles.menuItemContainer} onPress={() => handleAction(action)}>
     <View style={styles.menuItemLeft}>
-      {/* Renderizamos el componente SVG y le pasamos el color */}
       <IconComponent color={color} style={styles.menuIcon} /> 
       <Text style={[styles.menuItemText, { color }]}>{label}</Text>
     </View>
-    {/* Flecha derecha es siempre de color gris */}
     <ChevronRight /> 
   </TouchableOpacity>
 );
 
 // --- MAIN COMPONENT ---
-export const MenuProfesional = () => {
+export const MenuProfesional = ({ navigation }) => {
   const userData = {
     name: 'Maria Carrizo',
     email: 'mariacarrizo@gmail.com',
     profilePic: 'https://via.placeholder.com/150/d26e00/FFFFFF?text=MC', 
   };
 
+  // Actualizamos handleAction para navegación
+  const handleAction = (action) => {
+    if (action === 'profile') {
+      navigation.navigate('PerfilProfesional'); // Navega a PerfilProfesional
+    } else if (action === 'contact') {
+      console.log('Contact pressed');
+    } else if (action === 'logout') {
+      console.log('Logout pressed');
+    } else if (action === 'close') {
+      console.log('Close menu pressed');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         
-        {/* Header Section: Title and Close Button */}
+        {/* Header Section */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>¡Bienvenido al menú!</Text>
           <TouchableOpacity onPress={() => handleAction('close')}>
-            {/* Usamos el componente SVG CrossIcon */}
             <CrossIcon /> 
           </TouchableOpacity>
         </View>
@@ -133,6 +141,7 @@ export const MenuProfesional = () => {
               label={item.label}
               color={item.color}
               action={item.action}
+              handleAction={handleAction} // Pasamos la función actualizada
             />
           ))}
         </View>
@@ -140,7 +149,6 @@ export const MenuProfesional = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.teamInfo}>
-            {/* Usamos un SVG genérico o una imagen para el logo */}
             <UserIcon color="#666" style={{ width: 16, height: 16 }} /> 
             <Text style={styles.teamText}>Los más copados team</Text>
           </View>
@@ -151,7 +159,7 @@ export const MenuProfesional = () => {
   );
 };
 
-// --- STYLES (No necesitan cambios) ---
+// --- STYLES ---
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

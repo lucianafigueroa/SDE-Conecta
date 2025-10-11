@@ -16,7 +16,6 @@ import placeholder from "../assets/images/placeholder.png";
 
 const { width } = Dimensions.get('window');
 
-// --- Datos de ejemplo (Adaptados al diseño de la imagen) ---
 const mainCategories = [
   { id: 't1', name: 'Todos', active: true },
   { id: 't2', name: 'Albañil', active: false },
@@ -25,7 +24,6 @@ const mainCategories = [
   { id: 't5', name: 'Gasista', active: false },
 ];
 
-// Datos de prestadores sin colores de fondo específicos
 const featuredProviders = [
     { id: 'f1', name: 'Jackson', service: 'Electrician', rating: 3.9, image: placeholder },
     { id: 'f2', name: 'Emily Jani', service: 'Electrician', rating: 4.8, image: placeholder },
@@ -38,11 +36,9 @@ const cleaningProviders = [
     { id: 'c3', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
 ];
 
-// --- Componente de Tarjeta de Prestador Horizontal (Nuevo Estilo) ---
 const HorizontalProviderCard = ({ name, service, rating, image, navigation }) => (
-    // Se elimina 'bgColor' como prop y de los estilos inline
     <TouchableOpacity style={newStyles.providerCardHorizontal}>
-        <View style={newStyles.imageContainer}> {/* No se pasa bgColor al contenedor de la imagen */}
+        <View style={newStyles.imageContainer}>
             <Image source={image} style={newStyles.providerImageHorizontal} />
         </View>
         <Text style={newStyles.providerNameHorizontal}>{name}</Text>
@@ -56,7 +52,6 @@ const HorizontalProviderCard = ({ name, service, rating, image, navigation }) =>
     </TouchableOpacity>
 );
 
-// --- Componente Principal ---
 export default function Prestadores({ navigation }) {
 
   const navTabs = [
@@ -79,7 +74,6 @@ export default function Prestadores({ navigation }) {
         <Text style={styles.title}>Prestadores</Text>
       </View>
 
-      {/* --- Barra de Búsqueda Flotante --- */}
       <View style={styles.searchBarContainer}>
         <Image source={placeholder} style={styles.searchIcon} />
         <TextInput
@@ -90,10 +84,8 @@ export default function Prestadores({ navigation }) {
         <Image source={placeholder} style={styles.filterIcon} />
       </View>
 
-      {/* ScrollView para el contenido listado */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
-        {/* --- Píldoras de Filtro de Categoría Principal --- */}
         <FlatList
           data={mainCategories}
           keyExtractor={(item) => item.id}
@@ -111,7 +103,6 @@ export default function Prestadores({ navigation }) {
           )}
         />
 
-        {/* --- Sección 1: Electricistas/Recomendados (Estilo Carrusel) --- */}
         <View style={newStyles.sectionContainer}>
           <FlatList
             data={featuredProviders}
@@ -129,7 +120,6 @@ export default function Prestadores({ navigation }) {
           />
         </View>
 
-        {/* --- Sección 2: Limpieza --- */}
         <View style={newStyles.sectionHeaderRow}>
             <Text style={newStyles.sectionTitleHorizontal}>Limpieza</Text>
             <TouchableOpacity>
@@ -147,19 +137,16 @@ export default function Prestadores({ navigation }) {
               <HorizontalProviderCard
                 {...item}
                 image={placeholder}
-                // Se elimina la prop bgColor
                 navigation={navigation}
               />
             )}
           />
         </View>
 
-        {/* Espacio extra al final para el scroll */}
         <View style={{ height: 30 }} />
 
       </ScrollView>
 
-      {/* --- Barra de Navegación Inferior (Tab Bar) --- */}
       <View style={styles.bottomNav}>
         {navTabs.map((tab, index) => (
           <TouchableOpacity
@@ -189,9 +176,7 @@ export default function Prestadores({ navigation }) {
   );
 }
 
-// --- Estilos para la Nueva Maqueta (Horizontal Cards) ---
 const newStyles = StyleSheet.create({
-    // --- Categorías Principales ---
     mainCategoryList: {
         paddingHorizontal: 20,
         marginTop: 15,
@@ -207,7 +192,7 @@ const newStyles = StyleSheet.create({
         borderColor: '#ccc',
     },
     categoryPillMainActive: {
-        backgroundColor: '#d26e00', // Naranja
+        backgroundColor: '#d26e00',
         borderColor: '#d26e00',
     },
     categoryTextMain: {
@@ -220,7 +205,6 @@ const newStyles = StyleSheet.create({
         fontWeight: '600',
     },
 
-    // --- Secciones de Carrusel (Limpieza/Electricista) ---
     sectionHeaderRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -240,21 +224,20 @@ const newStyles = StyleSheet.create({
         color: '#2c3e50',
     },
     sectionContainer: {
-        // Contenedor para el FlatList horizontal
+
     },
     horizontalCardList: {
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
 
-    // --- Tarjeta de Prestador Horizontal ---
     providerCardHorizontal: {
-        width: width * 0.45, // Aproximadamente la mitad de la pantalla
+        width: width * 0.45,
         marginRight: 15,
         borderRadius: 15,
         padding: 10,
         alignItems: 'center',
-        backgroundColor: 'white', // Color de fondo ahora es blanco por defecto
+        backgroundColor: 'white',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -267,7 +250,7 @@ const newStyles = StyleSheet.create({
         borderRadius: 15,
         overflow: 'hidden',
         marginBottom: 10,
-        backgroundColor: 'white', // Aseguramos que el contenedor de la imagen también sea blanco
+        backgroundColor: 'white',
     },
     providerImageHorizontal: {
         width: '100%',
@@ -298,7 +281,7 @@ const newStyles = StyleSheet.create({
         color: '#2c3e50',
     },
     verPerfilButton: {
-        backgroundColor: '#d26e00', // Naranja
+        backgroundColor: '#d26e00',
         paddingHorizontal: 15,
         paddingVertical: 8,
         borderRadius: 20,
@@ -311,8 +294,6 @@ const newStyles = StyleSheet.create({
     }
 });
 
-
-// --- Estilos Base (Se mantienen y se ajustan) ---
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -322,43 +303,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     width: width,
-    height: 140, // Altura ajustada
+    height: 140,
     backgroundColor: 'white',
     zIndex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingTop: 140, // Para que el contenido inicie debajo del header
+    paddingTop: 140,
     paddingBottom: 100,
   },
-  // --- Barra de Estado ---
-  statusBar: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    zIndex: 10,
-  },
-  timeText: {
-    fontSize: 17,
-    fontWeight: '500',
-    color: 'black',
-  },
-  statusIcons: {
-    // Simulación
-  },
-  // --- Título ---
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#2c3e50',
-    marginTop: 70, // Posición vertical ajustada
+    marginTop: 70,
     alignSelf: 'center',
     zIndex: 1,
   },
-  // --- Barra de Búsqueda (Ajustada para que flote) ---
+
   searchBarContainer: {
     width: '85%',
     height: 53,
@@ -368,8 +330,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 15,
     alignSelf: 'center',
-    position: 'absolute', // Hacemos que flote
-    top: 105, // Posicionamos debajo del título
+    position: 'absolute',
+    top: 105,
     zIndex: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -395,7 +357,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     opacity: 0.5,
   },
-  // --- Bottom Navigation (Tab Bar) ---
+
   bottomNav: {
     position: 'absolute',
     bottom: 0,
