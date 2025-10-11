@@ -15,6 +15,8 @@ import MenuUsuario from './src/screens/MenuUsuario.js';
 import Prestadores from './src/screens/Prestadores.js';
 import Calificaciones from './src/screens/Calificaciones.js';
 import MenuProfesional from './src/screens/MenuProfesional.js';
+import NotificacionesProfesional from './src/screens/NotificacionesProfesional.js';
+import Categorias from './src/screens/Categorias.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,9 +25,15 @@ const Stack = createNativeStackNavigator();
 // SIMULACIÓN: En una app real, esta variable se obtendría de AsyncStorage.
 // Cambia a 'false' para probar el flujo de usuario recurrente.
 // -----------------------------------------------------------------------------
-const IS_FIRST_LAUNCH = true; // true -> Inicia en Bienvenida02 | false -> Inicia en Bienvenida
+//const IS_FIRST_LAUNCH = true; // true -> Inicia en Bienvenida02 | false -> Inicia en Bienvenida
+//<Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={INITIAL_ROUTE}>
+//        {/* Flujo de Primer Ingreso: 02 -> 03 -> 04 -> 05 -> Bienvenida */}
+//       <Stack.Screen name="Bienvenida02" component={Bienvenida02} />
+//        <Stack.Screen name="OnboardingScreen" component={OnboardingScreen} />
+//        <Stack.Screen name="Bienvenida05" component={Bienvenida05} />
 
-const INITIAL_ROUTE = IS_FIRST_LAUNCH ? 'Bienvenida02' : 'Bienvenida';
+//        {/* Flujo Principal/Recurrente: Bienvenida -> Login -> Registro */}
+//const INITIAL_ROUTE = IS_FIRST_LAUNCH ? 'Bienvenida02' : 'Bienvenida';
 
 export default function App() {
   return (
@@ -48,6 +56,8 @@ export default function App() {
         <Stack.Screen name="Prestadores" component={Prestadores} />
         <Stack.Screen name="Calificaciones" component={Calificaciones} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
+        <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional} />
+        <Stack.Screen name="Categorias" component={Categorias} />
       </Stack.Navigator>
     </NavigationContainer>
   );

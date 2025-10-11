@@ -77,7 +77,6 @@ export default function MenuUsuario({ navigation }) {
         <CustomerProfile
           name="Maria Carrizo"
           email="mariacarrizo@gmail.com"
-          onProfilePress={() => console.log("Ir a Mi Perfil")}
         />
 
         {/* --- ScrollView para la Lista de Opciones --- */}
@@ -89,14 +88,14 @@ export default function MenuUsuario({ navigation }) {
             <MenuItem
               text="Mi Perfil"
               icon="👤" // Simulación de icono
-              onPress={() => console.log("Navegar a Mi Perfil")}
+              onPress={() => navigation.navigate('MiPerfil')}
             />
 
             {/* Contáctanos (asumiendo que el icono es un teléfono o chat) */}
             <MenuItem
               text="Contáctanos"
               icon="📞" // Simulación de icono
-              onPress={() => console.log("Navegar a Contáctanos")}
+              onPress={() => navigation.navigate('Contactanos')}
             />
 
             {/* Convertirse en Profesional */}
