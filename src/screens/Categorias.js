@@ -35,7 +35,7 @@ const group427321974 = require('../assets/images/plomeroIcono.png'); // Placehol
 
 
 // -----------------------------------------------------------------------------
-//  2. DATOS DE CATEGORÍAS
+// DATOS DE CATEGORÍAS
 // -----------------------------------------------------------------------------
 const categories = [
   { id: 1, image: group427321957, label: 'Limpieza' },
@@ -79,7 +79,7 @@ const ArrowLeftSVG = ({ color = '#2c3e50', size = 24 }) => (
 
 
 // -----------------------------------------------------------------------------
-//  3. COMPONENTE CATEGORIAS
+// COMPONENTE CATEGORIAS
 // -----------------------------------------------------------------------------
 export default function Categorias() {
   const navigation = useNavigation();
@@ -126,7 +126,7 @@ export default function Categorias() {
 }
 
 // -----------------------------------------------------------------------------
-//  4. ESTILOS (STYLESHEET)
+//  ESTILOS (STYLESHEET)
 // -----------------------------------------------------------------------------
 const styles = StyleSheet.create({
   safeArea: {
