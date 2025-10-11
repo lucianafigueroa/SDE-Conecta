@@ -5,20 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="307f4c9f-4e43-48fb-8848-d0d8cd1ea64e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/assets/images/aireIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/albañilIcono.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/carpinteroIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/cerrajeroIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/durlockIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/electricistaIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/gasistaIcono.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/images/herreroIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/limpiezaIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/pileteroIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/pintorIcono.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/assets/images/plomeroIcono.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/screens/Categorias.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/screens/Categorias.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,26 +42,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Usuario/StudioProjects/SDE-Conecta/src/assets/images"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Usuario/StudioProjects/SDE-Conecta/src/assets/images&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Usuario\StudioProjects\SDE-Conecta\src\assets\images" />
       <recent name="C:\Users\dgera\StudioProjects\SDE-Conecta\src\assets\images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Usuario\StudioProjects\SDE-Conecta\src\assets\images" />
       <recent name="C:\Users\dgera\StudioProjects\SDE-Conecta\src\assets\images" />
     </key>
   </component>
