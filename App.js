@@ -17,10 +17,6 @@ import Calificaciones from './src/screens/Calificaciones.js';
 import MenuProfesional from './src/screens/MenuProfesional.js';
 import NotificacionesProfesional from './src/screens/NotificacionesProfesional.js';
 import Categorias from './src/screens/Categorias.js';
-import RegistrarServicio from './src/screens/RegistrarServicio.js';
-import AgregarDescripcion from './src/screens/AgregarDescripcion.js';
-import AgregarDireccion from './src/screens/AgregarDireccion.js';
-import AgregarFoto from './src/screens/AgregarFoto.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,8 +40,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
-        // CAMBIA ESTO: Establece la pantalla que quieres ver
-        initialRouteName="RegistrarServicio"
+        // ➡️ CAMBIA ESTO: Establece la pantalla que quieres ver
+        initialRouteName="Categorias"
       >
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
         <Stack.Screen name="Login" component={Login} />
@@ -63,10 +59,6 @@ export default function App() {
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
         <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional} />
         <Stack.Screen name="Categorias" component={Categorias} />
-        <Stack.Screen name="RegistrarServicio" component={RegistrarServicio} />
-        <Stack.Screen name="AgregarDescripcion" component={AgregarDescripcion} />
-        <Stack.Screen name="AgregarDireccion" component={AgregarDireccion} />
-        <Stack.Screen name="AgregarFoto" component={AgregarFoto} />
       </Stack.Navigator>
     </NavigationContainer>
   );

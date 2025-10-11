@@ -15,6 +15,11 @@ import placeholder from "../assets/images/placeholder.png";
 import banner from "../assets/images/banner.png";
 import limpieza from "../assets/images/limpieza.png";
 import mujer from "../assets/images/mujer.png";
+import iconoLimpieza from "../assets/images/placeholder.png";
+import iconoAlbanil from "../assets/images/placeholder.png";
+import iconoElectricista from "../assets/images/placeholder.png";
+import iconoGasista from "../assets/images/placeholder.png";
+
 
 const { width } = Dimensions.get('window'); // Definimos width para estilos
 
@@ -93,7 +98,7 @@ export default function InicioCliente({ navigation }) {
             { name: "Lucía Pérez", rating: 5, reviews: 150, service: "Servicio de Limpieza" },
             { name: "Pablo Mendoza", rating: 4, reviews: 90, service: "Servicio de Limpieza" },
           ].map((provider, index) => (
-            <TouchableOpacity key={index} style={styles.providerCard}>
+            <TouchableOpacity key={index} style={styles.providerCard} onPress={() => navigation.navigate('VerPerfil')}>
               <Image source={mujer} style={styles.providerImage} />
               <View style={styles.providerInfo}>
                 <Text style={styles.providerName}>{provider.name}</Text>

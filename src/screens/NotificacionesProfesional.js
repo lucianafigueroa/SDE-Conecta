@@ -9,12 +9,13 @@ import {
   Dimensions
 } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
+import campana from "../assets/images/campana.png";
 
 const { width } = Dimensions.get('window');
 const PADDING_HORIZONTAL = 20;
 
 // Placeholder para la imagen de ilustración del centro (Bell Illustration)
-const BELL_ILLUSTRATION_URI = 'https://via.placeholder.com/179x169/F0F0F0/D26E00?text=SIN+NOTIFICACIONES';
+<Image source={campana} />
 
 // --- ICONOS SVG COMO COMPONENTES ---
 
@@ -81,9 +82,19 @@ export const NotificacionesProfesional = () => {
         {/* Content: Empty State */}
         <View style={styles.emptyStateContainer}>
           <Image 
-            source={{ uri: BELL_ILLUSTRATION_URI }}
-            style={styles.illustrationImage}
-            resizeMode="cover"
+          // 1. Usa la variable de la imagen local importada
+          source={campana} 
+  
+          // 2. Mueve 'resizeMode' como una propiedad independiente
+          resizeMode="stretch"
+  
+          // 3. Puedes mover el estilo a un StyleSheet o dejarlo inline (como aquí)
+          style={{ 
+          borderRadius: 30, 
+          // 🚨 Nuevas dimensiones (ejemplo de un tamaño más pequeño y "normal")
+          width: 100, // Reducido a 100 unidades
+          height: 130  // Reducido para mantener la proporción 
+          }} 
           />
           <Text style={styles.emptyStateTitle}>No hay notificaciones todavía</Text>
           <Text style={styles.emptyStateSubtitle}>
