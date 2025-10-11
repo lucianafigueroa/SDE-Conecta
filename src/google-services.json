@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "992150847499",
+    "project_id": "sde-conecta",
+    "storage_bucket": "sde-conecta.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992150847499:android:55177053b3c11a2330070e",
+        "android_client_info": {
+          "package_name": "com.sdeconecta.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "992150847499-np1rh447ev2re4ne5i7f892e1095jg9h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1ZTaOuJrHm71RWhR-AGPSK9dPRLx0NDw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "992150847499-np1rh447ev2re4ne5i7f892e1095jg9h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,7 @@
   "expo": {
     "name": "sde-conecta",
     "slug": "sde-conecta",
+    "scheme": "sde-conecta",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "auto",
@@ -14,12 +15,20 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.sdeconecta.app",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
-    "web": {
+    "web": {},
+    "plugins": [
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b40fd07e-657c-4deb-ad93-21ec45d3b9eb"
+      }
     }
   }
 }

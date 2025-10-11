@@ -32,7 +32,6 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
-        // ➡️ CAMBIA ESTO: Establece la pantalla que quieres ver
         initialRouteName="Bienvenida"
       >
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
