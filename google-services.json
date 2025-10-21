@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "992150847499-7ma69qga9fpss84bbd6mrc913jnbqijm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sdeconecta.app",
+            "certificate_hash": "39622f58e744bb0ed185abea9d1e8ee02e79e2f1"
+          }
+        },
+        {
           "client_id": "992150847499-np1rh447ev2re4ne5i7f892e1095jg9h.apps.googleusercontent.com",
           "client_type": 3
         }

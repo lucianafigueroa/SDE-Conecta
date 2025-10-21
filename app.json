@@ -2,7 +2,7 @@
   "expo": {
     "name": "sde-conecta",
     "slug": "sde-conecta",
-    "scheme": "sde-conecta",
+    "scheme": "com.sdeconecta.app",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "auto",
@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {},
     "plugins": [
