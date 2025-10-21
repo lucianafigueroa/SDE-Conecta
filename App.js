@@ -18,41 +18,7 @@ import MenuProfesional from "./src/screens/MenuProfesional.js";
 import NotificacionesProfesional from "./src/screens/NotificacionesProfesional.js";
 import Categorias from "./src/screens/Categorias.js";
 
-import * as WebBrowser from "expo-web-browser";
-
 const Stack = createNativeStackNavigator();
-
-WebBrowser.maybeCompleteAuthSession();
-
-const [request, response, promptAsync] = Google.useAuthRequest({
-  webClientId: EXPO_PUBLIC_WEB_CLIENT_ID,
-  androidClientId: EXPO_PUBLIC_ANDROID_CLIENT_ID,
-});
-
-const handleGoogleRegister = async (idToken) => {
-  try {
-    const credential = GoogleAuthProvider.credential(idToken);
-    await signInWithCredential(auth, credential);
-    console.log("Registro con Google exitoso.");
-    navigation.navigate("Seleccion");
-  } catch (error) {
-    console.error("Error al autenticar con Google:", error.message);
-    Alert.alert("Error", "Error al conectar con Google. Inténtalo de nuevo.");
-  }
-};
-
-const handleGoogleLogin = async (idToken) => {
-  try {
-    const credential = GoogleAuthProvider.credential(idToken);
-    await signInWithCredential(auth, credential);
-
-    console.log("Login con Google exitoso.");
-    navigation.navigate("InicioCliente");
-  } catch (error) {
-    console.error("Error al autenticar con Google:", error.message);
-    alert("Error al conectar con Google. Inténtalo de nuevo.");
-  }
-};
 
 export default function App() {
   return (
