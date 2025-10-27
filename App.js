@@ -17,8 +17,12 @@ import Calificaciones from "./src/screens/Calificaciones.js";
 import MenuProfesional from "./src/screens/MenuProfesional.js";
 import NotificacionesProfesional from "./src/screens/NotificacionesProfesional.js";
 import Categorias from "./src/screens/Categorias.js";
+import InicioProfesional from "./src/screens/InicioProfesional.js";
+import VerPerfil from "./src/screens/VerPerfil.js";
 
 const Stack = createNativeStackNavigator();
+
+//Falta definir rutas de usuario y profesional
 
 export default function App() {
   return (
@@ -46,6 +50,8 @@ export default function App() {
           component={NotificacionesProfesional}
         />
         <Stack.Screen name="Categorias" component={Categorias} />
+        <Stack.Screen name="InicioProfesional" component={InicioProfesional} />
+        <Stack.Screen name="VerPerfil" component={VerPerfil} />
       </Stack.Navigator>
     </NavigationContainer>
   );
