@@ -22,11 +22,12 @@ import VerPerfil from "./src/screens/VerPerfil.js";
 
 const Stack = createNativeStackNavigator();
 
-//Falta definir rutas de usuario y profesional
-
 export default function App() {
   return (
     <NavigationContainer>
+
+        {/* Inicio */}
+
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
         initialRouteName="Bienvenida"
@@ -35,8 +36,16 @@ export default function App() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Registro" component={Registro} />
 
-        {/* Otras pantallas */}
+        {/* Registro */}
+
         <Stack.Screen name="Seleccion" component={Seleccion} />
+
+        {/* Cliente */}
+
+        {/* Profesional */}
+
+        {/* Otras pantallas */}
+        
         <Stack.Screen name="Registrarse1" component={Registrarse1} />
         <Stack.Screen name="VerificarNumero" component={VerificarNumero} />
         <Stack.Screen name="VerificarCodigo" component={VerificarCodigo} />

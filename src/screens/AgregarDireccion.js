@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -18,7 +19,20 @@ const iconoMapa = require('../assets/images/mapa.png');
 
 const HEADER_PAD = 30;
 
-export default function AgregarDireccion() {
+export default function AgregarDireccion(route) {
+
+// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   const navegacion = useNavigation();
   const ruta = useRoute();
 

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, Feather } from '@expo/vector-icons'; // Usamos iconos para el mapa
@@ -16,7 +17,20 @@ const Button = ({ title, buttonStyle, textStyle, onPress, icon }) => (
 // Placeholder para la imagen del mapa 3D
 const MAP_IMAGE_URL = 'https://placehold.co/300x300/E5E8EC/2C3E50?text=Mapa+3D+Ubicacion';
 
-export default function Bienvenida05({ navigation }) {
+export default function Bienvenida05({ navigation, route }) {
+
+  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   // Navegación para "Elegir desde el mapa" (va a Bienvenida06)
   const handleMapSelect = () => {
     navigation.navigate('Bienvenida');

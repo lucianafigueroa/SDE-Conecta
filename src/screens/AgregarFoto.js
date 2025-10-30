@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -18,7 +19,20 @@ const IconoCamara = require('../assets/images/camara.png');
 const IconoPlaceholder = require('../assets/images/placeholder.png');
 
 
-export default function AgregarFoto() {
+export default function AgregarFoto(route) {
+
+// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   const navegacion = useNavigation();
   const ruta = useRoute();
   // Usar un estado para almacenar la URI o un array de URIs de las fotos

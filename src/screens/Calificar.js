@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   SafeAreaView,
   ScrollView,
@@ -20,7 +21,20 @@ import starEmpty from "../assets/images/siluetastar.png";
 import uploadIcon from "../assets/images/subir.png";
 import arrowBack from "../assets/images/back.png"; // ícono de volver (añádelo a tus imágenes)
 
-export default function Calificar({ navigation }) {
+export default function Calificar({ navigation, route }) {
+
+// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   const [rating, setRating] = useState(0);
   const [opinion, setOpinion] = useState("");
   const [photo, setPhoto] = useState(null);

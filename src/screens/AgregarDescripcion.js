@@ -1,3 +1,5 @@
+import React, { useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -13,7 +15,20 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 const flechaAtras = require('../assets/images/flechaAtras.png');
 
-export default function AgregarDescripcion() {
+export default function AgregarDescripcion(route) {
+
+// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   const navegacion = useNavigation();
   const ruta = useRoute();
 

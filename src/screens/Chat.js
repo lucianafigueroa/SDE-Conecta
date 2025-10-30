@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   SafeAreaView,
   View,
@@ -20,7 +21,20 @@ import micIcon from "../assets/images/mic.png";
 import phoneIcon from "../assets/images/phone.png";
 import attachIcon from "../assets/images/clip.png";
 
-export default function Chat({ navigation }) {
+export default function Chat({ navigation, route }) {
+
+  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   const navTabs = [
     { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
     { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },

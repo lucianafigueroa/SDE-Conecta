@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, Text, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -8,7 +9,20 @@ import Button from "../components/Button";
 
 import logo from "../assets/images/logo.png";
 
-export default function Seleccion({ navigation }) {
+export default function Seleccion({ navigation, route }) {
+
+    // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
 
     const primaryBackgroundColor = '#d26e00f2';
     const textColor = '#e5e8ec';

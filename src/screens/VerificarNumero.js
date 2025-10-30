@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, Image, ScrollView, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../components/Button";
@@ -7,7 +8,20 @@ import { textStyles } from "../styles/texts";
 
 import logo from "../assets/images/logo1.png";
 
-export default function VerificarNumero({ navigation }) {
+export default function VerificarNumero({ navigation, route}) {
+
+  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   const [numero, setNumero] = useState("");
   const [error, setError] = useState(false);
 

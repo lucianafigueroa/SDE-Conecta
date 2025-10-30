@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   SafeAreaView,
   ScrollView,
@@ -23,7 +24,20 @@ import iconoGasista from "../assets/images/placeholder.png";
 
 const { width } = Dimensions.get('window'); // Definimos width para estilos
 
-export default function InicioCliente({ navigation }) {
+export default function InicioCliente({ navigation, route }) {
+
+  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
+    useFocusEffect(
+        useCallback(() => {
+            // USAR route.name AQUÍ
+            console.log("-> PANTALLA ENFOCADA: " + route.name);
+
+            // Se omite la función de limpieza (desenfoque)
+            return () => {}; 
+        }, [route.name]) // Añadir route.name a las dependencias
+    );
+    // ------------------------------------------------------------
+
   // Datos de navegación inferior
   const navTabs = [
     { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
