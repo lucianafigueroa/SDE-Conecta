@@ -1,7 +1,16 @@
 import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
-import { View, ScrollView, Text, Image, StyleSheet } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  View,
+  ScrollView,
+  Text,
+  Image,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../config/firebaseConfig.js";
 
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
@@ -10,107 +19,129 @@ import Button from "../components/Button";
 import logo from "../assets/images/logo.png";
 
 export default function Seleccion({ navigation, route }) {
+  // Extraemos el UID que debe venir de la pantalla de Registro
+  const { uid } = route.params || {};
 
-    // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
+  // Log cuando se enfoca la pantalla
+  useFocusEffect(
+    useCallback(() => {
+      console.log("-> PANTALLA ENFOCADA: " + route.name);
+      if (uid) console.log("-> UID del usuario: " + uid);
+      return () => {};
+    }, [route.name, uid])
+  );
 
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+  const primaryBackgroundColor = "#d26e00f2";
+  const textColor = "#e5e8ec";
 
+  // Función para actualizar el rol en Firestore y navegar
+  const updateRoleAndNavigate = async (rol) => {
+    if (!uid) {
+      Alert.alert(
+        "Error",
+        "El ID de usuario es necesario para guardar el rol. Por favor, vuelve a registrarte."
+      );
+      return;
+    }
 
-    const primaryBackgroundColor = '#d26e00f2';
-    const textColor = '#e5e8ec';
+    const dbRole = rol === "profesional" ? "prestador" : "cliente";
 
-    const handleClientPress = () => {
-        navigation.navigate("Registrarse1", { tipoUsuario: "cliente" });
-    };
+    try {
+      const userRef = doc(db, "usuarios", uid);
+      await updateDoc(userRef, { rol: dbRole });
+      console.log(`Rol del usuario ${uid} actualizado a: ${dbRole}`);
 
-    const handleProfessionalPress = () => {
-        navigation.navigate("Registrarse1", { tipoUsuario: "profesional" });
-    };
+      navigation.navigate("Registrarse1", {
+        tipoUsuario: rol,
+        uid: uid,
+      });
+    } catch (error) {
+      console.error("Error al actualizar el rol en Firestore:", error);
+      Alert.alert(
+        "Error de Conexión",
+        "No se pudo guardar la selección de rol. Verifica tu conexión o las reglas de seguridad de Firestore."
+      );
+    }
+  };
 
-    return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: primaryBackgroundColor }]}>
-            <ScrollView contentContainerStyle={styles.container}>
+  const handleClientPress = async () => {
+    await updateRoleAndNavigate("cliente");
+  };
 
-                <Text style={[styles.title, { color: textColor }]}>
-                    ¡Bienvenido!
-                </Text>
+  const handleProfessionalPress = async () => {
+    await updateRoleAndNavigate("profesional");
+  };
 
-                <Text style={[styles.subtitle, { color: textColor }]}>
-                    ¿Cuál es tu rol?
-                </Text>
+  return (
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: primaryBackgroundColor }]}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={[styles.title, { color: textColor }]}>¡Bienvenido!</Text>
 
-                <Image
-                    source={logo}
-                    resizeMode="contain"
-                    style={styles.logo}
-                />
+        <Text style={[styles.subtitle, { color: textColor }]}>
+          ¿Cuál es tu rol?
+        </Text>
 
-                <Button
-                    title="Soy un cliente"
-                    buttonStyle={[buttonStyles.main, styles.clientButton]}
-                    textStyle={textStyles.mainText}
-                    onPress={handleClientPress}
-                />
+        <Image source={logo} resizeMode="contain" style={styles.logo} />
 
-                <Button
-                    title="Soy un Profesional"
-                    buttonStyle={[buttonStyles.secondary, styles.professionalButton]}
-                    textStyle={[textStyles.mainText, styles.professionalText]}
-                    onPress={handleProfessionalPress}
-                />
+        <Button
+          title="Soy un cliente"
+          buttonStyle={[buttonStyles.main, styles.clientButton]}
+          textStyle={textStyles.mainText}
+          onPress={handleClientPress}
+        />
 
-            </ScrollView>
-        </SafeAreaView>
-    );
+        <Button
+          title="Soy un Profesional"
+          buttonStyle={[buttonStyles.secondary, styles.professionalButton]}
+          textStyle={[textStyles.mainText, styles.professionalText]}
+          onPress={handleProfessionalPress}
+        />
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-    },
-    container: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 60,
-        paddingHorizontal: 20,
-    },
-    title: {
-        fontWeight: 'bold',
-        fontSize: 40,
-        textAlign: 'center',
-        marginBottom: 12,
-    },
-    subtitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        textAlign: 'center',
-        marginBottom: 30,
-    },
-    logo: {
-        width: 350,
-        height: 350,
-    },
-    clientButton: {
-        backgroundColor: '#154360',
-        marginBottom: 24,
-        width: '80%',
-    },
-    professionalButton: {
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderColor: '#e5e8ec',
-        width: '80%',
-    },
-    professionalText: {
-        color: '#e5e8ec',
-    },
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 40,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  logo: {
+    width: 350,
+    height: 350,
+  },
+  clientButton: {
+    backgroundColor: "#154360",
+    marginBottom: 24,
+    width: "80%",
+  },
+  professionalButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#e5e8ec",
+    width: "80%",
+  },
+  professionalText: {
+    color: "#e5e8ec",
+  },
 });

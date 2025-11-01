@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 import {
   SafeAreaView,
   ScrollView,
@@ -33,18 +33,12 @@ WebBrowser.maybeCompleteAuthSession();
 const { width } = Dimensions.get("window");
 
 export default function Registro({ navigation, route }) {
-
-// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+  useFocusEffect(
+    useCallback(() => {
+      console.log("-> PANTALLA ENFOCADA: " + route.name);
+      return () => {};
+    }, [route.name])
+  );
 
   const [username, onChangeUsername] = React.useState("");
   const [email, onChangeEmail] = React.useState("");
@@ -75,7 +69,7 @@ export default function Registro({ navigation, route }) {
         { merge: true }
       );
 
-      navigation.navigate("Seleccion");
+      navigation.navigate("Seleccion", { uid: user.uid });
     } catch (error) {
       console.error("Error al autenticar con Google:", error.message);
       Alert.alert("Error", "Error al conectar con Google. Inténtalo de nuevo.");
@@ -134,7 +128,7 @@ export default function Registro({ navigation, route }) {
       });
 
       Alert.alert("Registro Exitoso", "Tu cuenta ha sido creada. ¡Bienvenido!");
-      navigation.navigate("Seleccion");
+      navigation.navigate("Seleccion", { uid: user.uid });
     } catch (error) {
       let errorMessage = "Ocurrió un error al registrar. Inténtalo de nuevo.";
 
@@ -163,7 +157,9 @@ export default function Registro({ navigation, route }) {
         />
 
         <Text style={registerStyles.title}>Registrarse</Text>
-        <Text style={registerStyles.subtitle}>Creá tu cuenta para empezar.</Text>
+        <Text style={registerStyles.subtitle}>
+          Creá tu cuenta para empezar.
+        </Text>
 
         <View style={registerStyles.inputsSection}>
           <View style={registerStyles.inputWrapper}>
@@ -234,22 +230,22 @@ export default function Registro({ navigation, route }) {
             style={registerStyles.socialButton}
             onPress={() => promptAsync()}
           >
-            <Text
-              style={[registerStyles.socialIconText, { color: "#DB4437" }]}
-            >
+            <Text style={[registerStyles.socialIconText, { color: "#DB4437" }]}>
               G
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* ✅ FIX: Text separado, no anidado */}
         <View style={registerStyles.loginFooterContainer}>
           <Text style={registerStyles.registerText}>
-            ¿Ya tienes una cuenta?
+            ¿Ya tienes una cuenta?{" "}
+            <Text
+              style={registerStyles.registerLink}
+              onPress={() => navigation.navigate("Login")}
+            >
+              Iniciar Sesión
+            </Text>
           </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={registerStyles.registerLink}>Iniciar Sesión</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -343,9 +339,7 @@ const registerStyles = StyleSheet.create({
   },
   registerText: { fontSize: 14, color: "#2c3e50", textAlign: "center" },
   registerLink: {
-    fontSize: 14,
     fontWeight: "600",
     color: "#d26e00",
-    marginTop: 4,
   },
 });
