@@ -39,17 +39,18 @@ export default function App() {
         {/* Registro */}
 
         <Stack.Screen name="Seleccion" component={Seleccion} />
+        <Stack.Screen name="Registrarse1" component={Registrarse1} />
+        <Stack.Screen name="VerificarNumero" component={VerificarNumero} />
+        <Stack.Screen name="VerificarCodigo" component={VerificarCodigo} />
 
         {/* Cliente */}
+
+        <Stack.Screen name="InicioCliente" component={InicioCliente} />
 
         {/* Profesional */}
 
         {/* Otras pantallas */}
-        
-        <Stack.Screen name="Registrarse1" component={Registrarse1} />
-        <Stack.Screen name="VerificarNumero" component={VerificarNumero} />
-        <Stack.Screen name="VerificarCodigo" component={VerificarCodigo} />
-        <Stack.Screen name="InicioCliente" component={InicioCliente} />
+
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="Prestadores" component={Prestadores} />
         <Stack.Screen name="Calificaciones" component={Calificaciones} />

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 import {
   SafeAreaView,
   ScrollView,
@@ -10,15 +10,17 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  Alert,
 } from "react-native";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithCredential,
 } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import { auth } from "../config/firebaseConfig.js";
+import { auth, db } from "../config/firebaseConfig.js";
 
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
@@ -30,37 +32,55 @@ WebBrowser.maybeCompleteAuthSession();
 
 const { width } = Dimensions.get("window");
 
+const checkUserRoleAndNavigate = async (user, navigation) => {
+  const userRef = doc(db, "usuarios", user.uid);
+  try {
+    const docSnap = await getDoc(userRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const rol = userData.rol;
+
+      if (rol === "prestador") {
+        navigation.navigate("InicioProfesional");
+      } else if (rol === "cliente") {
+        navigation.navigate("InicioCliente");
+      } else {
+        Alert.alert("Error de Rol", "Tu perfil no tiene un rol válido. Contacta a soporte.");
+      }
+    } else {
+      Alert.alert("Perfil Incompleto", "No encontramos tu información de perfil. Regístrate de nuevo.");
+    }
+  } catch (error) {
+    console.error("Error al obtener el rol:", error.message);
+    Alert.alert("Error de Conexión", "No se pudo verificar tu rol. Inténtalo más tarde.");
+  }
+};
+
 export default function IniciarSesion({ navigation, route }) {
-
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+  useFocusEffect(
+    useCallback(() => {
+      console.log("PANTALLA ENFOCADA: " + route.name);
+      return () => {};
+    }, [route.name])
+  );
 
   const [email, onChangeEmail] = React.useState("");
   const [password, onChangePassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
 
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
-      androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
-    },
-  );
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
+  });
 
   const handleGoogleLogin = async (idToken) => {
     try {
       const credential = GoogleAuthProvider.credential(idToken);
-      await signInWithCredential(auth, credential);
+      const userCredential = await signInWithCredential(auth, credential);
+      const user = userCredential.user;
       console.log("Login con Google exitoso.");
-      navigation.navigate("InicioCliente");
+      await checkUserRoleAndNavigate(user, navigation);
     } catch (error) {
       console.error("Error al autenticar con Google:", error.message);
       alert("Error al conectar con Google. Inténtalo de nuevo.");
@@ -83,27 +103,17 @@ export default function IniciarSesion({ navigation, route }) {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log("Usuario logueado con éxito:", user.email);
-
-      navigation.navigate("InicioCliente");
+      await checkUserRoleAndNavigate(user, navigation);
     } catch (error) {
       let errorMessage = "Error al iniciar sesión. Verifica tus credenciales.";
-
       if (error.code === "auth/invalid-credential") {
-        errorMessage =
-          "E-mail o contraseña inválidos. Por favor, intenta de nuevo.";
+        errorMessage = "E-mail o contraseña inválidos. Por favor, intenta de nuevo.";
       } else if (error.code === "auth/too-many-requests") {
-        errorMessage =
-          "Acceso bloqueado temporalmente debido a demasiados intentos fallidos.";
+        errorMessage = "Acceso bloqueado temporalmente debido a demasiados intentos fallidos.";
       }
-
       console.error("Error de Login:", error.message);
       alert(errorMessage);
     }
@@ -114,8 +124,7 @@ export default function IniciarSesion({ navigation, route }) {
       name: "Google",
       icon: "G",
       color: "#DB4437",
-      onPress: () =>
-        promptAsync(),
+      onPress: () => promptAsync(),
     },
   ];
 
@@ -144,7 +153,7 @@ export default function IniciarSesion({ navigation, route }) {
 
           <View style={styles.inputWrapper}>
             <TextInput
-              style={[styles.input, { paddingRight: 50 }]} // Espacio para el icono de visibilidad
+              style={[styles.input, { paddingRight: 50 }]}
               onChangeText={onChangePassword}
               value={password}
               placeholder="Ingresá tu contraseña"
@@ -164,9 +173,7 @@ export default function IniciarSesion({ navigation, route }) {
           style={styles.forgotPassword}
           onPress={() => console.log("Ir a recuperar contraseña")}
         >
-          <Text style={styles.forgotPasswordText}>
-            ¿Olvidaste tu contraseña?
-          </Text>
+          <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -177,20 +184,11 @@ export default function IniciarSesion({ navigation, route }) {
         </TouchableOpacity>
 
         <View style={styles.orLoginContainer}>
-          <Image
-            source={placeholder}
-            style={styles.orLoginLine}
-            resizeMode="contain"
-          />
+          <Image source={placeholder} style={styles.orLoginLine} resizeMode="contain" />
           <Text style={styles.orLoginText}>O Iniciá con</Text>
-          <Image
-            source={placeholder}
-            style={styles.orLoginLine}
-            resizeMode="contain"
-          />
+          <Image source={placeholder} style={styles.orLoginLine} resizeMode="contain" />
         </View>
 
-        {/* --- CAMBIO AQUÍ: Botones Sociales usando íconos de texto/emojis --- */}
         <View style={styles.socialButtonsContainer}>
           {socialButtons.map((button, index) => (
             <TouchableOpacity
@@ -198,13 +196,10 @@ export default function IniciarSesion({ navigation, route }) {
               style={styles.socialButton}
               onPress={button.onPress}
             >
-              <Text style={[styles.socialIconText, { color: button.color }]}>
-                {button.icon}
-              </Text>
+              <Text style={[styles.socialIconText, { color: button.color }]}>{button.icon}</Text>
             </TouchableOpacity>
           ))}
         </View>
-        {/* ------------------------------------------------------------------ */}
 
         <View style={styles.registerContainer}>
           <Text style={styles.registerText}>
@@ -221,10 +216,11 @@ export default function IniciarSesion({ navigation, route }) {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#e5e8ec", // Fondo gris claro
+    backgroundColor: "#e5e8ec",
   },
   container: {
     flexGrow: 1,
@@ -239,35 +235,28 @@ const styles = StyleSheet.create({
     height: 256,
     backgroundColor: "#d26e00",
   },
-  statusIconsContainer: {
-    flexDirection: "row",
-  },
   logo: {
     width: 200,
     height: 200,
-    marginTop: 20, // Mantener el logo arriba
+    marginTop: 20,
     zIndex: 2,
   },
   title: {
     fontSize: 28,
-    // fontFamily: 'Poppins-Bold', // Asumir que la fuente está cargada
     fontWeight: "bold",
-    color: "#f9f5ee", // Color del título (blanco/crema)
+    color: "#f9f5ee",
     textAlign: "center",
-    // --- CAMBIO AQUÍ ---
-    marginTop: -50, // Ajusta este valor para subir el título dentro del header
-    zIndex: 3, // Asegura que el texto esté sobre el fondo naranja
+    marginTop: -50,
+    zIndex: 3,
   },
   subtitle: {
     fontSize: 16,
-    // fontFamily: 'Poppins-SemiBold',
     fontWeight: "600",
-    color: "#f9f5ee", // ¡Bienvenido de Nuevo! también blanco/crema para contrastar
+    color: "#f9f5ee",
     textAlign: "center",
-    // --- CAMBIO AQUÍ ---
-    marginTop: 5, // Un pequeño margen debajo del título
-    marginBottom: 80, // Mantener el margen para los inputs
-    zIndex: 3, // Asegura que el texto esté sobre el fondo naranja
+    marginTop: 5,
+    marginBottom: 80,
+    zIndex: 3,
   },
   inputsSection: {
     width: "90%",
@@ -288,7 +277,6 @@ const styles = StyleSheet.create({
     borderColor: "#e5e8ec",
     paddingHorizontal: 18,
     fontSize: 14,
-    // fontFamily: 'Poppins-Medium',
     color: "#2c3e50",
   },
   passwordToggle: {
@@ -308,7 +296,6 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 14,
-    // fontFamily: 'Poppins-Regular',
     color: "#154360",
     textAlign: "right",
   },
@@ -316,7 +303,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#154360",
     width: "80%",
     maxWidth: 333,
-    marginHorizontal: 0,
     borderRadius: 8,
     paddingVertical: 14,
   },
@@ -330,12 +316,10 @@ const styles = StyleSheet.create({
   orLoginLine: {
     flex: 1,
     height: 1,
-    width: "auto",
   },
   orLoginText: {
     paddingHorizontal: 10,
     fontSize: 14,
-    // fontFamily: 'Poppins-Regular',
     color: "#2c3e50",
   },
   socialButtonsContainer: {
@@ -367,13 +351,11 @@ const styles = StyleSheet.create({
   },
   registerText: {
     fontSize: 14,
-    // fontFamily: 'Poppins-Regular',
     color: "#2c3e50",
     textAlign: "center",
     marginBottom: 40,
   },
   registerLink: {
-    // fontFamily: 'Poppins-SemiBold',
     fontWeight: "600",
     color: "#d26e00",
   },
