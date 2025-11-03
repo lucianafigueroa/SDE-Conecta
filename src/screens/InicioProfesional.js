@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
@@ -11,11 +11,51 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebaseConfig";
 
 import BANNER_IMAGE from "../assets/images/banner.png";
 import PLACEHOLDER_ICON from "../assets/images/placeholder.png";
 
 export default function InicioProfesional({ navigation, route }) {
+  const [userName, setUserName] = useState("Cargando...");
+
+  useEffect(() => {
+    let unsubscribe;
+
+    const fetchUserData = async (user) => {
+      try {
+        const userDocRef = doc(db, "usuarios", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const nameFromDB = userData.nombre || "Usuario";
+          let displayableName = nameFromDB.split(" ")[0];
+          setUserName(displayableName);
+        } else {
+          setUserName("Usuario");
+        }
+      } catch (e) {
+        console.error("Error al obtener datos de Firestore:", e);
+        setUserName("Error");
+      }
+    };
+
+    unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserData(user);
+      } else {
+        setUserName("Invitado");
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       console.log("-> PANTALLA ENFOCADA: " + route.name);
@@ -45,61 +85,18 @@ export default function InicioProfesional({ navigation, route }) {
     </TouchableOpacity>
   );
 
-  const BottomMenu = () => (
-    <View style={styles.bottomNav}>
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("InicioProfesional")}>
-        <Ionicons name="home" size={24} color="#FF7F27" />
-        <View style={{ width: 60, alignItems: "center" }}>
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="clip"
-            style={[styles.navText, styles.activeText]}
-          >
-            Inicio
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("PresupuestosProfesional")}>
-        <Ionicons name="clipboard-outline" size={24} color="#6E6E6E" />
-        <View style={{ width: 80, alignItems: "center" }}>
-          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.navText}>
-            Presupuestos
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("PromocionesProfesional")}>
-        <Feather name="gift" size={24} color="#6E6E6E" />
-        <View style={{ width: 80, alignItems: "center" }}>
-          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.navText}>
-            Promociones
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("NotificacionesProfesional")}>
-        <Ionicons name="notifications-outline" size={24} color="#6E6E6E" />
-        <View style={{ width: 90, alignItems: "center" }}>
-          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.navText}>
-            Notificaciones
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={styles.headerText}>Hola Luciana</Text>
+          <Text style={styles.headerText}>Hola {userName}</Text>
           <View style={styles.locationContainer}>
             <Ionicons name="location-sharp" size={16} color="white" />
-            <Text style={styles.locationText}>Av. Belgrano Sur 281</Text>
+            <Text style={styles.locationText}>Dirección no registrada</Text>
             <MaterialIcons name="keyboard-arrow-down" size={20} color="white" />
           </View>
         </View>
+
         <TouchableOpacity
           style={styles.menuIcon}
           onPress={() => navigation.navigate("CerrarSesionProfesional")}
@@ -147,8 +144,6 @@ export default function InicioProfesional({ navigation, route }) {
           </View>
         </View>
       </ScrollView>
-
-      <BottomMenu />
     </View>
   );
 }
@@ -170,7 +165,13 @@ const styles = StyleSheet.create({
   headerContent: { flex: 1 },
   headerText: { fontSize: 28, fontWeight: "bold", color: "#fff", marginBottom: 5 },
   locationContainer: { flexDirection: "row", alignItems: "center" },
-  locationText: { fontSize: 16, color: "white", marginLeft: 5, marginRight: 5, fontWeight: "bold" },
+  locationText: {
+    fontSize: 16,
+    color: "white",
+    marginLeft: 5,
+    marginRight: 5,
+    fontWeight: "bold",
+  },
   menuIcon: { padding: 5 },
   searchBarContainer: {
     position: "absolute",
@@ -244,22 +245,4 @@ const styles = StyleSheet.create({
   },
   serviceIcon: { width: 60, height: 60, borderRadius: 30, marginBottom: 5, backgroundColor: "#EAEAEA" },
   serviceName: { fontSize: 12, fontWeight: "500", textAlign: "center", color: "#333" },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: "#EAEAEA",
-    backgroundColor: "white",
-    paddingVertical: 10,
-    paddingBottom: 20,
-  },
-  navItem: { alignItems: "center", justifyContent: "center" },
-  navText: {
-    fontSize: 11,
-    marginTop: 4,
-    color: "#6E6E6E",
-    textAlign: "center",
-    includeFontPadding: false,
-  },
-  activeText: { color: "#FF7F27", fontWeight: "bold" },
 });
