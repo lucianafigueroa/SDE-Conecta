@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   SafeAreaView,
   ScrollView,
@@ -8,156 +8,191 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  Dimensions, // Necesario para estilos sensibles como los que usamos antes
+  Dimensions,
+  ActivityIndicator,
 } from "react-native";
-// import Button from "../components/Button"; // Componente externo no definido, lo comentamos por ahora
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../config/firebaseConfig";
 
-import placeholder from "../assets/images/placeholder.png";
-import banner from "../assets/images/banner.png";
-import limpieza from "../assets/images/limpieza.png";
-import mujer from "../assets/images/mujer.png";
-import iconoLimpieza from "../assets/images/placeholder.png";
-import iconoAlbanil from "../assets/images/placeholder.png";
-import iconoElectricista from "../assets/images/placeholder.png";
-import iconoGasista from "../assets/images/placeholder.png";
+const { width } = Dimensions.get("window");
 
+// 🔸 Diccionario de íconos locales
+const iconos = {
+  carpinteroIcono: require("../assets/images/carpinteroIcono.png"),
+  limpiezaIcono: require("../assets/images/limpiezaIcono.png"),
+  plomeroIcono: require("../assets/images/plomeroIcono.png"),
+  pintorIcono: require("../assets/images/pintorIcono.png"),
+  albañilIcono: require("../assets/images/albañilIcono.png"),
+  electricistaIcono: require("../assets/images/electricistaIcono.png"),
+  niñeraIcono: require("../assets/images/niñeraIcono.png"),
 
-const { width } = Dimensions.get('window'); // Definimos width para estilos
+};
+
+const fotosPerfil = {
+  mujer: require("../assets/images/mujer.png"),
+  fotoNicolas: require("../assets/images/fotoNicolas.jpg"),
+};
 
 export default function InicioCliente({ navigation, route }) {
+  const { user } = route.params || {}; // 👈 recibimos el usuario desde la navegación
+  const [profesiones, setProfesiones] = useState([]);
+  const [recomendados, setRecomendados] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cliente, setCliente] = useState(user || null); // 👈 usamos ese user como cliente
 
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
+  const { email, displayName, uid, rol } = user;
+  console.log("Cliente autenticado:", { email, displayName, uid, rol });
 
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("-> PANTALLA ENFOCADA: " + route.name);
+      return () => {};
+    }, [route.name])
+  );
+
+  // 🔥 Cargar datos desde Firestore
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        // Profesiones
+        const profesionesSnap = await getDocs(collection(db, "profesiones"));
+
+        // Prestadores
+        const prestadoresQuery = query(
+          collection(db, "usuarios"),
+          where("rol", "==", "prestador")
+        );
+        const prestadoresSnap = await getDocs(prestadoresQuery);
+
+        // Cliente (usuario actual)
+        const clienteQuery = query(
+          collection(db, "usuarios"),
+          where("rol", "==", "cliente")
+        );
+        const clienteSnap = await getDocs(clienteQuery);
+        const clienteData =
+          clienteSnap.docs.length > 0 ? clienteSnap.docs[0].data() : null;
+
+        const listaProfesiones = profesionesSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        const listaPrestadores = prestadoresSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setProfesiones(listaProfesiones);
+        setRecomendados(listaPrestadores);
+        setCliente(clienteData);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatos();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator size="large" color="#d26e00" style={{ marginTop: 50 }} />
+      </SafeAreaView>
     );
-    // ------------------------------------------------------------
-
-  // Datos de navegación inferior
-  const navTabs = [
-    { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
-    { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
-    { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
-    { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' }, // ¡Aquí está el cambio!
-  ];
-
-  const handleNavigation = (screenName) => {
-    // Solo navegamos si la pantalla no es la actual (o si queremos recargarla)
-    if (screenName && screenName !== 'InicioCliente') {
-        navigation.navigate(screenName);
-    }
-    // Si es "Inicio", podrías hacer un scroll to top o no hacer nada,
-    // ya que probablemente ya estás en esta pantalla.
-  };
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-
-        {/* --- Header --- */}
+        {/* Header dinámico */}
         <View style={styles.header}>
-          {/* El diseño anterior tenía el header naranja y el saludo en blanco/crema */}
-          <Text style={styles.headerText}>Hola Luciana</Text>
-          <Text style={styles.locationText}>Av. Belgrano Sur 281</Text>
-          {/* Faltaría el botón de menú que estaba en la esquina superior derecha */}
+          <Text style={styles.headerText}>
+            Hola {cliente ? cliente.nombre : "Usuario"}
+          </Text>
+          <Text style={styles.locationText}>
+            {cliente ? cliente.domicilio : "Domicilio no disponible"}
+          </Text>
         </View>
 
-        {/* --- Search Bar (Simulación de barra flotante) --- */}
+        {/* Buscador */}
         <View style={styles.searchContainer}>
           <Text style={styles.searchText}>Buscar categoría</Text>
         </View>
 
-
-        {/* --- Banner --- */}
+        {/* Banner */}
         <View style={styles.bannerContainer}>
-          <Image source={banner} style={styles.bannerImage} resizeMode="cover" />
-          {/* Aquí faltarían los puntos del carrusel y el texto del banner */}
+          <Image
+            source={require("../assets/images/banner.png")}
+            style={styles.bannerImage}
+          />
         </View>
 
-        {/* --- Servicios --- */}
+        {/* --- Servicios dinámicos (profesiones) --- */}
         <View style={styles.servicesSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
-            <TouchableOpacity onPress={() => console.log('Ver más servicios')}>
-               <Text style={styles.verMasLink}>Ver más ›</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("VerMasServicios")}>
+              <Text style={styles.verMasLink}>Ver más ›</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.servicesContainer}>
-            {/* Limitamos a 4 elementos por fila para el grid */}
-            {["Limpieza", "Albañil", "Electricista", "Gasista"].map((service, index) => (
-              <TouchableOpacity key={index} style={styles.serviceCard}>
-                <Image source={limpieza} style={styles.serviceIcon} />
-                <Text style={styles.serviceName}>{service}</Text>
+            {profesiones.slice(0, 4).map((serv) => (
+              <TouchableOpacity key={serv.id} style={styles.serviceCard}>
+                <Image
+                  source={iconos[serv.icono] || require("../assets/images/sobre.png")}
+                  style={styles.serviceIcon}
+                />
+                <Text style={styles.serviceName}>{serv.nombre}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* --- Recomendados --- */}
+        {/* --- Recomendados dinámicos (prestadores) --- */}
         <View style={styles.recommendedSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recomendados</Text>
-            <TouchableOpacity onPress={() => console.log('Ver más recomendados')}>
-               <Text style={styles.verMasLink}>Ver más ›</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("VerMasRecomendados")}>
+              <Text style={styles.verMasLink}>Ver más ›</Text>
             </TouchableOpacity>
           </View>
 
-          {[
-            { name: "Lucía Pérez", rating: 5, reviews: 150, service: "Servicio de Limpieza" },
-            { name: "Pablo Mendoza", rating: 4, reviews: 90, service: "Servicio de Limpieza" },
-          ].map((provider, index) => (
-            <TouchableOpacity key={index} style={styles.providerCard} onPress={() => navigation.navigate('VerPerfil')}>
-              <Image source={mujer} style={styles.providerImage} />
+          {recomendados.map((prov) => (
+            <TouchableOpacity
+              key={prov.id}
+              style={styles.providerCard}
+              onPress={() => navigation.navigate("VerPerfil", { prestador: prov , user})}
+            >
+              <Image
+                source={fotosPerfil[prov.foto] || require("../assets/images/defaultUser.png")}
+                style={styles.providerImage}
+              />
               <View style={styles.providerInfo}>
-                <Text style={styles.providerName}>{provider.name}</Text>
-                <Text style={styles.providerRating}>⭐ {provider.rating} ({provider.reviews})</Text>
-                <Text style={styles.providerService}>{provider.service}</Text>
+                <Text style={styles.providerName}>{prov.nombre}</Text>
+                <Text style={styles.providerRating}>
+                  ⭐ {prov.puntuacion || 0} ({prov.opiniones || 0})
+                </Text>
+                <Text style={styles.providerService}>{prov.profesion}</Text>
               </View>
               <Text style={styles.providerArrow}>›</Text>
             </TouchableOpacity>
           ))}
         </View>
-
       </ScrollView>
-
-      {/* --- Barra de Navegación Inferior (bottomNav) --- */}
-      <View style={styles.bottomNav}>
-        {navTabs.map((tab, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.navItem}
-            onPress={() => handleNavigation(tab.screen)} // Uso de la función de navegación
-          >
-            <Image
-              source={tab.icon}
-              style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
-            />
-            <Text
-              style={[
-                styles.navText,
-                tab.name === 'Inicio' && styles.navTextActive // 'Inicio' como activo
-              ]}
-            >
-              {tab.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
     </SafeAreaView>
   );
 }
 
+// 🎨 Estilos
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: "#e5e8ec",
-    position: "relative",
   },
   container: {
     paddingBottom: 100,
@@ -167,76 +202,68 @@ const styles = StyleSheet.create({
     backgroundColor: "#d26e00",
     paddingHorizontal: 20,
     paddingTop: 40,
-    paddingBottom: 70, // espacio para que el buscador flote,
+    paddingBottom: 70,
   },
   headerText: {
     marginTop: 10,
     fontSize: 28,
-    fontFamily: "Poppins-Bold",
     color: "#fff",
-    marginBottom: 5,
     fontWeight: "bold",
-  },locationText: {
-      fontSize: 14,
-      fontFamily: "Poppins-Regular",
-      color: "#fff",
-      fontWeight: "bold",
-    },
-
-    searchContainer: {
-      position: "absolute",
-      top: 150, // ajustá según el alto del header
-      left: 20,
-      right: 20,
-      height: 53,
-      backgroundColor: "#fff",
-      borderRadius: 32,
-      justifyContent: "center",
-      paddingHorizontal: 15,
-      shadowColor: "#000",
-      shadowOpacity: 0.25,
-      shadowOffset: { width: 0, height: 4 },
-      shadowRadius: 9,
-      zIndex: 10,
-    },
-
-    searchText: {
-      fontSize: 16,
-      fontFamily: "Poppins-Medium",
-      color: "#2c3e50",
-    },
-  iconSmall: {
-    width: 20,
-    height: 20,
+  },
+  locationText: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  searchContainer: {
+    position: "absolute",
+    top: 150,
+    left: 20,
+    right: 20,
+    height: 53,
+    backgroundColor: "#fff",
+    borderRadius: 32,
+    justifyContent: "center",
+    paddingHorizontal: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 9,
+    zIndex: 10,
+  },
+  searchText: {
+    fontSize: 16,
+    color: "#2c3e50",
   },
   bannerContainer: {
     marginTop: 50,
     marginHorizontal: 20,
     marginBottom: 10,
-    position: "relative",
   },
   bannerImage: {
     width: "100%",
     height: 181,
     borderRadius: 15,
   },
-  bannerTitle: {
-    position: "absolute",
-    bottom: 10,
-    left: 15,
-    fontSize: 16,
-    fontFamily: "Poppins-Bold",
-    color: "#ffff63",
-  },
   servicesSection: {
     marginHorizontal: 20,
     marginTop: 20,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: "Poppins-Bold",
-    marginBottom: 10,
+    fontWeight: "bold",
     color: "#2c3e50",
+  },
+  verMasLink: {
+    fontSize: 14,
+    color: "#d26e00",
+    fontWeight: "600",
   },
   servicesContainer: {
     flexDirection: "row",
@@ -258,13 +285,7 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontSize: 14,
-    fontFamily: "Roboto-Medium",
     color: "#2c3e50",
-  },
-  verMas: {
-    fontSize: 12,
-    color: "#d26e00",
-    marginTop: 5,
   },
   recommendedSection: {
     marginHorizontal: 20,
@@ -289,7 +310,7 @@ const styles = StyleSheet.create({
   },
   providerName: {
     fontSize: 16,
-    fontFamily: "Poppins-Bold",
+    fontWeight: "bold",
     color: "#2c3e50",
   },
   providerRating: {
@@ -300,28 +321,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#7f8c8d",
   },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: 70,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: 4,
-  },
-  navText: {
-    fontSize: 12,
-    color: "#2c3e50",
+  providerArrow: {
+    fontSize: 22,
+    color: "#ccc",
   },
 });

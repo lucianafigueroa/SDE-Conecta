@@ -1,237 +1,230 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useEffect, useState, useCallback } from "react";
 import {
   SafeAreaView,
   View,
   Text,
-  Image,
+  FlatList,
   TextInput,
-  StyleSheet,
-  ScrollView,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
 } from "react-native";
-
-import ChatMessage from "../styles/ChatMessage";
-
-
-import userAvatar from "../assets/images/placeholder.png";
-import placeholder from "../assets/images/placeholder.png";
-import sendIcon from "../assets/images/phone.png";
-import micIcon from "../assets/images/mic.png";
-import phoneIcon from "../assets/images/phone.png";
-import attachIcon from "../assets/images/clip.png";
+import { auth, db } from "../config/firebaseConfig";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  setDoc,
+  getDoc,
+} from "firebase/firestore";
 
 export default function Chat({ navigation, route }) {
+  const { prestador } = route.params || {};
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState("");
 
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
+  const user = auth.currentUser;
+  const clienteEmail = user?.email || "cliente3@gmail.com";
 
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+  console.log("💬 Prestador recibido:", prestador?.email);
+  console.log("👤 Cliente logueado:", clienteEmail);
 
-  const navTabs = [
-    { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
-    { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
-    { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
-    { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' },
-  ];
+  // ✅ Crear ID del chat ordenado y limpio
+  const chatId = [prestador?.email?.trim(), clienteEmail.trim()]
+    .sort()
+    .join("_");
 
-  const handleNavigation = (screenName) => {
-    if (screenName && screenName !== 'InicioCliente') {
-      navigation.navigate(screenName);
+  console.log("🧩 Escuchando chatId:", chatId);
+
+  // 🔄 Escucha los mensajes del chat en tiempo real
+  useEffect(() => {
+    const chatRef = doc(db, "chats", chatId);
+    const messagesRef = collection(chatRef, "messages");
+
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log("📸 Snapshot size:", snapshot.size);
+      if (snapshot.empty) {
+        console.warn("⚠️ No se encontraron mensajes en Firestore");
+        setMessages([]);
+      } else {
+        const newMessages = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("✅ Mensajes recibidos:", newMessages.length);
+        setMessages(newMessages);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [chatId]);
+
+  // ✉️ Enviar mensaje
+  const handleSendMessage = useCallback(async () => {
+    if (inputText.trim() === "") return;
+
+    const chatRef = doc(db, "chats", chatId);
+    const messagesRef = collection(chatRef, "messages");
+
+    try {
+      // ✅ Verificar si el chat ya existe, sino crearlo
+      const chatSnap = await getDoc(chatRef);
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          participants: [prestador.email.trim(), clienteEmail.trim()],
+          createdAt: new Date(),
+        });
+        console.log("🆕 Chat creado en Firestore");
+      }
+
+      // ✅ Agregar mensaje
+      await addDoc(messagesRef, {
+        sender: clienteEmail,
+        text: inputText,
+        timestamp: new Date(),
+        type: "text",
+      });
+
+      console.log("💬 Mensaje enviado correctamente:", inputText);
+      setInputText("");
+    } catch (error) {
+      console.error("🚨 Error enviando mensaje:", error);
     }
-  };
+  }, [inputText, chatId, clienteEmail]);
+
+  // 💬 Render de mensaje individual
+  const renderMessage = ({ item }) => (
+    <View
+      style={[
+        styles.messageBubble,
+        item.sender === clienteEmail
+          ? styles.myMessage
+          : styles.theirMessage,
+      ]}
+    >
+      <Text
+        style={{
+          color: item.sender === clienteEmail ? "#fff" : "#000",
+        }}
+      >
+        {item.text}
+      </Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Header */}
+    <SafeAreaView style={styles.safeArea}>
+      {/* --- Header con botón atrás y nombre del prestador --- */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Image source={userAvatar} style={styles.headerAvatar} />
-          <View>
-            <Text style={styles.headerName}>George Alan</Text>
-            <Text style={styles.headerStatus}>Online</Text>
-          </View>
-        </View>
-
-        <View style={styles.headerIcons}>
-          <Image source={phoneIcon} style={styles.headerIcon} />
-          <Image source={micIcon} style={styles.headerIcon} />
-          <Image source={attachIcon} style={styles.headerIcon} />
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>
+          {prestador?.nombre
+            ? prestador.nombre
+            : prestador?.email || "Chat"}
+        </Text>
       </View>
 
-      {/* Chat messages */}
-      <ScrollView contentContainerStyle={styles.chatContainer}>
-        <ChatMessage type="voice" time="7:38 AM" isUser={false} />
-        <ChatMessage
-          type="text"
-          text="¡Sí, solo contesta mi pregunta primero! ¿Qué tamaño tiene tu televisor y en qué tipo de pared se va a montar?"
-          time="7:38 AM"
-          isUser={true}
+      {/* --- Contenido del chat --- */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <FlatList
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
         />
-        <ChatMessage
-          type="text"
-          text="Lorem ipsum dolor sit amet consectetur. Lorem ipsum dolor sit amet consectetur. Lorem ipsum dolor sit amet consectetur. Lorem ipsum dolor sit amet consectetur."
-          time="7:38 AM"
-          isUser={false}
-        />
-        <ChatMessage type="voice" time="7:39 AM" isUser={true} />
-        <ChatMessage type="text" text="Yes, see you then!" time="7:38 AM" isUser={false} />
-        <ChatMessage
-          type="info"
-          text="Tina programó una cita para el miércoles 23 de abril a las 11:30."
-        />
-      </ScrollView>
 
-      {/* Input */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Messages..."
-          placeholderTextColor="#999"
-        />
-        <TouchableOpacity>
-          <Image source={attachIcon} style={styles.inputIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={micIcon} style={styles.inputIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={sendIcon} style={styles.inputIcon} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        {navTabs.map((tab, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.navItem}
-            onPress={() => handleNavigation(tab.screen)}
-          >
-            <Image
-              source={tab.icon}
-              style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
-            />
-            <Text
-              style={[
-                styles.navText,
-                tab.name === 'Inicio' && styles.navTextActive
-              ]}
-            >
-              {tab.name}
-            </Text>
+        {/* --- Input para enviar mensaje --- */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Escribe un mensaje..."
+          />
+          <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
+            <Text style={styles.sendText}>Enviar</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
+// --- 🎨 Estilos ---
 const styles = StyleSheet.create({
-  safe: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#E5E8EC",
+    backgroundColor: "#f7f8fa",
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    elevation: 2,
-  },
-  headerLeft: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 60,
+    marginBottom: 20,
+    paddingHorizontal: 25,
   },
-  headerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  backArrow: {
+    fontSize: 24,
+    color: "#2C3E50",
     marginRight: 10,
   },
-  headerName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#2C3E50",
   },
-  headerStatus: {
-    fontSize: 12,
-    color: "green",
+  messageBubble: {
+    padding: 10,
+    borderRadius: 10,
+    marginVertical: 4,
+    maxWidth: "75%",
   },
-  headerIcons: {
-    flexDirection: "row",
-    gap: 12,
+  myMessage: {
+    alignSelf: "flex-end",
+    backgroundColor: "#FF8C00",
   },
-  headerIcon: {
-    width: 22,
-    height: 22,
-    tintColor: "#2c3e50",
-  },
-  chatContainer: {
-    padding: 15,
-    backgroundColor: "#F2F3F5",
+  theirMessage: {
+    alignSelf: "flex-start",
+    backgroundColor: "#ECECEC",
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
     backgroundColor: "#fff",
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 30,
-    marginHorizontal: 10,
-    marginBottom: 80,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: "#000",
-    paddingHorizontal: 10,
-  },
-  inputIcon: {
-    width: 22,
-    height: 22,
-    tintColor: "#2c3e50",
-    marginHorizontal: 5,
-  },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: 70,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 1,
+    borderWidth: 1,
     borderColor: "#ccc",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginRight: 10,
   },
-  navItem: {
-    alignItems: "center",
+  sendButton: {
+    backgroundColor: "#FF8C00",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
   },
-  navIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: 4,
-  },
-  navText: {
-    fontSize: 12,
-    color: "#2c3e50",
-  },
-  navIconActive: {
-    tintColor: "#000",
-  },
-  navTextActive: {
+  sendText: {
+    color: "#fff",
     fontWeight: "bold",
-    color: "#000",
   },
 });

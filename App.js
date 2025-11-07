@@ -20,6 +20,9 @@ import Categorias from "./src/screens/Categorias.js";
 import InicioProfesional from "./src/screens/InicioProfesional.js";
 import VerPerfil from "./src/screens/VerPerfil.js";
 import BottomTabs from "./src/components/BottomTabs";
+import VerMasServicios from "./src/screens/VerMasServicios.js";
+import Chat from "./src/screens/Chat.js";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +50,7 @@ export default function App() {
         {/* Cliente */}
 
         <Stack.Screen name="InicioCliente" component={InicioCliente} />
+        <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
 
         {/* Profesional */}
 
@@ -56,13 +60,11 @@ export default function App() {
         <Stack.Screen name="Prestadores" component={Prestadores} />
         <Stack.Screen name="Calificaciones" component={Calificaciones} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
-        <Stack.Screen
-          name="NotificacionesProfesional"
-          component={NotificacionesProfesional}
-        />
+        <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional}/>
         <Stack.Screen name="Categorias" component={Categorias} />
         <Stack.Screen name="InicioProfesional" component={BottomTabs} />
         <Stack.Screen name="VerPerfil" component={VerPerfil} />
+        <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
     </NavigationContainer>
   );

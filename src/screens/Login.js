@@ -44,7 +44,7 @@ const checkUserRoleAndNavigate = async (user, navigation) => {
       if (rol === "prestador") {
         navigation.navigate("InicioProfesional");
       } else if (rol === "cliente") {
-        navigation.navigate("InicioCliente");
+        navigation.navigate("InicioCliente", { user: { ...user, rol } });;
       } else {
         Alert.alert("Error de Rol", "Tu perfil no tiene un rol válido. Contacta a soporte.");
       }
