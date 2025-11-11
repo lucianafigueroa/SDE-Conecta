@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   SafeAreaView,
@@ -12,6 +12,11 @@ import {
 } from "react-native";
 import Button from "../components/Button";
 import { textStyles } from "../styles/texts";
+import BottomTabs from "../components/BottomTabs";
+
+// Firebase
+import { db } from "../config/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
 
 // Íconos locales
 import locationOnIcon from "../assets/images/localizacion.png";
@@ -33,19 +38,17 @@ const fotosPerfil = {
   fotoNicolas: require("../assets/images/fotoNicolas.jpg"),
 };
 
-
 const fotosServicios = {
-    fotoServicio1Nicolas: require("../assets/images/fotoServicio1Nicolas.jpg"),
-    fotoServicio2Nicolas: require("../assets/images/fotoServicio2Nicolas.jpg"),
-    fotoServicio3Nicolas: require("../assets/images/fotoServicio3Nicolas.jpg"),
-    fotoServicio1Catalina: require("../assets/images/fotoServicio1Catalina.jpg"),
-    fotoServicio2Catalina: require("../assets/images/fotoServicio2Catalina.jpg"),
-    fotoServicio3Catalina: require("../assets/images/fotoServicio3Catalina.jpg"),
-
-}
+  fotoServicio1Nicolas: require("../assets/images/fotoServicio1Nicolas.jpg"),
+  fotoServicio2Nicolas: require("../assets/images/fotoServicio2Nicolas.jpg"),
+  fotoServicio3Nicolas: require("../assets/images/fotoServicio3Nicolas.jpg"),
+  fotoServicio1Catalina: require("../assets/images/fotoServicio1Catalina.jpg"),
+  fotoServicio2Catalina: require("../assets/images/fotoServicio2Catalina.jpg"),
+  fotoServicio3Catalina: require("../assets/images/fotoServicio3Catalina.jpg"),
+};
 
 // Tarjeta de Opinión
-const ReviewCard = ({ name, date, reviewText, isInitiallyLong = false }) => {
+const ReviewCard = ({ name, date, reviewText, rating = 5, isInitiallyLong = false }) => {
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => setExpanded(!expanded);
 
@@ -59,7 +62,11 @@ const ReviewCard = ({ name, date, reviewText, isInitiallyLong = false }) => {
         </View>
         <View style={reviewStyles.ratingContainer}>
           {[...Array(5)].map((_, i) => (
-            <Image key={i} source={starIcon} style={reviewStyles.starIcon} />
+            <Image
+              key={i}
+              source={i < rating ? starIcon : starEmptyIcon}
+              style={reviewStyles.starIcon}
+            />
           ))}
         </View>
       </View>
@@ -84,6 +91,8 @@ const ReviewCard = ({ name, date, reviewText, isInitiallyLong = false }) => {
 
 export default function VerPerfil({ navigation, route }) {
   const { prestador, user } = route.params || {};
+  const [reseñas, setReseñas] = useState([]);
+
   console.log("🔍 fotosServicios en Firestore:", prestador.fotosServicios);
   console.log("👤 Cliente logueado:", user?.email);
 
@@ -95,6 +104,21 @@ export default function VerPerfil({ navigation, route }) {
       return () => {};
     }, [route.name])
   );
+
+  // 🔹 Cargar reseñas desde Firestore
+  useEffect(() => {
+    const fetchReseñas = async () => {
+      try {
+        const reseñasRef = collection(db, "usuarios", prestador.id, "reseñas");
+        const snapshot = await getDocs(reseñasRef);
+        const data = snapshot.docs.map((doc) => doc.data());
+        setReseñas(data);
+      } catch (error) {
+        console.error("Error al cargar reseñas:", error);
+      }
+    };
+    fetchReseñas();
+  }, [prestador.email]);
 
   if (!prestador) {
     return (
@@ -155,16 +179,12 @@ export default function VerPerfil({ navigation, route }) {
                     source={starIcon}
                     style={[
                       styles.starIcon,
-                      { tintColor: filled ? "#D26E00" : "#ccc" }, // naranja si está llena, gris si no
+                      { tintColor: filled ? "#D26E00" : "#ccc" },
                     ]}
                   />
                 );
               })}
             </View>
-            /*
-            <Text style={styles.distanceText}>
-              {prestador.distancia || "700 m"}
-            </Text>*/
           </View>
 
           {/* Ubicación */}
@@ -186,19 +206,19 @@ export default function VerPerfil({ navigation, route }) {
           <Text style={[styles.descriptionText, styles.serviceListTitle]}>
             Servicios:
           </Text>
-         <View style={styles.serviceListContainer}>
-           {Array.isArray(prestador.profesion) ? (
-             prestador.profesion.map((prof, i) => (
-               <Text key={i} style={styles.serviceListItem}>
-                 • {prof}
-               </Text>
-             ))
-           ) : (
-             <Text style={styles.serviceListItem}>
-               • {prestador.profesion || "Servicio general"}
-             </Text>
-           )}
-         </View>
+          <View style={styles.serviceListContainer}>
+            {Array.isArray(prestador.profesion) ? (
+              prestador.profesion.map((prof, i) => (
+                <Text key={i} style={styles.serviceListItem}>
+                  • {prof}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.serviceListItem}>
+                • {prestador.profesion || "Servicio general"}
+              </Text>
+            )}
+          </View>
 
           {/* Disponibilidad */}
           <View style={styles.availabilityContainer}>
@@ -213,7 +233,7 @@ export default function VerPerfil({ navigation, route }) {
             </Text>
           </View>
 
-          {/* 🧰 Servicios (imágenes desde Firebase) */}
+          {/* 🧰 Servicios */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
             <TouchableOpacity style={styles.viewMoreButton}>
@@ -225,10 +245,7 @@ export default function VerPerfil({ navigation, route }) {
           <View style={styles.servicesImageContainer}>
             {prestador.fotosServicios && prestador.fotosServicios.length > 0 ? (
               prestador.fotosServicios.map((nombreFoto, i) => {
-                // Buscar la imagen local por su nombre
                 const imagenLocal = fotosServicios[nombreFoto];
-
-                // Si existe en el objeto fotosServicios, la muestra
                 if (imagenLocal) {
                   return (
                     <Image
@@ -238,8 +255,6 @@ export default function VerPerfil({ navigation, route }) {
                     />
                   );
                 }
-
-                // Si no se encuentra, muestra un placeholder o un texto
                 return (
                   <View
                     key={i}
@@ -259,7 +274,7 @@ export default function VerPerfil({ navigation, route }) {
             )}
           </View>
 
-          {/* Opiniones */}
+          {/* 🔹 Opiniones dinámicas */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Opiniones de Clientes</Text>
             <TouchableOpacity style={styles.viewMoreButton}>
@@ -268,17 +283,26 @@ export default function VerPerfil({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
-          <ReviewCard
-            name="Nicole"
-            date="1 día atrás"
-            reviewText={longReviewText}
-            isInitiallyLong={true}
-          />
-          <ReviewCard
-            name="Laura"
-            date="2 días atrás"
-            reviewText={shortReviewText}
-          />
+          {Array.isArray(reseñas) && reseñas.length > 0 ? (
+            reseñas.map((r, index) => (
+              <ReviewCard
+                key={index}
+                name={r.clienteNombre || "Anónimo"}
+                date={
+                  r.fecha
+                    ? new Date(r.fecha).toLocaleDateString("es-AR")
+                    : "Sin fecha"
+                }
+                reviewText={r.comentario || "Sin comentario"}
+                rating={r.calificacion || 0}
+              />
+            ))
+          ) : (
+            <Text style={{ color: "#606060", fontSize: 12, marginBottom: 10 }}>
+              No hay opiniones todavía.
+            </Text>
+          )}
+
         </View>
       </ScrollView>
 
@@ -286,7 +310,7 @@ export default function VerPerfil({ navigation, route }) {
       <View style={styles.bottomButtonsContainer}>
         <Button
           title="Calificar"
-          onPress={() => navigation.navigate("Calificar")}
+          onPress={() => navigation.navigate("Calificar", { prestador, user })}
           buttonStyle={[styles.bottomButton, styles.calificarButton]}
           textStyle={[
             textStyles.mainText,

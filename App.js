@@ -22,6 +22,7 @@ import VerPerfil from "./src/screens/VerPerfil.js";
 import BottomTabs from "./src/components/BottomTabs";
 import VerMasServicios from "./src/screens/VerMasServicios.js";
 import Chat from "./src/screens/Chat.js";
+import Calificar from "./src/screens/Calificar.js";
 
 
 const Stack = createNativeStackNavigator();
@@ -51,12 +52,12 @@ export default function App() {
 
         <Stack.Screen name="InicioCliente" component={InicioCliente} />
         <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
+        <Stack.Screen name="Calificar" component={Calificar} />
+        <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
 
         {/* Profesional */}
 
         {/* Otras pantallas */}
-
-        <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="Prestadores" component={Prestadores} />
         <Stack.Screen name="Calificaciones" component={Calificaciones} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
