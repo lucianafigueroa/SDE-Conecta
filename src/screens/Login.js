@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -21,12 +20,14 @@ import { doc, getDoc } from "firebase/firestore";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { auth, db } from "../config/firebaseConfig.js";
-
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
-
 import logoImage from "../assets/images/logo.png";
 import placeholder from "../assets/images/placeholder.png";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
+
+// --- CAMBIO 1: Importar la librería de íconos ---
+import { Ionicons } from '@expo/vector-icons';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -36,15 +37,13 @@ const checkUserRoleAndNavigate = async (user, navigation) => {
   const userRef = doc(db, "usuarios", user.uid);
   try {
     const docSnap = await getDoc(userRef);
-
     if (docSnap.exists()) {
       const userData = docSnap.data();
       const rol = userData.rol;
-
       if (rol === "prestador") {
         navigation.navigate("InicioProfesional");
       } else if (rol === "cliente") {
-        navigation.navigate("InicioCliente", { user: { ...user, rol } });;
+        navigation.navigate("InicioCliente", { user: { ...user, rol } });
       } else {
         Alert.alert("Error de Rol", "Tu perfil no tiene un rol válido. Contacta a soporte.");
       }
@@ -57,13 +56,8 @@ const checkUserRoleAndNavigate = async (user, navigation) => {
   }
 };
 
-export default function IniciarSesion({ navigation, route }) {
-  useFocusEffect(
-    useCallback(() => {
-      console.log("PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
+export default function IniciarSesion({ navigation }) {
+  useScreenFocusLogger();
 
   const [email, onChangeEmail] = React.useState("");
   const [password, onChangePassword] = React.useState("");
@@ -101,7 +95,6 @@ export default function IniciarSesion({ navigation, route }) {
       alert("Por favor, ingresa tu e-mail y contraseña.");
       return;
     }
-
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -132,9 +125,7 @@ export default function IniciarSesion({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerBackground} />
-
         <Image source={logoImage} style={styles.logo} resizeMode="contain" />
-
         <Text style={styles.title}>Iniciar Sesión</Text>
         <Text style={styles.subtitle}>¡Bienvenido!</Text>
 
@@ -164,7 +155,12 @@ export default function IniciarSesion({ navigation, route }) {
               style={styles.passwordToggle}
               onPress={() => setShowPassword(!showPassword)}
             >
-              <Image source={placeholder} style={styles.passwordIcon} />
+              {/* --- CAMBIO AQUÍ: Lógica del ícono corregida --- */}
+              <Ionicons
+                name={showPassword ? "eye" : "eye-off"} // Si se muestra, ojo normal. Si no, ojo tachado.
+                size={24}
+                color="#7F8C8D"
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -267,6 +263,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     position: "relative",
     height: 56,
+    justifyContent: 'center', // Ayuda a centrar verticalmente el contenido
   },
   input: {
     width: "100%",
@@ -282,13 +279,10 @@ const styles = StyleSheet.create({
   passwordToggle: {
     position: "absolute",
     right: 15,
-    top: 17,
+    // top y height ya no son necesarios si el wrapper usa justifyContent: 'center'
     zIndex: 5,
   },
-  passwordIcon: {
-    width: 22,
-    height: 22,
-  },
+  // La propiedad passwordIcon ya no es necesaria, se puede borrar
   forgotPassword: {
     alignSelf: "flex-end",
     marginRight: (width - 333) / 2,

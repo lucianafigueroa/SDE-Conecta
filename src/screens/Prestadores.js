@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   Dimensions,
   FlatList,
 } from "react-native";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 import placeholder from "../assets/images/placeholder.png";
 
@@ -26,46 +26,35 @@ const mainCategories = [
 ];
 
 const featuredProviders = [
-    { id: 'f1', name: 'Jackson', service: 'Electrician', rating: 3.9, image: placeholder },
-    { id: 'f2', name: 'Emily Jani', service: 'Electrician', rating: 4.8, image: placeholder },
-    { id: 'f3', name: 'Shams Jack', service: 'Electrician', rating: 4.8, image: placeholder },
+  { id: 'f1', name: 'Jackson', service: 'Electrician', rating: 3.9, image: placeholder },
+  { id: 'f2', name: 'Emily Jani', service: 'Electrician', rating: 4.8, image: placeholder },
+  { id: 'f3', name: 'Shams Jack', service: 'Electrician', rating: 4.8, image: placeholder },
 ];
 
 const cleaningProviders = [
-    { id: 'c1', name: 'Luisina Martinez', service: 'Limpieza', rating: 3.9, image: placeholder, isVerified: true },
-    { id: 'c2', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
-    { id: 'c3', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
+  { id: 'c1', name: 'Luisina Martinez', service: 'Limpieza', rating: 3.9, image: placeholder, isVerified: true },
+  { id: 'c2', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
+  { id: 'c3', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
 ];
 
 const HorizontalProviderCard = ({ name, service, rating, image, navigation }) => (
-    <TouchableOpacity style={newStyles.providerCardHorizontal}>
-        <View style={newStyles.imageContainer}>
-            <Image source={image} style={newStyles.providerImageHorizontal} />
-        </View>
-        <Text style={newStyles.providerNameHorizontal}>{name}</Text>
-        <Text style={newStyles.providerServiceHorizontal}>{service}</Text>
-        <View style={newStyles.ratingRow}>
-            <Text style={newStyles.providerRatingText}>⭐ {rating}</Text>
-        </View>
-        <TouchableOpacity style={newStyles.verPerfilButton}>
-            <Text style={newStyles.verPerfilText}>Ver Perfil</Text>
-        </TouchableOpacity>
+  <TouchableOpacity style={newStyles.providerCardHorizontal}>
+    <View style={newStyles.imageContainer}>
+      <Image source={image} style={newStyles.providerImageHorizontal} />
+    </View>
+    <Text style={newStyles.providerNameHorizontal}>{name}</Text>
+    <Text style={newStyles.providerServiceHorizontal}>{service}</Text>
+    <View style={newStyles.ratingRow}>
+      <Text style={newStyles.providerRatingText}>⭐ {rating}</Text>
+    </View>
+    <TouchableOpacity style={newStyles.verPerfilButton}>
+      <Text style={newStyles.verPerfilText}>Ver Perfil</Text>
     </TouchableOpacity>
+  </TouchableOpacity>
 );
 
-export default function Prestadores({ navigation, route }) {
-
-// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+export default function Prestadores({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const navTabs = [
     { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
@@ -76,13 +65,12 @@ export default function Prestadores({ navigation, route }) {
 
   const handleNavigation = (screenName) => {
     if (screenName) {
-        navigation.navigate(screenName);
+      navigation.navigate(screenName);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-
       <View style={styles.headerBackground}>
         <Text style={styles.title}>Prestadores</Text>
       </View>
@@ -98,7 +86,6 @@ export default function Prestadores({ navigation, route }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-
         <FlatList
           data={mainCategories}
           keyExtractor={(item) => item.id}
@@ -134,10 +121,10 @@ export default function Prestadores({ navigation, route }) {
         </View>
 
         <View style={newStyles.sectionHeaderRow}>
-            <Text style={newStyles.sectionTitleHorizontal}>Limpieza</Text>
-            <TouchableOpacity>
-                <Text style={newStyles.verMasHorizontal}>Ver más ›</Text>
-            </TouchableOpacity>
+          <Text style={newStyles.sectionTitleHorizontal}>Limpieza</Text>
+          <TouchableOpacity>
+            <Text style={newStyles.verMasHorizontal}>Ver más ›</Text>
+          </TouchableOpacity>
         </View>
         <View style={newStyles.sectionContainer}>
           <FlatList
@@ -157,7 +144,6 @@ export default function Prestadores({ navigation, route }) {
         </View>
 
         <View style={{ height: 30 }} />
-
       </ScrollView>
 
       <View style={styles.bottomNav}>
@@ -190,121 +176,117 @@ export default function Prestadores({ navigation, route }) {
 }
 
 const newStyles = StyleSheet.create({
-    mainCategoryList: {
-        paddingHorizontal: 20,
-        marginTop: 15,
-        marginBottom: 20,
-    },
-    categoryPillMain: {
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 8,
-        backgroundColor: 'white',
-        marginRight: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-    },
-    categoryPillMainActive: {
-        backgroundColor: '#d26e00',
-        borderColor: '#d26e00',
-    },
-    categoryTextMain: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#2c3e50',
-    },
-    categoryTextMainActive: {
-        color: 'white',
-        fontWeight: '600',
-    },
-
-    sectionHeaderRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        paddingHorizontal: 20,
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    sectionTitleHorizontal: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#2c3e50',
-    },
-    verMasHorizontal: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#2c3e50',
-    },
-    sectionContainer: {
-
-    },
-    horizontalCardList: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-    },
-
-    providerCardHorizontal: {
-        width: width * 0.45,
-        marginRight: 15,
-        borderRadius: 15,
-        padding: 10,
-        alignItems: 'center',
-        backgroundColor: 'white',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    imageContainer: {
-        width: '100%',
-        aspectRatio: 1,
-        borderRadius: 15,
-        overflow: 'hidden',
-        marginBottom: 10,
-        backgroundColor: 'white',
-    },
-    providerImageHorizontal: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    providerNameHorizontal: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#2c3e50',
-        marginBottom: 2,
-    },
-    providerServiceHorizontal: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#2c3e50',
-        opacity: 0.7,
-        marginBottom: 5,
-    },
-    ratingRow: {
-        alignSelf: 'flex-start',
-        marginLeft: 5,
-        marginBottom: 10,
-    },
-    providerRatingText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#2c3e50',
-    },
-    verPerfilButton: {
-        backgroundColor: '#d26e00',
-        paddingHorizontal: 15,
-        paddingVertical: 8,
-        borderRadius: 20,
-        marginTop: 5,
-    },
-    verPerfilText: {
-        color: 'white',
-        fontSize: 14,
-        fontWeight: '700',
-    }
+  mainCategoryList: {
+    paddingHorizontal: 20,
+    marginTop: 15,
+    marginBottom: 20,
+  },
+  categoryPillMain: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  categoryPillMainActive: {
+    backgroundColor: '#d26e00',
+    borderColor: '#d26e00',
+  },
+  categoryTextMain: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#2c3e50',
+  },
+  categoryTextMainActive: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  sectionTitleHorizontal: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+  },
+  verMasHorizontal: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  sectionContainer: {},
+  horizontalCardList: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  providerCardHorizontal: {
+    width: width * 0.45,
+    marginRight: 15,
+    borderRadius: 15,
+    padding: 10,
+    alignItems: 'center',
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 15,
+    overflow: 'hidden',
+    marginBottom: 10,
+    backgroundColor: 'white',
+  },
+  providerImageHorizontal: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  providerNameHorizontal: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 2,
+  },
+  providerServiceHorizontal: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#2c3e50',
+    opacity: 0.7,
+    marginBottom: 5,
+  },
+  ratingRow: {
+    alignSelf: 'flex-start',
+    marginLeft: 5,
+    marginBottom: 10,
+  },
+  providerRatingText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2c3e50',
+  },
+  verPerfilButton: {
+    backgroundColor: '#d26e00',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 5,
+  },
+  verPerfilText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '700',
+  }
 });
 
 const styles = StyleSheet.create({
@@ -333,7 +315,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     zIndex: 1,
   },
-
   searchBarContainer: {
     width: '85%',
     height: 53,
@@ -370,7 +351,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     opacity: 0.5,
   },
-
   bottomNav: {
     position: 'absolute',
     bottom: 0,

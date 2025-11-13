@@ -1,5 +1,3 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -12,28 +10,18 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const flechaAtras = require('../assets/images/flechaAtras.png');
 
-export default function AgregarDescripcion(route) {
-
-// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+export default function AgregarDescripcion() {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const navegacion = useNavigation();
   const ruta = useRoute();
 
   const [descripcion, setDescripcion] = useState(ruta.params?.descripcionActual || ''); // Inicializa con valor actual
-    const puedeGuardar = descripcion.trim().length > 0;
+  const puedeGuardar = descripcion.trim().length > 0;
 
   // Recupera los datos persistentes
   const direccionPersistente = ruta.params?.direccionActual || '';
@@ -42,15 +30,15 @@ export default function AgregarDescripcion(route) {
   const manejarGuardado = () => {
     if (puedeGuardar) {
       navegacion.navigate('RegistrarServicio', {
-          // Datos NUEVOS
-          descripcionGuardada: true,
-          descripcionTexto: descripcion,
+        // Datos NUEVOS
+        descripcionGuardada: true,
+        descripcionTexto: descripcion,
 
-          // Datos PERSISTENTES
-          direccionGuardada: direccionPersistente.length > 0,
-          direccionTexto: direccionPersistente,
-          fotosGuardadas: fotosPersistentes.length > 0,
-          fotosCargadas: fotosPersistentes,
+        // Datos PERSISTENTES
+        direccionGuardada: direccionPersistente.length > 0,
+        direccionTexto: direccionPersistente,
+        fotosGuardadas: fotosPersistentes.length > 0,
+        fotosCargadas: fotosPersistentes,
       });
     }
   };
@@ -129,20 +117,20 @@ const estilos = StyleSheet.create({
   contenedorPrincipal: { paddingHorizontal: 25, paddingTop: 20 },
 
   // ENCABEZADO
-    encabezado: {
-      paddingHorizontal: 20,
-      paddingTop: 40,
-      paddingBottom: 40,
-      backgroundColor: 'white',
-      flexDirection: 'row',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 1,
-      elevation: 2,
-      zIndex: 10,
-    },
+  encabezado: {
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 40,
+    backgroundColor: 'white',
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 2,
+    zIndex: 10,
+  },
   botonAtras: { paddingRight: 15, paddingVertical: 5 },
   iconoAtras: { width: 24, height: 24, tintColor: '#2c3e50' },
   tituloEncabezado: {

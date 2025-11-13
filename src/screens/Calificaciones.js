@@ -1,16 +1,16 @@
-import React, { useCallback } from "react"; // <--- Importación fusionada
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  FlatList,
+  SafeAreaView,
+  ScrollView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  FlatList,
 } from "react-native";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 // Importaciones de assets (usaremos placeholder para simular todos los SVG/PNG)
 import placeholder from "../assets/images/placeholder.png"; // Usaremos uno general
@@ -18,10 +18,10 @@ const ArrowPrevSmall = placeholder; // Simulación
 
 // --- Componente CustomerReviews (Filtro) ---
 const CustomerReviews = ({ text, text1, style }) => (
-  <View style={[styles.customerReviewsContainer, style]}>
-    <Text style={styles.customerReviewsTitle}>{text}</Text>
-    <Text style={styles.customerReviewsSubtitle}>{text1}</Text>
-  </View>
+  <View style={[styles.customerReviewsContainer, style]}>
+    <Text style={styles.customerReviewsTitle}>{text}</Text>
+    <Text style={styles.customerReviewsSubtitle}>{text1}</Text>
+  </View>
 );
 
 const { width } = Dimensions.get('window');
@@ -29,188 +29,176 @@ const HEADER_HEIGHT = 140;
 
 // --- Componente de Tarjeta de Calificación (Revisión) ---
 const ReviewCard = ({ name, date, text, image }) => (
-  <View style={reviewStyles.card}>
-    {/* Contenedor principal: Imagen a la izquierda, detalles a la derecha */}
-    <View style={reviewStyles.contentContainer}>
+  <View style={reviewStyles.card}>
+    {/* Contenedor principal: Imagen a la izquierda, detalles a la derecha */}
+    <View style={reviewStyles.contentContainer}>
 
-      {/* 1. Imagen a la izquierda */}
-      <Image source={image} style={reviewStyles.mainImage} />
+      {/* 1. Imagen a la izquierda */}
+      <Image source={image} style={reviewStyles.mainImage} />
 
-      {/* 2. Detalles de la revisión a la derecha */}
-      <View style={reviewStyles.details}>
+      {/* 2. Detalles de la revisión a la derecha */}
+      <View style={reviewStyles.details}>
 
-        {/* Fila del Título (Nombre, Fecha, Estrellas) */}
-        <View style={reviewStyles.headerRow}>
-            <Text style={reviewStyles.name}>{name}</Text>
-            <View style={reviewStyles.ratingDateColumn}>
+        {/* Fila del Título (Nombre, Fecha, Estrellas) */}
+        <View style={reviewStyles.headerRow}>
+          <Text style={reviewStyles.name}>{name}</Text>
+          <View style={reviewStyles.ratingDateColumn}>
 
-                {/* Fecha */}
-                <Text style={reviewStyles.dateText}>{date}</Text>
+            {/* Fecha */}
+            <Text style={reviewStyles.dateText}>{date}</Text>
 
-                {/* Estrellas de Calificación */}
-                <View style={reviewStyles.starContainer}>
-                    {/* 4 estrellas rellenas y 1 vacía para simular 4.0 */}
-                    <Text style={reviewStyles.star}>★</Text>
-                    <Text style={reviewStyles.star}>★</Text>
-                    <Text style={reviewStyles.star}>★</Text>
-                    <Text style={reviewStyles.star}>★</Text>
-                    <Text style={reviewStyles.starEmpty}>★</Text>
-                </View>
-            </View>
-        </View>
+            {/* Estrellas de Calificación */}
+            <View style={reviewStyles.starContainer}>
+              {/* 4 estrellas rellenas y 1 vacía para simular 4.0 */}
+              <Text style={reviewStyles.star}>★</Text>
+              <Text style={reviewStyles.star}>★</Text>
+              <Text style={reviewStyles.star}>★</Text>
+              <Text style={reviewStyles.star}>★</Text>
+              <Text style={reviewStyles.starEmpty}>★</Text>
+            </View>
+          </View>
+        </View>
 
-        {/* Texto de la Reseña */}
-        <Text style={reviewStyles.reviewText}>{text}</Text>
+        {/* Texto de la Reseña */}
+        <Text style={reviewStyles.reviewText}>{text}</Text>
 
-        {/* Enlace Leer más */}
-        <TouchableOpacity>
-            <Text style={reviewStyles.readMore}>Leer más</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
+        {/* Enlace Leer más */}
+        <TouchableOpacity>
+          <Text style={reviewStyles.readMore}>Leer más</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
 );
 
 // --- Datos de ejemplo para las Reseñas ---
 const reviewsData = [
-  {
-    id: 'r1',
-    name: 'Maria Carrizo',
-    date: '22:40 12/09/2025',
-    text: '"María es una profesional increíble. Dejó mi departamento impecable y se nota que trabaja con mucho cuidado. Totalmente recomendable, ¡la volveré a contratar!"',
-    image: placeholder,
-  },
-  {
-    id: 'r2',
-    name: 'Maria Carrizo',
-    date: '22:40 12/09/2025',
-    text: '"María es una profesional increíble. Dejó mi departamento impecable y se nota que trabaja con mucho cuidado. Totalmente recomendable, ¡la volveré a contratar!"',
-    image: placeholder,
-  },
-  {
-    id: 'r3',
-    name: 'Maria Carrizo',
-    date: '22:40 12/09/2025',
-    text: '"María es una profesional increíble. Dejó mi departamento impecable y se nota que trabaja con mucho cuidado. Totalmente recomendable, ¡la volveré a contratar!"',
-    image: placeholder,
-  },
+  {
+    id: 'r1',
+    name: 'Maria Carrizo',
+    date: '22:40 12/09/2025',
+    text: '"María es una profesional increíble. Dejó mi departamento impecable y se nota que trabaja con mucho cuidado. Totalmente recomendable, ¡la volveré a contratar!"',
+    image: placeholder,
+  },
+  {
+    id: 'r2',
+    name: 'Maria Carrizo',
+    date: '22:40 12/09/2025',
+    text: '"María es una profesional increíble. Dejó mi departamento impecable y se nota que trabaja con mucho cuidado. Totalmente recomendable, ¡la volveré a contratar!"',
+    image: placeholder,
+  },
+  {
+    id: 'r3',
+    name: 'Maria Carrizo',
+    date: '22:40 12/09/2025',
+    text: '"María es una profesional increíble. Dejó mi departamento impecable y se nota que trabaja con mucho cuidado. Totalmente recomendable, ¡la volveré a contratar!"',
+    image: placeholder,
+  },
 ];
 
 
-export default function Calificaciones({ navigation, route }) {
+export default function Calificaciones({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
-    // LÓGICA DE LOGGING: Usando route.name para identificar la pantalla automáticamente
-    useFocusEffect(
-        useCallback(() => {
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-            return () => {}; // Evita el log de "DESENFOCADA"
-        }, [route.name]) 
-    );
-    // ------------------------------------------------------------
+  const navTabs = [
+    { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
+    { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
+    { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
+    { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' },
+  ];
 
+  const handleNavigation = (screenName) => {
+    if (screenName) {
+      navigation.navigate(screenName)
+    }
+  };
 
-      const navTabs = [
-        { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
-        { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
-        { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
-        { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' }, // ¡Aquí está el cambio!
-      ];
+  return (
+    <SafeAreaView style={styles.safeArea}>
 
-    const handleNavigation = (screenName) => {
-        if (screenName) {
-            navigation.navigate(screenName)
-        }
-    };
+      {/* --- Header Fijo Blanco --- */}
+      <View style={styles.headerBackground} />
 
-    return (
-        <SafeAreaView style={styles.safeArea}>
+      {/* --- Título de la Vista --- */}
+      <View style={styles.titleContainer}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Image source={ArrowPrevSmall} style={styles.backIcon} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Calificaciones</Text>
+      </View>
 
-            {/* --- Header Fijo Blanco --- */}
-            <View style={styles.headerBackground} />
+      {/* --- Componente de Filtrado (CustomerReviews) --- */}
+      <View style={styles.filterContainer}>
+        <CustomerReviews
+          text="Historial de tus calificaciones"
+          text1="Ordenado por (Más reciente)"
+          style={styles.reviewsFilter}
+        />
+        <Image source={placeholder} style={styles.filterIcon} />
+      </View>
 
-            {/* --- Título de la Vista --- */}
-            <View style={styles.titleContainer}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Image source={ArrowPrevSmall} style={styles.backIcon} />
-                </TouchableOpacity>
-                <Text style={styles.title}>Calificaciones</Text>
-            </View>
+      {/* ScrollView para el contenido listado */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
 
-            {/* --- Componente de Filtrado (CustomerReviews) --- */}
-            <View style={styles.filterContainer}>
-                <CustomerReviews
-                    text="Historial de tus calificaciones"
-                    text1="Ordenado por (Más reciente)"
-                    style={styles.reviewsFilter}
-                />
-                <Image source={placeholder} style={styles.filterIcon} />
-            </View>
+        {/* Lista de Calificaciones */}
+        <FlatList
+          data={reviewsData}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <ReviewCard
+              name={item.name}
+              date={item.date}
+              text={item.text}
+              image={item.image}
+            />
+          )}
+        />
 
-            {/* ScrollView para el contenido listado */}
-            {/* Se usa FlatList dentro de ScrollView con scrollEnabled={false} para evitar problemas de anidamiento */}
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* --- Paginación/Indicadores (Simulación) --- */}
+        <View style={styles.paginationContainer}>
+          <View style={[styles.dot, styles.dotActive]} />
+          <View style={styles.dot} />
+          <View style={styles.dot} />
+        </View>
 
-                {/* Lista de Calificaciones */}
-                <FlatList
-                    data={reviewsData}
-                    keyExtractor={(item) => item.id}
-                    scrollEnabled={false}
-                    renderItem={({ item }) => (
-                        <ReviewCard
-                            name={item.name}
-                            date={item.date}
-                            text={item.text}
-                            image={item.image}
-                        />
-                    )}
-                />
+        {/* Espacio final para evitar que el Tab Bar oculte contenido */}
+        <View style={{ height: 30 }} />
 
-                {/* --- Paginación/Indicadores (Simulación) --- */}
-                <View style={styles.paginationContainer}>
-                    <View style={[styles.dot, styles.dotActive]} />
-                    <View style={styles.dot} />
-                    <View style={styles.dot} />
-                </View>
+      </ScrollView>
 
-                {/* Espacio final para evitar que el Tab Bar oculte contenido */}
-                <View style={{ height: 30 }} />
-
-            </ScrollView>
-
-           {/* --- Barra de Navegación Inferior (bottomNav) --- */}
-                 <View style={styles.bottomNav}>
-                   {navTabs.map((tab, index) => (
-                     <TouchableOpacity
-                       key={index}
-                       style={styles.navItem}
-                       onPress={() => handleNavigation(tab.screen)} // Uso de la función de navegación
-                     >
-                       <Image
-                         source={tab.icon}
-                         style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
-                       />
-                       <Text
-                         style={[
-                           styles.navText,
-                           tab.name === 'Inicio' && styles.navTextActive // 'Inicio' como activo
-                         ]}
-                       >
-                         {tab.name}
-                       </Text>
-                     </TouchableOpacity>
-                   ))}
-                 </View>
-        </SafeAreaView>
-    );
+      {/* --- Barra de Navegación Inferior (bottomNav) --- */}
+      <View style={styles.bottomNav}>
+        {navTabs.map((tab, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => handleNavigation(tab.screen)} // Uso de la función de navegación
+          >
+            <Image
+              source={tab.icon}
+              style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
+            />
+            <Text
+              style={[
+                styles.navText,
+                tab.name === 'Inicio' && styles.navTextActive // 'Inicio' como activo
+              ]}
+            >
+              {tab.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </SafeAreaView>
+  );
 }
 
-// --- Estilos de la Tarjeta de Revisión (Ajustados) ---
+// --- NOTA: Añade aquí tus objetos de estilo completos para `reviewStyles` y `styles` ---
 const reviewStyles = StyleSheet.create({
-// ... (rest of reviewStyles)
+  // ... tus estilos para las tarjetas de revisión
 });
 
-
-// --- Estilos Base ---
 const styles = StyleSheet.create({
-// ... (rest of styles)
+  // ... tus estilos principales para la pantalla
 });

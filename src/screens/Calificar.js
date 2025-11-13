@@ -1,5 +1,4 @@
-import React, { useCallback, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import { db } from "../config/firebaseConfig";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 // Íconos locales
 import iconLocation from "../assets/images/localizacion.png";
@@ -29,14 +29,8 @@ const fotosPerfil = {
 };
 
 export default function Calificar({ navigation, route }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
   const { prestador, user } = route.params || {};
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
 
   const [rating, setRating] = useState(0);
   const [opinion, setOpinion] = useState("");

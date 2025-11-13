@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import { 
   View, 
   Text, 
@@ -7,16 +6,16 @@ import {
   SafeAreaView, 
   TouchableOpacity, 
   Image,
-  // Importaciones de RN necesarias aquí
 } from 'react-native';
 import Svg, { Path, Circle, Polyline, Rect } from 'react-native-svg';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const PADDING_HORIZONTAL = 20;
 const USER_COLOR = '#2c3e50';
 const ALERT_COLOR = '#FF8C00';
 const LOGOUT_COLOR = 'red';
 
-// --- ICONOS --- (Sin cambios)
+// --- ICONOS ---
 const ChevronLeft = ({ color = USER_COLOR, size = 28 }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <Polyline points="15 18 9 12 15 6"/>
@@ -53,14 +52,13 @@ const LogOutIcon = ({ color, size = 22 }) => (
     </Svg>
 );
 
-// --- DATOS DEL USUARIO ---
+// --- DATOS ---
 const userData = {
     name: 'Maria Carrizo',
     email: 'mariacarrizo@gmail.com',
     profilePic: 'https://via.placeholder.com/150/F08080/FFFFFF?text=MC'
 };
 
-// --- MENÚ ---
 const menuItems = [
     { id: 'info', Icon: UserIcon, label: 'Información personal', action: 'personalInfo', color: USER_COLOR },
     { id: 'security', Icon: SecurityIcon, label: 'Cuenta y seguridad', action: 'security', color: USER_COLOR },
@@ -69,7 +67,7 @@ const menuItems = [
     { id: 'logout', Icon: LogOutIcon, label: 'Cerrar Sesión', action: 'logout', color: LOGOUT_COLOR }
 ];
 
-// --- ITEM DE MENÚ ---
+// --- SUB-COMPONENTES ---
 const MenuItem = ({ Icon, label, color, onPress }) => (
     <TouchableOpacity style={styles.menuItemContainer} onPress={onPress}>
         <View style={styles.menuItemLeft}>
@@ -80,57 +78,44 @@ const MenuItem = ({ Icon, label, color, onPress }) => (
     </TouchableOpacity>
 );
 
-// --- ACCIONES ---
-const handleAction = (action, navigation) => {
-    console.log(`Action taken: ${action}`);
-    if (!navigation) {
-        console.warn('Error de Navegación: El objeto navigation es indefinido.');
-        return;
-    }
-
-    switch (action) {
-        case 'personalInfo':
-            navigation.navigate('PerfilInfoPersonal');
-            break;
-        case 'logout':
-            navigation.navigate('CerrarSesionProfesional');
-            break;
-        case 'goBack':
-            navigation.goBack();
-            break;
-        case 'security':
-        case 'notifications':
-        case 'support':
-            // Asumiendo que estas rutas se llaman igual que la acción, por simplicidad
-            navigation.navigate(action.charAt(0).toUpperCase() + action.slice(1));
-            break;
-        default:
-            console.log(`No se definió una acción para: ${action}`);
-            break;
-    }
-};
-
 // --- COMPONENTE PRINCIPAL ---
-export default function PerfilProfesional({ navigation, route }) { // 🚨 Definición final de la función
+export default function PerfilProfesional({ navigation }) {
+    useScreenFocusLogger(); // <-- 2. Hook en uso
     
-    // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
+    const handleAction = (action) => {
+        console.log(`Action taken: ${action}`);
+        if (!navigation) {
+            console.warn('Error de Navegación: El objeto navigation es indefinido.');
+            return;
+        }
 
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+        switch (action) {
+            case 'personalInfo':
+                navigation.navigate('PerfilInfoPersonal');
+                break;
+            case 'logout':
+                navigation.navigate('CerrarSesionProfesional');
+                break;
+            case 'goBack':
+                navigation.goBack();
+                break;
+            case 'security':
+            case 'notifications':
+            case 'support':
+                navigation.navigate(action.charAt(0).toUpperCase() + action.slice(1));
+                break;
+            default:
+                console.log(`No se definió una acción para: ${action}`);
+                break;
+        }
+    };
     
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
                 {/* Encabezado */}
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => handleAction('goBack', navigation)}>
+                    <TouchableOpacity onPress={() => handleAction('goBack')}>
                         <ChevronLeft />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>Mi perfil</Text>
@@ -153,7 +138,7 @@ export default function PerfilProfesional({ navigation, route }) { // 🚨 Defin
                             Icon={item.Icon} 
                             label={item.label} 
                             color={item.color} 
-                            onPress={() => handleAction(item.action, navigation)} 
+                            onPress={() => handleAction(item.action)} 
                         />
                     ))}
                 </View>
@@ -171,7 +156,6 @@ export default function PerfilProfesional({ navigation, route }) { // 🚨 Defin
     );
 }
 
-// --- ESTILOS ---
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#EAEAEA' },
     container: { flex: 1, paddingHorizontal: PADDING_HORIZONTAL, backgroundColor: '#EAEAEA' },

@@ -9,23 +9,19 @@ import {
   Dimensions,
   StatusBar,
   Alert,
-  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// 🚨 CORREGIDO: Usamos los hooks para acceder a la navegación y la ruta
-import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 
 const IconoAtras = require('../assets/images/flechaAtras.png');
 const IconoCruz = require('../assets/images/cerrar.png');
-const IconoSuma = require('../assets/images/mas.png');
 const IconoUbicacion = require('../assets/images/ubicacion.png');
 const IconoDescripcion = require('../assets/images/descripcion.png');
 const IconoFotos = require('../assets/images/foto.png');
 
-// --- Datos de Prueba y Constantes ---
 const PADDING_HORIZONTAL = 32;
-
 const ImagenLimpieza = require('../assets/images/limpiezaIcono.png');
 
 
@@ -59,34 +55,15 @@ const DetalleTextoBloque = ({ etiqueta, contenido, onPress }) => {
     );
 }
 
-// =============================================================================
-// COMPONENTE PRINCIPAL
-// =============================================================================
+export default function RegistrarServicio({ navigation, route }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
-// 🚨 CORREGIDO: Ahora recibe las props normales de React Navigation
-export default function RegistrarServicio({ navigation, route }) { // Usamos { navigation, route }
-  
-  const navegacion = useNavigation(); // Usamos el hook useNavigation para manejar la navegación
-  const ruta = useRoute(); // Usamos el hook useRoute para manejar la ruta
-
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
-
-  // ESTADOS PARA DATOS REALES (para mostrar en el bloque de texto)
+  // ESTADOS PARA DATOS REALES
   const [direccionTexto, setDireccionTexto] = useState("");
   const [descripcionTexto, setDescripcionTexto] = useState("");
-  const [fotosArray, setFotosArray] = useState([]); // Array de URIs
+  const [fotosArray, setFotosArray] = useState([]);
 
-  // ESTADOS DE COMPLETITUD (booleanos)
+  // ESTADOS DE COMPLETITUD
   const [categoriasSeleccionadas] = useState([
     { id: 1, nombre: "Limpieza", imagen: ImagenLimpieza, seleccionado: true },
   ]);
@@ -96,53 +73,46 @@ export default function RegistrarServicio({ navigation, route }) { // Usamos { n
 
 
   // LÓGICA DE ACTUALIZACIÓN AL VOLVER
-useFocusEffect(
-  React.useCallback(() => {
-    let shouldClearParams = false; 
-    const currentParams = ruta.params || {};
-    
-    // Función auxiliar para leer los parámetros, usando un valor de fallback
-    const getParam = (name) => currentParams[name];
+  useFocusEffect(
+    React.useCallback(() => {
+      let shouldClearParams = false;
+      const currentParams = route.params || {};
 
-    // LECTURA DE DIRECCIÓN
-    const isDireccionGuardada = getParam('direccionGuardada');
-    if (isDireccionGuardada !== undefined) {
-        setDireccionTexto(getParam('direccionTexto') || "");
-        setDireccionAgregada(isDireccionGuardada === true);
-        shouldClearParams = true;
-    }
+      const getParam = (name) => currentParams[name];
 
-    // LECTURA DE DESCRIPCIÓN
-    const isDescripcionGuardada = getParam('descripcionGuardada');
-    if (isDescripcionGuardada !== undefined) {
-        setDescripcionTexto(getParam('descripcionTexto') || "");
-        setDescripcionAgregada(isDescripcionGuardada === true);
-        shouldClearParams = true;
-    }
+      // LECTURA DE DIRECCIÓN
+      const isDireccionGuardada = getParam('direccionGuardada');
+      if (isDireccionGuardada !== undefined) {
+        setDireccionTexto(getParam('direccionTexto') || "");
+        setDireccionAgregada(isDireccionGuardada === true);
+        shouldClearParams = true;
+      }
 
-    // LECTURA DE FOTOS
-    const isFotosGuardadas = getParam('fotosGuardadas');
-    // 🚨 CORRECCIÓN LÓGICA: Esta condición estaba causando problemas. 
-    // Debe ejecutarse siempre si hay un posible intento de guardar fotos.
-    if (isFotosGuardadas !== undefined) { 
+      // LECTURA DE DESCRIPCIÓN
+      const isDescripcionGuardada = getParam('descripcionGuardada');
+      if (isDescripcionGuardada !== undefined) {
+        setDescripcionTexto(getParam('descripcionTexto') || "");
+        setDescripcionAgregada(isDescripcionGuardada === true);
+        shouldClearParams = true;
+      }
+
+      // LECTURA DE FOTOS
+      const isFotosGuardadas = getParam('fotosGuardadas');
+      if (isFotosGuardadas !== undefined) {
         setFotosArray(getParam('fotosCargadas') || []);
         setFotosAgregadas(isFotosGuardadas === true);
         shouldClearParams = true;
-    }
+      }
 
-
-    // Al limpiar TODOS los parámetros, garantizamos que el próximo navigate (con nuevos datos)
-    // no se mezcle con los que acabas de procesar.
-    if (shouldClearParams) {
-        navegacion.setParams({
-            direccionGuardada: undefined, direccionTexto: undefined,
-            descripcionGuardada: undefined, descripcionTexto: undefined,
-            fotosGuardadas: undefined, fotosCargadas: undefined,
-        });
-    }
-
-  }, [ruta.params, navegacion])
-);
+      if (shouldClearParams) {
+        navigation.setParams({
+          direccionGuardada: undefined, direccionTexto: undefined,
+          descripcionGuardada: undefined, descripcionTexto: undefined,
+          fotosGuardadas: undefined, fotosCargadas: undefined,
+        });
+      }
+    }, [route.params, navigation])
+  );
 
 
   // LÓGICA DE HABILITACIÓN DEL BOTÓN
@@ -155,33 +125,32 @@ useFocusEffect(
     );
   }, [categoriasSeleccionadas, direccionAgregada, descripcionAgregada, fotosAgregadas]);
 
-const manejarAgregarDireccion = () => {
-  navegacion.navigate('AgregarDireccion', {
-    direccionActual: direccionTexto,
-    descripcionActual: descripcionTexto,
-    fotosActuales: fotosArray,
-  });
-};
+  const manejarAgregarDireccion = () => {
+    navigation.navigate('AgregarDireccion', {
+      direccionActual: direccionTexto,
+      descripcionActual: descripcionTexto,
+      fotosActuales: fotosArray,
+    });
+  };
 
-const manejarAgregarDescripcion = () => {
-  navegacion.navigate('AgregarDescripcion', {
-    direccionActual: direccionTexto,
-    descripcionActual: descripcionTexto,
-    fotosActuales: fotosArray,
-  });
-};
+  const manejarAgregarDescripcion = () => {
+    navigation.navigate('AgregarDescripcion', {
+      direccionActual: direccionTexto,
+      descripcionActual: descripcionTexto,
+      fotosActuales: fotosArray,
+    });
+  };
 
-const manejarAgregarFotos = () => {
-  navegacion.navigate('AgregarFoto', {
-    direccionActual: direccionTexto,
-    descripcionActual: descripcionTexto,
-    fotosActuales: fotosArray,
-  });
-};
+  const manejarAgregarFotos = () => {
+    navigation.navigate('AgregarFoto', {
+      direccionActual: direccionTexto,
+      descripcionActual: descripcionTexto,
+      fotosActuales: fotosArray,
+    });
+  };
 
-  const manejarVolverAtras = () => { navegacion.goBack(); };
+  const manejarVolverAtras = () => { navigation.goBack(); };
   const manejarEliminarFoto = (index) => {
-      // Lógica para eliminar una foto del array
       setFotosArray(prev => {
           const newArray = prev.filter((_, i) => i !== index);
           if (newArray.length === 0) setFotosAgregadas(false);
@@ -189,44 +158,39 @@ const manejarAgregarFotos = () => {
       });
   };
 
-const manejarRegistrarServicio = () => {
-  // Datos que se registran
-  const datosRegistro = {
-    categoria: categoriasSeleccionadas,
-    direccion: direccionTexto,
-    descripcion: descripcionTexto,
-    fotos: fotosArray,
-  };
+  const manejarRegistrarServicio = () => {
+    const datosRegistro = {
+      categoria: categoriasSeleccionadas,
+      direccion: direccionTexto,
+      descripcion: descripcionTexto,
+      fotos: fotosArray,
+    };
 
-  console.log('Servicio Registrado:', datosRegistro);
+    console.log('Servicio Registrado:', datosRegistro);
 
-  // 1. Mostrar la alerta de éxito
-  Alert.alert(
-    "¡Servicio Registrado con Éxito!",
-    "Tu solicitud de servicio ha sido enviada para su procesamiento.",
-    [
-      {
-        text: "OK",
-        onPress: () => {
-          // 2. Reiniciar todos los estados del formulario
-          setDireccionTexto("");
-          setDescripcionTexto("");
-          setFotosArray([]);
-          setDireccionAgregada(false);
-          setDescripcionAgregada(false);
-          setFotosAgregadas(false);
-        }
-      }
-    ]
-  );
-}
+    Alert.alert(
+      "¡Servicio Registrado con Éxito!",
+      "Tu solicitud de servicio ha sido enviada para su procesamiento.",
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            setDireccionTexto("");
+            setDescripcionTexto("");
+            setFotosArray([]);
+            setDireccionAgregada(false);
+            setDescripcionAgregada(false);
+            setFotosAgregadas(false);
+          }
+        }
+      ]
+    );
+  }
 
-  // --- RENDERIZADO ---
   return (
     <SafeAreaView style={estilos.areaSegura}>
       <StatusBar barStyle="dark-content" />
 
-      {/* 1. ENCABEZADO */}
       <View style={estilos.encabezado}>
         <TouchableOpacity onPress={manejarVolverAtras} style={estilos.botonAtras}>
           <Image source={IconoAtras} style={[estilos.iconoPequeno, { tintColor: '#2c3e50' }]} />
@@ -234,35 +198,26 @@ const manejarRegistrarServicio = () => {
         <Text style={estilos.tituloEncabezado}>Registrar Servicio</Text>
       </View>
 
-      {/* CONTENIDO PRINCIPAL */}
       <ScrollView contentContainerStyle={estilos.contenedorScroll}>
-
-        {/* SECCIÓN CATEGORÍA (Muestra el título) */}
         <Text style={estilos.tituloSeccion}>Categoría</Text>
         <View style={estilos.contenedorCategoria}>
-          {/* ... (Tarjeta de Categoría Seleccionada y Botón de Agregar) ... */}
-           {categoriasSeleccionadas.map((categoria) => (
+          {categoriasSeleccionadas.map((categoria) => (
             <View key={categoria.id} style={estilos.tarjetaCategoriaSeleccionada}>
               <Image source={categoria.imagen} style={estilos.imagenCategoria} resizeMode="contain" />
               <Text style={estilos.etiquetaCategoria}>{categoria.nombre}</Text>
-              <TouchableOpacity
-                style={estilos.botonRemover} activeOpacity={0.7}>
+              <TouchableOpacity style={estilos.botonRemover} activeOpacity={0.7}>
                 <Image source={IconoCruz} style={[estilos.iconoMinimo, { tintColor: '#2c3e50', opacity: 0.8 }]} resizeMode="contain" />
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
-
-        {/* SECCIÓN DETALLES DEL SERVICIO (Lógica Condicional) */}
         <View style={estilos.seccionDetalles}>
-
-          {/* DIRECCIÓN */}
           {direccionAgregada ? (
             <DetalleTextoBloque
                 etiqueta="Dirección"
                 contenido={direccionTexto}
-                onPress={manejarAgregarDireccion} // Permite editar
+                onPress={manejarAgregarDireccion}
             />
           ) : (
             <BotonDetalle
@@ -272,12 +227,11 @@ const manejarRegistrarServicio = () => {
             />
           )}
 
-          {/* DESCRIPCIÓN */}
           {descripcionAgregada ? (
             <DetalleTextoBloque
                 etiqueta="Detalles"
                 contenido={descripcionTexto}
-                onPress={manejarAgregarDescripcion} // Permite editar
+                onPress={manejarAgregarDescripcion}
             />
           ) : (
             <BotonDetalle
@@ -287,21 +241,17 @@ const manejarRegistrarServicio = () => {
             />
           )}
 
-          {/* FOTOS */}
           {fotosAgregadas ? (
             <View style={estilos.contenedorFotos}>
                 <Text style={estilos.detalleTextoEtiqueta}>Fotos</Text>
                 <View style={estilos.fotosWrapper}>
-                    {/* Renderiza las fotos cargadas */}
                     {fotosArray.map((foto, index) => (
                         <View key={index} style={estilos.tarjetaFoto}>
                             <Image
-                                // source usa el URI de la foto cargada
                                 source={{ uri: foto.uri }}
                                 style={estilos.imagenFoto}
                                 resizeMode="cover"
                             />
-                            {/* Botón de Remover Foto */}
                             <TouchableOpacity
                                 onPress={() => manejarEliminarFoto(index)}
                                 style={estilos.botonRemoverFoto}
@@ -315,7 +265,6 @@ const manejarRegistrarServicio = () => {
                             </TouchableOpacity>
                         </View>
                     ))}
-                    {/* Placeholders para agregar más fotos (hasta 5 en total) */}
                     {[...Array(5 - fotosArray.length)].map((_, index) => (
                         <TouchableOpacity key={index} style={estilos.tarjetaAgregarFoto} onPress={manejarAgregarFotos} />
                     ))}
@@ -328,18 +277,14 @@ const manejarRegistrarServicio = () => {
               fuenteIcono={IconoFotos}
             />
           )}
-
         </View>
 
-        {/* BOTÓN REGISTRAR SERVICIO */}
         <TouchableOpacity
           onPress={manejarRegistrarServicio}
           disabled={!formularioEstaCompleto}
           style={[
             estilos.botonRegistro,
-            {
-              backgroundColor: formularioEstaCompleto ? '#154360' : 'rgba(40, 40, 40, 0.3)',
-            }
+            { backgroundColor: formularioEstaCompleto ? '#154360' : 'rgba(40, 40, 40, 0.3)' }
           ]}
           activeOpacity={0.7}
         >
@@ -347,7 +292,6 @@ const manejarRegistrarServicio = () => {
             Registrar Servicio
           </Text>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -355,7 +299,6 @@ const manejarRegistrarServicio = () => {
 
 const { width } = Dimensions.get('window');
 
-// --- Estilos de React Native ---
 const estilos = StyleSheet.create({
     areaSegura: { flex: 1, backgroundColor: '#e5e8ec' },
     iconoPequeno: { width: 24, height: 24 },
@@ -402,7 +345,6 @@ const estilos = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 100,
     },
-    tarjetaAgregarCategoria: { width: 93, height: 94, backgroundColor: 'white', borderRadius: 8, alignItems: 'center', justifyContent: 'center', opacity: 0.8 },
     seccionDetalles: { gap: 7, marginBottom: 40 },
     botonDetalle: {
         height: 59,
@@ -414,8 +356,6 @@ const estilos = StyleSheet.create({
     },
     iconoDetalle: { width: 26, height: 26, marginRight: 10 },
     textoDetalle: { fontSize: 14, color: 'white', fontWeight: '400' },
-
-    // --- ESTILOS PARA LA TRANSFORMACIÓN A TEXTO  ---
     detalleTextoEtiqueta: {
         fontSize: 14,
         fontWeight: '600',
@@ -427,7 +367,7 @@ const estilos = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 13,
         paddingVertical: 18,
-        marginBottom: 10, // Espacio entre bloques
+        marginBottom: 10,
     },
     detalleTextoContenido: {
         fontSize: 14,
@@ -435,10 +375,8 @@ const estilos = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 20,
     },
-
-    // --- ESTILOS PARA FOTOS  ---
     contenedorFotos: {
-        marginBottom: 30, // Menos espacio para el bloque final
+        marginBottom: 30,
         marginTop: 10,
     },
     fotosWrapper: {
@@ -480,8 +418,6 @@ const estilos = StyleSheet.create({
         alignItems: 'center',
         opacity: 0.6,
     },
-
-    // BOTÓN REGISTRAR SERVICIO
     botonRegistro: {
         height: 57,
         borderRadius: 6,

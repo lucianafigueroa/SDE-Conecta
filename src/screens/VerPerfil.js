@@ -1,5 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -12,11 +11,9 @@ import {
 } from "react-native";
 import Button from "../components/Button";
 import { textStyles } from "../styles/texts";
-import BottomTabs from "../components/BottomTabs";
-
-// Firebase
 import { db } from "../config/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- Cambio 1
 
 // Íconos locales
 import locationOnIcon from "../assets/images/localizacion.png";
@@ -48,7 +45,7 @@ const fotosServicios = {
 };
 
 // Tarjeta de Opinión
-const ReviewCard = ({ name, date, reviewText, rating = 5, isInitiallyLong = false }) => {
+const ReviewCard = ({ name, date, reviewText, rating = 5 }) => {
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => setExpanded(!expanded);
 
@@ -90,23 +87,20 @@ const ReviewCard = ({ name, date, reviewText, rating = 5, isInitiallyLong = fals
 };
 
 export default function VerPerfil({ navigation, route }) {
+  useScreenFocusLogger(); // <-- Cambio 2
   const { prestador, user } = route.params || {};
   const [reseñas, setReseñas] = useState([]);
 
-  console.log("🔍 fotosServicios en Firestore:", prestador.fotosServicios);
+  console.log("🔍 fotosServicios en Firestore:", prestador?.fotosServicios);
   console.log("👤 Cliente logueado:", user?.email);
 
   const handleGoBack = () => navigation.goBack();
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
-
   // 🔹 Cargar reseñas desde Firestore
   useEffect(() => {
+    // Protección para evitar errores si no hay prestador
+    if (!prestador?.id) return; 
+
     const fetchReseñas = async () => {
       try {
         const reseñasRef = collection(db, "usuarios", prestador.id, "reseñas");
@@ -118,7 +112,7 @@ export default function VerPerfil({ navigation, route }) {
       }
     };
     fetchReseñas();
-  }, [prestador.email]);
+  }, [prestador?.id]); // <-- Cambio 3 (más seguro)
 
   if (!prestador) {
     return (
@@ -142,11 +136,6 @@ export default function VerPerfil({ navigation, route }) {
       fotoPerfil = { uri: prestador.foto };
     }
   }
-
-  const longReviewText =
-    "¡Excelente profesional! Puntual, amable y dejó todo impecable. La recomiendo totalmente. Además, se encargó de cada detalle y dejó la casa reluciente. Es un servicio de 5 estrellas.";
-  const shortReviewText =
-    "Muy buena experiencia, hizo un gran trabajo. La atención fue personalizada y de calidad.";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -290,7 +279,7 @@ export default function VerPerfil({ navigation, route }) {
                 name={r.clienteNombre || "Anónimo"}
                 date={
                   r.fecha
-                    ? new Date(r.fecha).toLocaleDateString("es-AR")
+                    ? new Date(r.fecha.seconds * 1000).toLocaleDateString("es-AR") // <-- Cambio 4 (Corrección de Timestamp)
                     : "Sin fecha"
                 }
                 reviewText={r.comentario || "Sin comentario"}
@@ -331,81 +320,27 @@ export default function VerPerfil({ navigation, route }) {
   );
 }
 
-// ------------------ ESTILOS ------------------
 const reviewStyles = StyleSheet.create({
-  card: {
-    width: "100%",
-    padding: 15,
-    backgroundColor: "#FFF",
-    borderRadius: 10,
-    marginBottom: 10,
-  },
+  card: { width: "100%", padding: 15, backgroundColor: "#FFF", borderRadius: 10, marginBottom: 10 },
   header: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  profileImage: {
-    width: 35,
-    height: 35,
-    borderRadius: 17.5,
-    marginRight: 10,
-  },
+  profileImage: { width: 35, height: 35, borderRadius: 17.5, marginRight: 10 },
   nameText: { fontSize: 14, fontWeight: "600", color: "#2C3E50" },
   dateTextSmall: { fontSize: 10, color: "#606060" },
   ratingContainer: { flexDirection: "row", marginLeft: "auto" },
-  starIcon: {
-    width: 10,
-    height: 10,
-    resizeMode: "contain",
-    tintColor: "#D26E00",
-    marginRight: 2,
-  },
-  reviewText: {
-    fontSize: 12,
-    color: "#606060",
-    lineHeight: 18,
-    marginBottom: 5,
-  },
+  starIcon: { width: 10, height: 10, resizeMode: "contain", tintColor: "#D26E00", marginRight: 2 },
+  reviewText: { fontSize: 12, color: "#606060", lineHeight: 18, marginBottom: 5 },
   readMoreText: { fontSize: 12, color: "#D26E00", fontWeight: "600" },
 });
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#e5e8ec" },
-  headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-    paddingBottom: 150,
-    backgroundColor: "white",
-    width: "100%",
-  },
+  headerContainer: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 40, paddingBottom: 150, backgroundColor: "white", width: "100%" },
   backButton: { paddingRight: 15 },
   backIcon: { fontSize: 28, color: "#2C3E50" },
-  profileNameHeader: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#2c3e50",
-    marginLeft: 5,
-  },
+  profileNameHeader: { fontSize: 24, fontWeight: "700", color: "#2c3e50", marginLeft: 5 },
   scrollViewContent: { alignItems: "center", paddingBottom: 100 },
-  profileImage: {
-    width: width * 0.9,
-    height: width * 0.9 * (238 / 390),
-    resizeMode: "cover",
-    position: "absolute",
-    top: 100,
-    zIndex: 1,
-    borderRadius: 15,
-  },
-  contentCard: {
-    backgroundColor: "white",
-    width: "100%",
-    minHeight: height * 0.7,
-    marginTop: 60,
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    paddingHorizontal: PADDING_HORIZONTAL_CONTENT,
-    paddingTop: 20,
-    zIndex: 2,
-  },
+  profileImage: { width: width * 0.9, height: width * 0.9 * (238 / 390), resizeMode: "cover", position: "absolute", top: 100, zIndex: 1, borderRadius: 15 },
+  contentCard: { backgroundColor: "white", width: "100%", minHeight: height * 0.7, marginTop: 60, borderTopLeftRadius: 35, borderTopRightRadius: 35, paddingHorizontal: PADDING_HORIZONTAL_CONTENT, paddingTop: 20, zIndex: 2 },
   nameRatingContainer: { flexDirection: "row", alignItems: "center", width: "100%" },
   nameText: { fontSize: 20, fontWeight: "700", color: "#2c3e50", marginRight: 10 },
   ratingContainer: { flexDirection: "row", alignItems: "center" },
@@ -419,55 +354,19 @@ const styles = StyleSheet.create({
   serviceListTitle: { fontWeight: "600" },
   serviceListContainer: { paddingLeft: 10 },
   serviceListItem: { fontSize: 12, color: "#606060", lineHeight: 20, marginTop: 2 },
-  availabilityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 15,
-    width: "100%",
-    justifyContent: "space-between",
-  },
+  availabilityContainer: { flexDirection: "row", alignItems: "center", marginTop: 15, width: "100%", justifyContent: "space-between" },
   availabilityRow: { flexDirection: "row", alignItems: "center", flex: 1 },
   alarmIcon: { width: 15, height: 15, marginRight: 5, tintColor: "#606060" },
   availabilityText: { fontSize: 14, fontWeight: "600", color: "#606060" },
   hoursText: { fontSize: 14, color: "#606060" },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    marginTop: 30,
-    marginBottom: 10,
-  },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", marginTop: 30, marginBottom: 10 },
   sectionTitle: { fontSize: 20, fontWeight: "700", color: "#2c3e50" },
   viewMoreButton: { flexDirection: "row", alignItems: "center" },
   viewMoreText: { fontSize: 12, fontWeight: "600", color: "#2c3e50", marginRight: 5 },
   arrowIcon: { width: 13, height: 13, tintColor: "#2c3e50" },
-  servicesImageContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 30,
-  },
-  serviceImage: {
-    width: serviceImageWidth > 0 ? serviceImageWidth : 100,
-    height: 100,
-    borderRadius: 8,
-    resizeMode: "cover",
-    backgroundColor: "#f0f0f0",
-  },
-  bottomButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    position: "absolute",
-    bottom: 0,
-    paddingHorizontal: 20,
-    backgroundColor: "white",
-    paddingTop: 10,
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-  },
+  servicesImageContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", marginBottom: 30 },
+  serviceImage: { width: serviceImageWidth > 0 ? serviceImageWidth : 100, height: 100, borderRadius: 8, resizeMode: "cover", backgroundColor: "#f0f0f0" },
+  bottomButtonsContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", position: "absolute", bottom: 0, paddingHorizontal: 20, backgroundColor: "white", paddingTop: 10, paddingBottom: 20, borderTopWidth: 1, borderTopColor: "#E0E0E0" },
   bottomButton: { width: "48%", borderRadius: 32, height: 51 },
   calificarButton: { backgroundColor: "#2c3e50", opacity: 0.8 },
   orangeButton: { backgroundColor: "#D26E00" },

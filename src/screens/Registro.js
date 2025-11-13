@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -24,6 +23,7 @@ import * as WebBrowser from "expo-web-browser";
 import { auth, db } from "../config/firebaseConfig.js";
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 import logoImage from "../assets/images/logo.png";
 import placeholder from "../assets/images/placeholder.png";
@@ -32,13 +32,8 @@ WebBrowser.maybeCompleteAuthSession();
 
 const { width } = Dimensions.get("window");
 
-export default function Registro({ navigation, route }) {
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
+export default function Registro({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const [username, onChangeUsername] = React.useState("");
   const [email, onChangeEmail] = React.useState("");

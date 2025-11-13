@@ -1,43 +1,39 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import { 
   View, 
   Text, 
   StyleSheet, 
   SafeAreaView, 
   TouchableOpacity, 
-  Image, // Asegúrate de que esta importación de Image esté presente
+  Image,
   Dimensions 
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 20;
 
 // --- ICONOS SVG COMO COMPONENTES ---
-// 1. Icono de Flecha Derecha (ChevronRight)
 const ChevronRight = ({ color = "#A0A0A0" }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
     <Path d="M9 18l6-6-6-6"/>
   </Svg>
 );
 
-// 2. Icono de Perfil (User)
-const UserIcon = ({ color, style }) => ( // Añadido style para uso en el footer
+const UserIcon = ({ color, style }) => (
   <Svg style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
     <Path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
     <Path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
   </Svg>
 );
 
-// 3. Icono de Teléfono (Phone)
 const PhoneIcon = ({ color }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
     <Path d="M22 16.92v3.08a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 3.08 2h3.08L7.5 7.5l-2.45 2.45L10.95 16.4l2.45-2.45z"/>
   </Svg>
 );
 
-// 4. Icono de Cerrar Sesión (LogOut)
 const LogOutIcon = ({ color }) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
     <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -45,7 +41,6 @@ const LogOutIcon = ({ color }) => (
   </Svg>
 );
 
-// 5. Icono de Cerrar Menú (Cross/X)
 const CrossIcon = ({ color = "#2c3e50" }) => (
   <Svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
     <Path d="M18 6L6 18M6 6l12 12"/>
@@ -54,30 +49,11 @@ const CrossIcon = ({ color = "#2c3e50" }) => (
 
 // --- ARREGLOS DE DATOS Y LÓGICA ---
 const menuItems = [
-  { 
-    id: "profile", 
-    IconComponent: UserIcon,
-    label: "Mi Perfil", 
-    color: "#2c3e50", 
-    action: "profile" 
-  },
-  { 
-    id: "contact", 
-    IconComponent: PhoneIcon,
-    label: "Contáctanos", 
-    color: "#2c3e50", 
-    action: "contact" 
-  },
-  { 
-    id: "logout", 
-    IconComponent: LogOutIcon,
-    label: "Cerrar Sesión", 
-    color: "#D21818", 
-    action: "logout" 
-  },
+  { id: "profile", IconComponent: UserIcon, label: "Mi Perfil", color: "#2c3e50", action: "profile" },
+  { id: "contact", IconComponent: PhoneIcon, label: "Contáctanos", color: "#2c3e50", action: "contact" },
+  { id: "logout", IconComponent: LogOutIcon, label: "Cerrar Sesión", color: "#D21818", action: "logout" },
 ];
 
-// Helper Component for a single menu item
 const MenuItem = ({ IconComponent, label, color, action, handleAction }) => (
   <TouchableOpacity style={styles.menuItemContainer} onPress={() => handleAction(action)}>
     <View style={styles.menuItemLeft}>
@@ -88,21 +64,8 @@ const MenuItem = ({ IconComponent, label, color, action, handleAction }) => (
   </TouchableOpacity>
 );
 
-// --- MAIN COMPONENT ---
-export default function MenuProfesional({ navigation, route }) { // 🚨 Ahora es un export default function y recibe 'route'
-
-    // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
-
+export default function MenuProfesional({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const userData = {
     name: 'Maria Carrizo',
@@ -110,17 +73,15 @@ export default function MenuProfesional({ navigation, route }) { // 🚨 Ahora e
     profilePic: 'https://via.placeholder.com/150/d26e00/FFFFFF?text=MC', 
   };
 
-  // Actualizamos handleAction para navegación
   const handleAction = (action) => {
     if (action === 'profile') {
       navigation.navigate('PerfilProfesional'); 
     } else if (action === 'contact') {
       console.log('Contact pressed');
     } else if (action === 'logout') {
-      // Aquí debe ir la lógica real de Firebase (signOut y navigation.reset)
       console.log('LOGIC: Cerrar sesión con Firebase y Resetear navegación');
     } else if (action === 'close') {
-      navigation.goBack(); // Cierra el menú volviendo a la pantalla anterior
+      navigation.goBack();
     }
   };
 
@@ -157,7 +118,7 @@ export default function MenuProfesional({ navigation, route }) { // 🚨 Ahora e
               label={item.label}
               color={item.color}
               action={item.action}
-              handleAction={handleAction} // Pasamos la función actualizada
+              handleAction={handleAction}
             />
           ))}
         </View>

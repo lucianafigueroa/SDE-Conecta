@@ -1,5 +1,4 @@
-import React, { useCallback ,useState, useRef } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,11 +10,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../components/Button';
-// Importaciones de imágenes (usaremos mocks por ahora)
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
+
+// Importaciones de imágenes
 import onboardingImage3 from '../assets/images/bienvenida03.png';
 import onboardingImage4 from '../assets/images/bienvenida04.png';
 
-// Obtenemos el ancho de la pantalla para la paginación
 const { width } = Dimensions.get('window');
 
 // --- DATOS DEL CARRUSEL ---
@@ -37,7 +37,6 @@ const slides = [
 // --- Subcomponente de la página individual (Slide) ---
 const OnboardingSlide = ({ slide }) => (
   <View style={styles.slideContainer}>
-    {/* Imagen principal */}
     <View style={styles.imageContainer}>
       <Image
         source={slide.image}
@@ -45,8 +44,6 @@ const OnboardingSlide = ({ slide }) => (
         resizeMode="contain"
       />
     </View>
-
-    {/* Contenido de texto */}
     <View style={styles.textContent}>
       <Text style={styles.slideTitle}>{slide.title}</Text>
       <Text style={styles.slideDescription}>{slide.description}</Text>
@@ -55,25 +52,13 @@ const OnboardingSlide = ({ slide }) => (
 );
 
 // --- Componente Principal ---
-export default function OnboardingScreen({ navigation, route }) {
-
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+export default function OnboardingScreen({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef(null);
 
   const onViewableItemsChanged = (event) => {
-    // Calcula el índice actual basado en el desplazamiento
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(contentOffsetX / width);
     setCurrentIndex(newIndex);
@@ -81,16 +66,13 @@ export default function OnboardingScreen({ navigation, route }) {
 
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
-      // Navegar al siguiente slide
       scrollRef.current?.scrollTo({ x: width * (currentIndex + 1), animated: true });
     } else {
-      // Finalizar el carrusel y pasar a la siguiente etapa (Bienvenida05)
       navigation.navigate('Bienvenida05');
     }
   };
 
   const handleSkip = () => {
-    // Saltar todo el carrusel e ir a la siguiente etapa
     navigation.navigate('Bienvenida05');
   };
 
@@ -127,7 +109,6 @@ export default function OnboardingScreen({ navigation, route }) {
 
         {/* Botones */}
         <View style={styles.buttonContainer}>
-          {/* Botón Saltar/Atrás */}
           <TouchableOpacity
             onPress={currentIndex > 0 ? () => scrollRef.current?.scrollTo({ x: width * (currentIndex - 1), animated: true }) : handleSkip}
             style={styles.skipButton}
@@ -137,7 +118,6 @@ export default function OnboardingScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
 
-          {/* Botón Siguiente/Empezar */}
           <Button
             title={currentIndex === slides.length - 1 ? "Siguiente" : "Siguiente"}
             buttonStyle={styles.nextButton}
@@ -153,13 +133,13 @@ export default function OnboardingScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#E5E8EC', // Fondo de color claro
+    backgroundColor: '#E5E8EC',
   },
   scrollView: {
     flex: 1,
   },
   slideContainer: {
-    width: width, // Ocupa el ancho completo para la paginación
+    width: width,
     alignItems: 'center',
     paddingHorizontal: 25,
     paddingTop: 50,
@@ -182,21 +162,21 @@ const styles = StyleSheet.create({
   slideTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2C3E50', // Texto oscuro
+    color: '#2C3E50',
     textAlign: 'center',
     marginBottom: 15,
     lineHeight: 32,
   },
   slideDescription: {
     fontSize: 16,
-    color: '#2C3E50', // Texto oscuro
+    color: '#2C3E50',
     textAlign: 'center',
     opacity: 0.8,
     lineHeight: 24,
   },
   footer: {
     paddingHorizontal: 25,
-    paddingBottom: 80, // Espacio desde el borde inferior
+    paddingBottom: 80,
     backgroundColor: '#E5E8EC',
     width: '100%',
   },
@@ -213,20 +193,19 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   activeDot: {
-    backgroundColor: '#D26E00', // Naranja
+    backgroundColor: '#D26E00',
   },
   inactiveDot: {
-    backgroundColor: '#BDC3C7', // Gris suave
+    backgroundColor: '#BDC3C7',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    height: 60, // Para que el botón "Saltar" se alinee verticalmente con "Siguiente"
+    height: 60,
   },
   skipButton: {
-    // Ocupa el espacio restante a la izquierda
     justifyContent: 'center',
     alignItems: 'flex-start',
     height: '100%',
@@ -235,13 +214,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#2C3E50',
     fontWeight: '500',
-    // Alineación para que quede en la misma línea que el texto del botón
     lineHeight: 22,
   },
   nextButton: {
-    backgroundColor: '#D26E00', // Naranja
+    backgroundColor: '#D26E00',
     borderRadius: 31,
-    width: 150, // Ancho fijo, similar al diseño
+    width: 150,
     height: 62,
     justifyContent: 'center',
     alignItems: 'center',

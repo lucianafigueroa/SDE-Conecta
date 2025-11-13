@@ -1,5 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,11 +13,13 @@ import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 import BANNER_IMAGE from "../assets/images/banner.png";
 import PLACEHOLDER_ICON from "../assets/images/placeholder.png";
 
-export default function InicioProfesional({ navigation, route }) {
+export default function InicioProfesional({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
   const [userName, setUserName] = useState("Cargando...");
 
   useEffect(() => {
@@ -55,13 +56,6 @@ export default function InicioProfesional({ navigation, route }) {
       if (unsubscribe) unsubscribe();
     };
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
 
   const services = [
     { name: "Limpieza", icon: PLACEHOLDER_ICON, screen: "ServicioLimpieza" },

@@ -1,5 +1,4 @@
-import React, { useCallback, useState } from "react";
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useState } from "react";
 import { 
   View, 
   Text, 
@@ -13,8 +12,9 @@ import {
 // Lógica de Firebase
 import { signOut } from "firebase/auth"; 
 import { auth } from "../config/firebaseConfig.js"; 
-
+import { useNavigation } from '@react-navigation/native'; // Importación corregida
 import Svg, { Path, Circle } from 'react-native-svg';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const CARD_MARGIN = 20;
 const USER_COLOR = '#2c3e50';
@@ -58,11 +58,10 @@ const ModalExitArrow = ({ color = "#FFF", size = 40 }) => (
   </Svg>
 );
 
-// --- DATOS (Opción "professional" eliminada) ---
+// --- DATOS ---
 const menuItems = [
   { id: 'profile', Icon: UserIcon, label: 'Mi Perfil', color: USER_COLOR, action: 'profile' },
   { id: 'contact', Icon: ContactIcon, label: 'Contáctanos', color: USER_COLOR, action: 'contact' },
-// 🛑 Botón "Convertirse en Profesional" ELIMINADO de aquí
   { id: 'logout', Icon: LogOutIcon, label: 'Cerrar Sesión', color: LOGOUT_COLOR, action: 'showModal' }, 
 ];
 
@@ -76,21 +75,9 @@ const MenuItem = ({ Icon, label, color, onPress }) => (
   </TouchableOpacity>
 );
 
-// --- COMPONENTE PRINCIPAL ---
 export default function CerrarSesionProfesional(route) { // Mantenemos el nombre solicitado
 
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
-
+  useScreenFocusLogger(); // <-- 2. Hook en uso
   const [isModalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -131,20 +118,11 @@ export default function CerrarSesionProfesional(route) { // Mantenemos el nombre
     else if (action === 'closeMenu') {
         navigation.goBack(); 
     }
-    // 🛑 La acción 'toProfessional' ya no se necesita aquí.
     else {
       console.log(`Action taken: ${action}`);
     }
   };
-
-  // Lógica de Logging
-  useFocusEffect(
-      useCallback(() => {
-          console.log("-> PANTALLA ENFOCADA: CerrarSesionProfesional");
-          return () => {};
-      }, [])
-  );
-
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>

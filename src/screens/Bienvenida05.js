@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
-import { View, ScrollView, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React from "react";
+import { View, ScrollView, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AntDesign, Feather } from '@expo/vector-icons'; // Usamos iconos para el mapa
+import { Feather } from '@expo/vector-icons';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const { width } = Dimensions.get('window');
 
@@ -14,31 +14,17 @@ const Button = ({ title, buttonStyle, textStyle, onPress, icon }) => (
   </TouchableOpacity>
 );
 
-// Placeholder para la imagen del mapa 3D
-const MAP_IMAGE_URL = 'https://placehold.co/300x300/E5E8EC/2C3E50?text=Mapa+3D+Ubicacion';
+export default function Bienvenida05({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
-export default function Bienvenida05({ navigation, route }) {
-
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
-
-  // Navegación para "Elegir desde el mapa" (va a Bienvenida06)
+  // Navegación para "Elegir desde el mapa"
   const handleMapSelect = () => {
-    navigation.navigate('Bienvenida');
+    navigation.navigate('Bienvenida'); // Ajusta a la pantalla correcta si 'Bienvenida' no es el destino final
   };
 
   // Navegación para "Introducir manualmente"
   const handleManualInput = () => {
-    navigation.navigate('Bienvenida');
+    navigation.navigate('Bienvenida'); // Ajusta a la pantalla correcta si 'Bienvenida' no es el destino final
   };
 
   return (
@@ -47,10 +33,10 @@ export default function Bienvenida05({ navigation, route }) {
 
         {/* Imagen/Gráfico del mapa con pin */}
         <View style={styles.mapGraphicContainer}>
-            {/* Usamos un ícono de ubicación grande y un círculo para simular el mapa */}
-            <View style={styles.mapCircle}>
-                <Feather name="map-pin" size={80} color="#D26E00" />
-            </View>
+          {/* Usamos un ícono de ubicación grande y un círculo para simular el mapa */}
+          <View style={styles.mapCircle}>
+            <Feather name="map-pin" size={80} color="#D26E00" />
+          </View>
         </View>
 
         {/* Título */}

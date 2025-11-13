@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,16 +11,12 @@ import {
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
 import Button from "../components/Button";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 import logo from "../assets/images/logo1.png";
 
-export default function VerificarNumero({ navigation, route }) {
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
+export default function VerificarCodigo({ navigation, route }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const handleVerificationPress = () => {
     navigation.navigate("InicioCliente");

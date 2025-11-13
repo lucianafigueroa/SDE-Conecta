@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -11,33 +10,30 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native'; // Para la flecha de atrás
+import { useNavigation } from '@react-navigation/native';
 import Svg, { Path } from 'react-native-svg';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 
-const group427321957 = require('../assets/images/limpiezaIcono.png'); // Placeholder
-const group427321958 = require('../assets/images/albañilIcono.png'); // Placeholder
-const group427321961 = require('../assets/images/electricistaIcono.png'); // Placeholder
-const group427321963 = require('../assets/images/gasistaIcono.png'); // Placeholder
-const group427321959 = require('../assets/images/cerrajeroIcono.png'); // Placeholder
-const group427321962 = require('../assets/images/plomeroIcono.png'); // Placeholder
-const group427321966 = require('../assets/images/pintorIcono.png'); // Placeholder
-const group427321964 = require('../assets/images/pileteroIcono.png'); // Placeholder
-const group427321965 = require('../assets/images/durlockIcono.png'); // Placeholder
-const group427321969 = require('../assets/images/carpinteroIcono.png'); // Placeholder
-const group427321967 = require('../assets/images/herreroIcono.png'); // Placeholder
-const group427321968 = require('../assets/images/aireIcono.png'); // Placeholder
-const group427321972 = require('../assets/images/limpiezaIcono.png'); // Placeholder
-const group427321970 = require('../assets/images/albañilIcono.png'); // Placeholder
-const group427321971 = require('../assets/images/electricistaIcono.png'); // Placeholder
-const group427321975 = require('../assets/images/gasistaIcono.png'); // Placeholder
-const group427321973 = require('../assets/images/cerrajeroIcono.png'); // Placeholder
-const group427321974 = require('../assets/images/plomeroIcono.png'); // Placeholder
+const group427321957 = require('../assets/images/limpiezaIcono.png');
+const group427321958 = require('../assets/images/albañilIcono.png');
+const group427321961 = require('../assets/images/electricistaIcono.png');
+const group427321963 = require('../assets/images/gasistaIcono.png');
+const group427321959 = require('../assets/images/cerrajeroIcono.png');
+const group427321962 = require('../assets/images/plomeroIcono.png');
+const group427321966 = require('../assets/images/pintorIcono.png');
+const group427321964 = require('../assets/images/pileteroIcono.png');
+const group427321965 = require('../assets/images/durlockIcono.png');
+const group427321969 = require('../assets/images/carpinteroIcono.png');
+const group427321967 = require('../assets/images/herreroIcono.png');
+const group427321968 = require('../assets/images/aireIcono.png');
+const group427321972 = require('../assets/images/limpiezaIcono.png');
+const group427321970 = require('../assets/images/albañilIcono.png');
+const group427321971 = require('../assets/images/electricistaIcono.png');
+const group427321975 = require('../assets/images/gasistaIcono.png');
+const group427321973 = require('../assets/images/cerrajeroIcono.png');
+const group427321974 = require('../assets/images/plomeroIcono.png');
 
-
-// -----------------------------------------------------------------------------
-//  2. DATOS DE CATEGORÍAS
-// -----------------------------------------------------------------------------
 const categories = [
   { id: 1, image: group427321957, label: 'Limpieza' },
   { id: 2, image: group427321958, label: 'Albañil' },
@@ -60,14 +56,13 @@ const categories = [
 ];
 
 const { width } = Dimensions.get('window');
-const PADDING_HORIZONTAL = 40; // El left-8 de tu diseño original
+const PADDING_HORIZONTAL = 40;
 const GAP_X = 18;
 const NUM_COLUMNS = 3;
 const ITEM_WIDTH = (width - (PADDING_HORIZONTAL * 2) - (GAP_X * (NUM_COLUMNS - 1))) / NUM_COLUMNS;
 
 const ArrowLeftSVG = ({ color = '#2c3e50', size = 24 }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    {/* Este Path dibuja una flecha simple apuntando a la izquierda */}
     <Path
       d="M19 12H5M12 19l-7-7 7-7"
       stroke={color}
@@ -78,24 +73,8 @@ const ArrowLeftSVG = ({ color = '#2c3e50', size = 24 }) => (
   </Svg>
 );
 
-
-// -----------------------------------------------------------------------------
-//  3. COMPONENTE CATEGORIAS
-// -----------------------------------------------------------------------------
-export default function Categorias(route) {
-
-// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
-
+export default function Categorias() {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
   const navigation = useNavigation();
 
   return (
@@ -105,11 +84,10 @@ export default function Categorias(route) {
       {/* HEADER: Título y botón de retroceso */}
       <View style={styles.header}>
         <TouchableOpacity
-          //onPress={() => navigation.goBack()}
           onPress={() => navigation.navigate('Bienvenida')}
           style={styles.backButton}
         >
-        <ArrowLeftSVG size={24} color="#2c3e50" />
+          <ArrowLeftSVG size={24} color="#2c3e50" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Categorias</Text>
       </View>
@@ -139,9 +117,6 @@ export default function Categorias(route) {
   );
 }
 
-// -----------------------------------------------------------------------------
-//  4. ESTILOS (STYLESHEET)
-// -----------------------------------------------------------------------------
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -154,7 +129,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
-    // La elevación es para simular la sombra que tiene la barra de estado en el diseño
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -172,25 +146,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
   },
   scrollContainer: {
-    paddingTop:25,
+    paddingTop: 25,
     paddingHorizontal: PADDING_HORIZONTAL,
   },
   categoriesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    gap: GAP_X, // Simula el gap-x y gap-y de Tailwind CSS
-    paddingBottom: 40, // Espacio al final del scroll
+    gap: GAP_X,
+    paddingBottom: 40,
   },
   categoryButton: {
-    // El width se calcula dinámicamente arriba (ITEM_WIDTH)
-    // El height es fijo a 102px
     borderRadius: 9.71,
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 22, // Simula el gap-y
-    // Sombra sutil para el efecto de card
+    marginBottom: 22,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

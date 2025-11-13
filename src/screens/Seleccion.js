@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   ScrollView,
@@ -9,26 +8,28 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig.js";
 
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
 import Button from "../components/Button";
-
 import logo from "../assets/images/logo.png";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 export default function Seleccion({ navigation, route }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
+
   // Extraemos el UID que debe venir de la pantalla de Registro
   const { uid } = route.params || {};
 
-  // Log cuando se enfoca la pantalla
+  // Log específico del UID cuando se enfoca la pantalla
   useFocusEffect(
     useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
       if (uid) console.log("-> UID del usuario: " + uid);
       return () => {};
-    }, [route.name, uid])
+    }, [uid])
   );
 
   const primaryBackgroundColor = "#d26e00f2";

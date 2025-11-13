@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import {
   SafeAreaView,
   View,
@@ -11,33 +10,22 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 import logo from "../assets/images/logo1.png";
-
 import phoneIcon from "../assets/images/llamar.png";
 import mailIcon from "../assets/images/sobre.png";
 import linkedinIcon from "../assets/images/linkedin.png";
 import facebookIcon from "../assets/images/facebook.png";
-import twitterIcon from "../assets/images/twitter.png"; // Asegúrate de tener este
+import twitterIcon from "../assets/images/twitter.png";
 import instagramIcon from "../assets/images/instagram.png";
 import whatsappIcon from "../assets/images/whatsapp.png";
 
 
 const { width } = Dimensions.get("window");
 
-export default function Contactanos({ navigation, route }) {
-
-  // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+export default function Contactanos({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   // Función para simular el back button de la cabecera
   const handleGoBack = () => {
@@ -45,13 +33,10 @@ export default function Contactanos({ navigation, route }) {
   };
 
   return (
-    // El color de fondo claro se aplica a todo el SafeAreaView
     <SafeAreaView style={styles.safe}>
-
-      {/* Cabecera de la App (como en la imagen) */}
+      {/* Cabecera de la App */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-          {/* Se usa un Text simple para simular la flecha de 'back' */}
           <Text style={styles.backIcon}>&lt;</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Contáctanos</Text>
@@ -67,7 +52,6 @@ export default function Contactanos({ navigation, route }) {
 
         {/* Sección de contacto (Teléfono y Email) */}
         <View style={styles.contactSection}>
-
           {/* Teléfono */}
           <TouchableOpacity
             style={styles.contactIconContainer}
@@ -104,50 +88,22 @@ export default function Contactanos({ navigation, route }) {
 
         {/* Redes sociales */}
         <View style={styles.socialContainer}>
-          {/* LinkedIn */}
-          <TouchableOpacity
-            onPress={() => Linking.openURL("https://www.linkedin.com")}
-          >
+          <TouchableOpacity onPress={() => Linking.openURL("https://www.linkedin.com")}>
             <Image source={linkedinIcon} style={styles.socialIcon} />
           </TouchableOpacity>
-
-          {/* Facebook */}
-          <TouchableOpacity
-            onPress={() => Linking.openURL("https://www.facebook.com")}
-          >
+          <TouchableOpacity onPress={() => Linking.openURL("https://www.facebook.com")}>
             <Image source={facebookIcon} style={styles.socialIcon} />
           </TouchableOpacity>
-
-          {/* Twitter */}
-          <TouchableOpacity
-            onPress={() => Linking.openURL("https://www.twitter.com")}
-          >
-            {/* El ícono de Twitter no se ve en la imagen, pero está en tu código original.
-            Lo incluimos por si lo necesitas. Si la imagen es fiel, lo quitarías.
-            Según la imagen, el orden parece ser LinkedIn, Facebook, Twitter, Instagram, WhatsApp.
-            Asegúrate de que los íconos de tu `assets` son los correctos. */}
+          <TouchableOpacity onPress={() => Linking.openURL("https://www.twitter.com")}>
             <Image source={twitterIcon} style={styles.socialIcon} />
           </TouchableOpacity>
-
-          {/* Instagram */}
-          <TouchableOpacity
-            // Se corrige el método a Linking.openURL
-            onPress={() => Linking.openURL("https://www.instagram.com")}
-          >
+          <TouchableOpacity onPress={() => Linking.openURL("https://www.instagram.com")}>
             <Image source={instagramIcon} style={styles.socialIcon} />
           </TouchableOpacity>
-
-          {/* WhatsApp */}
-          <TouchableOpacity
-            // Se corrige el método a Linking.openURL
-            onPress={() => Linking.openURL("https://api.whatsapp.com/send?phone=+9234709635")}
-          >
+          <TouchableOpacity onPress={() => Linking.openURL("https://api.whatsapp.com/send?phone=+9234709635")}>
             <Image source={whatsappIcon} style={styles.socialIcon} />
           </TouchableOpacity>
-
         </View>
-
-        {/* Se elimina el Botón "Volver al Menú" que no aparece en la foto */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -156,7 +112,6 @@ export default function Contactanos({ navigation, route }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    // Color de fondo de la imagen: un gris muy claro/blanco roto
     backgroundColor: "#F5F5F5",
   },
   header: {
@@ -165,25 +120,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginTop: 60,
-    backgroundColor: '#F5F5F5', // El mismo color que el fondo
+    backgroundColor: '#F5F5F5',
   },
   backButton: {
     paddingRight: 15,
   },
   backIcon: {
     fontSize: 28,
-    color: '#2C3E50', // Color del texto del título
+    color: '#2C3E50',
     fontWeight: 'normal',
   },
-  // El 'title' se mueve a la cabecera, pero mantenemos el estilo para el texto
   title: {
-    fontSize: 24, // Ajustado para que se vea más grande en la cabecera
+    fontSize: 24,
     fontWeight: "bold",
     color: "#2C3E50",
   },
   container: {
     alignItems: "center",
-    flexGrow: 1, // Permite que el contenido se centre verticalmente si es corto
+    flexGrow: 1,
   },
   logo: {
     width: 250,
@@ -195,42 +149,40 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     marginHorizontal: 40,
-    marginBottom: 50, // Más espacio antes de los contactos
+    marginBottom: 50,
   },
   contactSection: {
-    // Ya no es una tarjeta, solo un contenedor para centrar
     alignItems: "center",
-    marginBottom: 50, // Espacio antes de la sección de redes sociales
+    marginBottom: 50,
   },
   contactIconContainer: {
-    // Contenedor para el ícono con el fondo naranja circular
     width: 50,
     height: 50,
-    backgroundColor: "#FF8C42", // Naranja de los íconos
+    backgroundColor: "#FF8C42",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8, // Espacio entre el ícono y el texto
+    marginBottom: 8,
   },
   icon: {
     width: 25,
     height: 25
   },
   contactText: {
-    color: "#2C3E50", // Color oscuro para el texto
-    fontSize: 18, // Ligeramente más grande
+    color: "#2C3E50",
+    fontSize: 18,
   },
   findUsText: {
     fontSize: 14,
-    color: "#6F7485", // Color gris del texto
-    marginBottom: 20, // Espacio antes de los íconos de redes
+    color: "#6F7485",
+    marginBottom: 20,
   },
   socialContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 15, // Espacio entre los íconos
+    gap: 15,
   },
   socialIcon: {
-    width: 38, // Un poco más grandes para coincidir con la foto
+    width: 38,
     height: 38,
     resizeMode: "contain",
   },

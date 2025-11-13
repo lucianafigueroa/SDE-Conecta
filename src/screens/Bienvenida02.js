@@ -1,26 +1,15 @@
-import React, { useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React from "react";
 import { View, ScrollView, Text, Image, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../components/Button';
 import plomeroSentado from '../assets/images/plomeroSentado.png';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 // Obtenemos el ancho de la pantalla para una mejor respuesta en el tamaño de la imagen
 const { width } = Dimensions.get('window');
 
-export default function Bienvenida02({ navigation, route }) {
-
-// USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
+export default function Bienvenida02({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
 
   const handleStart = () => {
     navigation.navigate('OnboardingScreen');
@@ -35,11 +24,11 @@ export default function Bienvenida02({ navigation, route }) {
         </Text>
 
         <View style={styles.imageContainer}>
-            <Image
-                source={plomeroSentado}
-                style={styles.mainImage}
-                resizeMode="contain"
-            />
+          <Image
+            source={plomeroSentado}
+            style={styles.mainImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* Botón "Empezar" */}

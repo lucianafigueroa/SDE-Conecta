@@ -21,8 +21,11 @@ import {
   setDoc,
   getDoc,
 } from "firebase/firestore";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 export default function Chat({ navigation, route }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
+
   const { prestador } = route.params || {};
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");

@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useState } from 'react';
 import { 
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Image, TextInput, ScrollView, Modal, KeyboardAvoidingView, Platform, Dimensions 
 } from 'react-native';
 import Svg, { Path, Circle, Polyline } from 'react-native-svg';
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const USER_COLOR = '#2c3e50';
 const ALERT_COLOR = '#FF8C00';
@@ -11,7 +11,7 @@ const RED_ERROR = '#FF0000';
 const PADDING_HORIZONTAL = 20;
 const screenWidth = Dimensions.get('window').width;
 
-// --- ICONOS --- (Sin cambios)
+// --- ICONOS ---
 const ChevronLeft = ({ color = USER_COLOR, size = 28 }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <Polyline points="15 18 9 12 15 6"/>
@@ -42,8 +42,9 @@ const CrossIcon = ({ color = USER_COLOR, size = 28 }) => (
   </Svg>
 );
 
-// --- COMPONENTE PRINCIPAL ---
-export default function PerfilInfoPersonal({ navigation, route }) { // 🚨 Definición como función y export default
+export default function PerfilInfoPersonal({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
+
   const [data, setData] = useState({
     name: 'Maria Carrizo',
     email: 'mariacarrizo@gmail.com',
@@ -63,19 +64,6 @@ export default function PerfilInfoPersonal({ navigation, route }) { // 🚨 Defi
     profilePic: 'https://via.placeholder.com/150/F08080/FFFFFF?text=MC',
   };
     
-    // USAR useFocusEffect PARA LOGUEAR CUANDO PIERDE EL FOCO
-    useFocusEffect(
-        useCallback(() => {
-            // USAR route.name AQUÍ
-            console.log("-> PANTALLA ENFOCADA: " + route.name);
-
-            // Se omite la función de limpieza (desenfoque)
-            return () => {}; 
-        }, [route.name]) // Añadir route.name a las dependencias
-    );
-    // ------------------------------------------------------------
-
-
   const handleUpdate = (key, value) => {
     setData(prev => ({ ...prev, [key]: value }));
   };
@@ -93,9 +81,9 @@ export default function PerfilInfoPersonal({ navigation, route }) { // 🚨 Defi
   const handleAction = (action) => {
     console.log(`Action: ${action}`);
     if (action === 'goBack') {
-        navigation.goBack(); // Implementación de navegación
+        navigation.goBack();
     }
-    // Aquí irían las implementaciones reales de las otras acciones (e.g., elegir foto, verificar email)
+    // Implementaciones de otras acciones (elegir foto, verificar email, etc.) irían aquí.
   };
 
   const FieldItem = ({ label, value, onPress, icon }) => (
@@ -209,7 +197,6 @@ export default function PerfilInfoPersonal({ navigation, route }) { // 🚨 Defi
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
     </SafeAreaView>
   );
 }

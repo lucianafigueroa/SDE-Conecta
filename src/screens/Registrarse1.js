@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -11,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import Button from "../components/Button";
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
@@ -21,8 +21,11 @@ import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import clienteLogo from "../assets/images/cliente.png";
 import profesionalLogo from "../assets/images/profesional.png";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 export default function Registrarse1({ route, navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
+
   const { tipoUsuario, uid } = route.params || {};
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -31,10 +34,9 @@ export default function Registrarse1({ route, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      console.log("PANTALLA ENFOCADA: " + route.name);
       console.log("UID del Usuario: " + uid);
       return () => {};
-    }, [route.name, uid])
+    }, [uid])
   );
 
   const uploadImage = async (uri, uid) => {

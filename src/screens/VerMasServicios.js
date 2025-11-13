@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -10,9 +10,9 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 const { width } = Dimensions.get("window");
 
@@ -26,17 +26,11 @@ const iconos = {
   electricistaIcono: require("../assets/images/electricistaIcono.png"),
 };
 
-export default function VerMasServicios({ navigation, route }) {
+export default function VerMasServicios({ navigation }) {
+  useScreenFocusLogger(); // <-- 2. Hook en uso
+
   const [profesiones, setProfesiones] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // --- Detectar enfoque de pantalla ---
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA:", route.name);
-      return () => {};
-    }, [route.name])
-  );
 
   // --- Cargar profesiones desde Firestore ---
   useEffect(() => {

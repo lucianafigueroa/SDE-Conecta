@@ -1,5 +1,8 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StatusBar } from "react-native"; // <-- CAMBIO 1: Importar StatusBar
+
+// Importación de todas tus pantallas
 import Bienvenida from "./src/screens/Bienvenida.js";
 import Bienvenida02 from "./src/screens/Bienvenida02.js";
 import OnboardingScreen from "./src/screens/OnboardingScreen.js";
@@ -24,14 +27,17 @@ import VerMasServicios from "./src/screens/VerMasServicios.js";
 import Chat from "./src/screens/Chat.js";
 import Calificar from "./src/screens/Calificar.js";
 
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-
-        {/* Inicio */}
+      {/* CAMBIO 2: Establecer un StatusBar por defecto para toda la app */}
+      <StatusBar 
+        barStyle="dark-content" 
+        backgroundColor="transparent" 
+        translucent={true}
+      />
 
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
@@ -42,26 +48,22 @@ export default function App() {
         <Stack.Screen name="Registro" component={Registro} />
 
         {/* Registro */}
-
         <Stack.Screen name="Seleccion" component={Seleccion} />
         <Stack.Screen name="Registrarse1" component={Registrarse1} />
         <Stack.Screen name="VerificarNumero" component={VerificarNumero} />
         <Stack.Screen name="VerificarCodigo" component={VerificarCodigo} />
 
         {/* Cliente */}
-
         <Stack.Screen name="InicioCliente" component={InicioCliente} />
         <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
         <Stack.Screen name="Calificar" component={Calificar} />
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
 
         {/* Profesional */}
-
-        {/* Otras pantallas */}
         <Stack.Screen name="Prestadores" component={Prestadores} />
         <Stack.Screen name="Calificaciones" component={Calificaciones} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
-        <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional}/>
+        <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional} />
         <Stack.Screen name="Categorias" component={Categorias} />
         <Stack.Screen name="InicioProfesional" component={BottomTabs} />
         <Stack.Screen name="VerPerfil" component={VerPerfil} />

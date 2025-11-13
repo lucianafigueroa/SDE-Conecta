@@ -1,5 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -11,12 +10,13 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../config/firebaseConfig";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "../config/firebaseConfig";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 const { width } = Dimensions.get("window");
 
-// 🔸 Diccionario de íconos locales
 const iconos = {
   carpinteroIcono: require("../assets/images/carpinteroIcono.png"),
   limpiezaIcono: require("../assets/images/limpiezaIcono.png"),
@@ -25,7 +25,6 @@ const iconos = {
   albañilIcono: require("../assets/images/albañilIcono.png"),
   electricistaIcono: require("../assets/images/electricistaIcono.png"),
   niñeraIcono: require("../assets/images/niñeraIcono.png"),
-
 };
 
 const fotosPerfil = {
@@ -34,68 +33,55 @@ const fotosPerfil = {
 };
 
 export default function InicioCliente({ navigation, route }) {
-  const { user } = route.params || {}; // 👈 recibimos el usuario desde la navegación
+  useScreenFocusLogger();
+
   const [profesiones, setProfesiones] = useState([]);
   const [recomendados, setRecomendados] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cliente, setCliente] = useState(user || null); // 👈 usamos ese user como cliente
+  const [cliente, setCliente] = useState(null);
 
-  const { email, displayName, uid, rol } = user;
-  console.log("Cliente autenticado:", { email, displayName, uid, rol });
-
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log("-> PANTALLA ENFOCADA: " + route.name);
-      return () => {};
-    }, [route.name])
-  );
-
-  // 🔥 Cargar datos desde Firestore
   useEffect(() => {
-    const cargarDatos = async () => {
-      try {
-        // Profesiones
-        const profesionesSnap = await getDocs(collection(db, "profesiones"));
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        console.log("Usuario autenticado detectado:", currentUser.uid);
+        const userDocRef = doc(db, "usuarios", currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-        // Prestadores
-        const prestadoresQuery = query(
-          collection(db, "usuarios"),
-          where("rol", "==", "prestador")
-        );
-        const prestadoresSnap = await getDocs(prestadoresQuery);
+        if (userDocSnap.exists()) {
+          setCliente(userDocSnap.data());
+        } else {
+          console.warn("No se encontró el documento del usuario en Firestore.");
+        }
+        
+        try {
+          const profesionesSnap = await getDocs(collection(db, "profesiones"));
+          const prestadoresQuery = query(collection(db, "usuarios"), where("rol", "==", "prestador"));
+          const prestadoresSnap = await getDocs(prestadoresQuery);
 
-        // Cliente (usuario actual)
-        const clienteQuery = query(
-          collection(db, "usuarios"),
-          where("rol", "==", "cliente")
-        );
-        const clienteSnap = await getDocs(clienteQuery);
-        const clienteData =
-          clienteSnap.docs.length > 0 ? clienteSnap.docs[0].data() : null;
+          const listaProfesiones = profesionesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const listaPrestadores = prestadoresSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-        const listaProfesiones = profesionesSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+          setProfesiones(listaProfesiones);
+          setRecomendados(listaPrestadores);
 
-        const listaPrestadores = prestadoresSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        } catch (error) {
+          console.error("Error al cargar datos de la pantalla:", error);
+        } finally {
+          setLoading(false);
+        }
 
-        setProfesiones(listaProfesiones);
-        setRecomendados(listaPrestadores);
-        setCliente(clienteData);
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-      } finally {
+      } else {
+        console.log("Ningún usuario autenticado.");
         setLoading(false);
+        // navigation.replace("Login");
       }
-    };
+    });
 
-    cargarDatos();
+    return () => unsubscribe();
   }, []);
+  
+  // <-- CAMBIO CLAVE 1: Calcular el primer nombre
+  const firstName = cliente?.nombre?.split(' ')[0] || "Usuario";
 
   if (loading) {
     return (
@@ -110,11 +96,12 @@ export default function InicioCliente({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.container}>
         {/* Header dinámico */}
         <View style={styles.header}>
+          {/* <-- CAMBIO CLAVE 2: Usar la nueva variable firstName --> */}
           <Text style={styles.headerText}>
-            Hola {cliente ? cliente.nombre : "Usuario"}
+            Hola {firstName}
           </Text>
           <Text style={styles.locationText}>
-            {cliente ? cliente.domicilio : "Domicilio no disponible"}
+            {cliente?.domicilio || "Domicilio no disponible"}
           </Text>
         </View>
 
@@ -166,7 +153,7 @@ export default function InicioCliente({ navigation, route }) {
             <TouchableOpacity
               key={prov.id}
               style={styles.providerCard}
-              onPress={() => navigation.navigate("VerPerfil", { prestador: prov , user})}
+              onPress={() => navigation.navigate("VerPerfil", { prestador: prov , user: auth.currentUser })}
             >
               <Image
                 source={fotosPerfil[prov.foto] || require("../assets/images/defaultUser.png")}
@@ -188,7 +175,7 @@ export default function InicioCliente({ navigation, route }) {
   );
 }
 
-// 🎨 Estilos
+// Estilos (sin cambios)
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
@@ -201,11 +188,10 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#d26e00",
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 70,
   },
   headerText: {
-    marginTop: 10,
     fontSize: 28,
     color: "#fff",
     fontWeight: "bold",
