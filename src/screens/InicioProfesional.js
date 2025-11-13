@@ -13,18 +13,16 @@ import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 import BANNER_IMAGE from "../assets/images/banner.png";
 import PLACEHOLDER_ICON from "../assets/images/placeholder.png";
 
 export default function InicioProfesional({ navigation }) {
-  useScreenFocusLogger(); // <-- 2. Hook en uso
+  useScreenFocusLogger();
   const [userName, setUserName] = useState("Cargando...");
 
   useEffect(() => {
-    let unsubscribe;
-
     const fetchUserData = async (user) => {
       try {
         const userDocRef = doc(db, "usuarios", user.uid);
@@ -44,7 +42,7 @@ export default function InicioProfesional({ navigation }) {
       }
     };
 
-    unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchUserData(user);
       } else {
@@ -52,9 +50,7 @@ export default function InicioProfesional({ navigation }) {
       }
     });
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const services = [
@@ -91,9 +87,10 @@ export default function InicioProfesional({ navigation }) {
           </View>
         </View>
 
+        {/* --- CAMBIO AQUÍ --- */}
         <TouchableOpacity
           style={styles.menuIcon}
-          onPress={() => navigation.navigate("CerrarSesionProfesional")}
+          onPress={() => navigation.navigate("MenuProfesional")} // <-- Navega al menú unificado
         >
           <Feather name="menu" size={24} color="white" />
         </TouchableOpacity>

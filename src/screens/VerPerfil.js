@@ -9,11 +9,10 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import Button from "../components/Button";
-import { textStyles } from "../styles/texts";
+// Ya no se importa el Button genérico
 import { db } from "../config/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- Cambio 1
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 // Íconos locales
 import locationOnIcon from "../assets/images/localizacion.png";
@@ -67,14 +66,9 @@ const ReviewCard = ({ name, date, reviewText, rating = 5 }) => {
           ))}
         </View>
       </View>
-
-      <Text
-        style={reviewStyles.reviewText}
-        numberOfLines={expanded ? undefined : MAX_LINES}
-      >
+      <Text style={reviewStyles.reviewText} numberOfLines={expanded ? undefined : MAX_LINES}>
         {reviewText}
       </Text>
-
       {reviewText.length > 150 && (
         <TouchableOpacity onPress={toggleExpanded}>
           <Text style={reviewStyles.readMoreText}>
@@ -87,20 +81,14 @@ const ReviewCard = ({ name, date, reviewText, rating = 5 }) => {
 };
 
 export default function VerPerfil({ navigation, route }) {
-  useScreenFocusLogger(); // <-- Cambio 2
+  useScreenFocusLogger();
   const { prestador, user } = route.params || {};
   const [reseñas, setReseñas] = useState([]);
 
-  console.log("🔍 fotosServicios en Firestore:", prestador?.fotosServicios);
-  console.log("👤 Cliente logueado:", user?.email);
-
   const handleGoBack = () => navigation.goBack();
 
-  // 🔹 Cargar reseñas desde Firestore
   useEffect(() => {
-    // Protección para evitar errores si no hay prestador
-    if (!prestador?.id) return; 
-
+    if (!prestador?.id) return;
     const fetchReseñas = async () => {
       try {
         const reseñasRef = collection(db, "usuarios", prestador.id, "reseñas");
@@ -112,7 +100,7 @@ export default function VerPerfil({ navigation, route }) {
       }
     };
     fetchReseñas();
-  }, [prestador?.id]); // <-- Cambio 3 (más seguro)
+  }, [prestador?.id]);
 
   if (!prestador) {
     return (
@@ -127,7 +115,6 @@ export default function VerPerfil({ navigation, route }) {
     );
   }
 
-  // 📸 Foto de perfil
   let fotoPerfil = userProfilePlaceholder;
   if (prestador.foto) {
     if (fotosPerfil[prestador.foto]) {
@@ -140,89 +127,45 @@ export default function VerPerfil({ navigation, route }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
             <Text style={styles.backIcon}>‹</Text>
           </TouchableOpacity>
           <Text style={styles.profileNameHeader}>{prestador.nombre}</Text>
         </View>
-
-        {/* Imagen principal */}
         <Image source={fotoPerfil} style={styles.profileImage} />
-
-        {/* Contenido */}
         <View style={styles.contentCard}>
-          {/* Nombre + Calificación */}
           <View style={styles.nameRatingContainer}>
             <Text style={styles.nameText}>{prestador.nombre}</Text>
             <View style={styles.ratingContainer}>
-              <Text style={styles.ratingText}>
-                {prestador.puntuacion?.toFixed(1) || "0.0"}
-              </Text>
-              {[...Array(5)].map((_, i) => {
-                const filled = i < Math.round(prestador.puntuacion || 0);
-                return (
-                  <Image
-                    key={i}
-                    source={starIcon}
-                    style={[
-                      styles.starIcon,
-                      { tintColor: filled ? "#D26E00" : "#ccc" },
-                    ]}
-                  />
-                );
-              })}
+              <Text style={styles.ratingText}>{prestador.puntuacion?.toFixed(1) || "0.0"}</Text>
+              {[...Array(5)].map((_, i) => (
+                <Image
+                  key={i}
+                  source={starIcon}
+                  style={[styles.starIcon, { tintColor: i < Math.round(prestador.puntuacion || 0) ? "#D26E00" : "#ccc" }]}
+                />
+              ))}
             </View>
           </View>
-
-          {/* Ubicación */}
           <View style={styles.locationContainer}>
             <Image source={locationOnIcon} style={styles.locationIcon} />
-            <Text style={styles.locationText}>
-              {prestador.domicilio || "Catamarca 50, Sgo. del Estero"}
-            </Text>
+            <Text style={styles.locationText}>{prestador.domicilio || "Catamarca 50, Sgo. del Estero"}</Text>
           </View>
-
-          {/* Descripción */}
-          <Text style={styles.descriptionText}>
-            {prestador.descripcion ||
-              `Profesional especializado en ${prestador.profesion?.toLowerCase() ||
-                "servicios generales"}.`}
-          </Text>
-
-          {/* Lista de servicios */}
-          <Text style={[styles.descriptionText, styles.serviceListTitle]}>
-            Servicios:
-          </Text>
+          <Text style={styles.descriptionText}>{prestador.descripcion || `Profesional especializado en ${prestador.profesion?.toLowerCase() || "servicios generales"}.`}</Text>
+          <Text style={[styles.descriptionText, styles.serviceListTitle]}>Servicios:</Text>
           <View style={styles.serviceListContainer}>
-            {Array.isArray(prestador.profesion) ? (
-              prestador.profesion.map((prof, i) => (
-                <Text key={i} style={styles.serviceListItem}>
-                  • {prof}
-                </Text>
-              ))
-            ) : (
-              <Text style={styles.serviceListItem}>
-                • {prestador.profesion || "Servicio general"}
-              </Text>
-            )}
+            {Array.isArray(prestador.profesion)
+              ? prestador.profesion.map((prof, i) => (<Text key={i} style={styles.serviceListItem}>• {prof}</Text>))
+              : (<Text style={styles.serviceListItem}>• {prestador.profesion || "Servicio general"}</Text>)}
           </View>
-
-          {/* Disponibilidad */}
           <View style={styles.availabilityContainer}>
             <View style={styles.availabilityRow}>
               <Image source={alarmIcon} style={styles.alarmIcon} />
-              <Text style={styles.availabilityText}>
-                {prestador.disponibilidad || "Sin información"}
-              </Text>
+              <Text style={styles.availabilityText}>{prestador.disponibilidad || "Sin información"}</Text>
             </View>
-            <Text style={styles.hoursText}>
-              {prestador.horario || "Sin información"}
-            </Text>
+            <Text style={styles.hoursText}>{prestador.horario || "Sin información"}</Text>
           </View>
-
-          {/* 🧰 Servicios */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
             <TouchableOpacity style={styles.viewMoreButton}>
@@ -230,40 +173,20 @@ export default function VerPerfil({ navigation, route }) {
               <Image source={arrowForwardIosIcon} style={styles.arrowIcon} />
             </TouchableOpacity>
           </View>
-
           <View style={styles.servicesImageContainer}>
-            {prestador.fotosServicios && prestador.fotosServicios.length > 0 ? (
-              prestador.fotosServicios.map((nombreFoto, i) => {
-                const imagenLocal = fotosServicios[nombreFoto];
-                if (imagenLocal) {
-                  return (
-                    <Image
-                      key={i}
-                      source={imagenLocal}
-                      style={styles.serviceImage}
-                    />
+            {prestador.fotosServicios && prestador.fotosServicios.length > 0
+              ? prestador.fotosServicios.map((nombreFoto, i) => {
+                  const imagenLocal = fotosServicios[nombreFoto];
+                  return imagenLocal ? (
+                    <Image key={i} source={imagenLocal} style={styles.serviceImage} />
+                  ) : (
+                    <View key={i} style={[styles.serviceImage, { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" }]}>
+                      <Text style={{ fontSize: 10, color: "#606060" }}>Sin imagen</Text>
+                    </View>
                   );
-                }
-                return (
-                  <View
-                    key={i}
-                    style={[
-                      styles.serviceImage,
-                      { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" },
-                    ]}
-                  >
-                    <Text style={{ fontSize: 10, color: "#606060" }}>Sin imagen</Text>
-                  </View>
-                );
-              })
-            ) : (
-              <Text style={{ color: "#606060", fontSize: 12 }}>
-                No hay imágenes disponibles
-              </Text>
-            )}
+                })
+              : <Text style={{ color: "#606060", fontSize: 12 }}>No hay imágenes disponibles</Text>}
           </View>
-
-          {/* 🔹 Opiniones dinámicas */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Opiniones de Clientes</Text>
             <TouchableOpacity style={styles.viewMoreButton}>
@@ -271,50 +194,34 @@ export default function VerPerfil({ navigation, route }) {
               <Image source={arrowForwardIosIcon} style={styles.arrowIcon} />
             </TouchableOpacity>
           </View>
-
-          {Array.isArray(reseñas) && reseñas.length > 0 ? (
-            reseñas.map((r, index) => (
-              <ReviewCard
-                key={index}
-                name={r.clienteNombre || "Anónimo"}
-                date={
-                  r.fecha
-                    ? new Date(r.fecha.seconds * 1000).toLocaleDateString("es-AR") // <-- Cambio 4 (Corrección de Timestamp)
-                    : "Sin fecha"
-                }
-                reviewText={r.comentario || "Sin comentario"}
-                rating={r.calificacion || 0}
-              />
-            ))
-          ) : (
-            <Text style={{ color: "#606060", fontSize: 12, marginBottom: 10 }}>
-              No hay opiniones todavía.
-            </Text>
-          )}
-
+          {Array.isArray(reseñas) && reseñas.length > 0
+            ? reseñas.map((r, index) => (
+                <ReviewCard
+                  key={index}
+                  name={r.clienteNombre || "Anónimo"}
+                  date={r.fecha ? new Date(r.fecha.seconds * 1000).toLocaleDateString("es-AR") : "Sin fecha"}
+                  reviewText={r.comentario || "Sin comentario"}
+                  rating={r.calificacion || 0}
+                />
+              ))
+            : <Text style={{ color: "#606060", fontSize: 12, marginBottom: 10 }}>No hay opiniones todavía.</Text>}
         </View>
       </ScrollView>
 
-      {/* Botones inferiores */}
+      {/* --- BOTONES INFERIORES ACTUALIZADOS --- */}
       <View style={styles.bottomButtonsContainer}>
-        <Button
-          title="Calificar"
+        <TouchableOpacity
+          style={[styles.bottomButton, styles.calificarButton]}
           onPress={() => navigation.navigate("Calificar", { prestador, user })}
-          buttonStyle={[styles.bottomButton, styles.calificarButton]}
-          textStyle={[
-            textStyles.mainText,
-            { textAlign: "center", color: "#fff", fontWeight: "700" },
-          ]}
-        />
-        <Button
-          title="Contactarse"
+        >
+          <Text style={styles.bottomButtonText}>Calificar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.bottomButton, styles.orangeButton]}
           onPress={() => navigation.navigate("Chat", { prestador, user })}
-          buttonStyle={[styles.bottomButton, styles.orangeButton]}
-          textStyle={[
-            textStyles.mainText,
-            { textAlign: "center", color: "#fff", fontWeight: "700" },
-          ]}
-        />
+        >
+          <Text style={styles.bottomButtonText}>Contactarse</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -345,8 +252,7 @@ const styles = StyleSheet.create({
   nameText: { fontSize: 20, fontWeight: "700", color: "#2c3e50", marginRight: 10 },
   ratingContainer: { flexDirection: "row", alignItems: "center" },
   ratingText: { fontSize: 14, color: "#606060", marginRight: 5 },
-  starIcon: { width: 13, height: 13, tintColor: "#D26E00", resizeMode: "contain" },
-  distanceText: { fontSize: 12, color: "#606060", marginLeft: "auto" },
+  starIcon: { width: 13, height: 13, resizeMode: "contain" },
   locationContainer: { flexDirection: "row", alignItems: "center", marginTop: 5 },
   locationIcon: { width: 15, height: 15, marginRight: 5, tintColor: "#606060" },
   locationText: { fontSize: 14, color: "#606060" },
@@ -366,8 +272,9 @@ const styles = StyleSheet.create({
   arrowIcon: { width: 13, height: 13, tintColor: "#2c3e50" },
   servicesImageContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", marginBottom: 30 },
   serviceImage: { width: serviceImageWidth > 0 ? serviceImageWidth : 100, height: 100, borderRadius: 8, resizeMode: "cover", backgroundColor: "#f0f0f0" },
-  bottomButtonsContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", position: "absolute", bottom: 0, paddingHorizontal: 20, backgroundColor: "white", paddingTop: 10, paddingBottom: 20, borderTopWidth: 1, borderTopColor: "#E0E0E0" },
-  bottomButton: { width: "48%", borderRadius: 32, height: 51 },
-  calificarButton: { backgroundColor: "#2c3e50", opacity: 0.8 },
+  bottomButtonsContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", position: "absolute", bottom: 0, paddingHorizontal: 20, backgroundColor: "white", paddingTop: 10, paddingBottom: 30, borderTopWidth: 1, borderTopColor: "#E0E0E0" },
+  bottomButton: { width: "48%", borderRadius: 32, height: 51, justifyContent: 'center', alignItems: 'center' },
+  calificarButton: { backgroundColor: "#2c3e50", opacity: 0.9 },
   orangeButton: { backgroundColor: "#D26E00" },
+  bottomButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });

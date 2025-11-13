@@ -19,7 +19,7 @@ export default function Bienvenida({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar 
-        barStyle="light-content" 
+        barStyle="dark-content" 
         backgroundColor="transparent" 
         translucent={true}
       />
