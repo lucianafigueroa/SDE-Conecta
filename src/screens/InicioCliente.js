@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   SafeAreaView,
@@ -16,7 +17,6 @@ import { db } from "../config/firebaseConfig";
 
 const { width } = Dimensions.get("window");
 
-// 🔸 Diccionario de íconos locales
 const iconos = {
   carpinteroIcono: require("../assets/images/carpinteroIcono.png"),
   limpiezaIcono: require("../assets/images/limpiezaIcono.png"),
@@ -25,7 +25,6 @@ const iconos = {
   albañilIcono: require("../assets/images/albañilIcono.png"),
   electricistaIcono: require("../assets/images/electricistaIcono.png"),
   niñeraIcono: require("../assets/images/niñeraIcono.png"),
-
 };
 
 const fotosPerfil = {
@@ -34,15 +33,17 @@ const fotosPerfil = {
 };
 
 export default function InicioCliente({ navigation, route }) {
-  const { user } = route.params || {}; // 👈 recibimos el usuario desde la navegación
+  const { user, userRole } = useAuth();
+  console.log("Cliente autenticado:", {
+    email: user?.email,
+    displayName: user?.displayName,
+    uid: user?.uid,
+    rol: userRole,
+  });
+  const [clienteData, setClienteData] = useState(null);
   const [profesiones, setProfesiones] = useState([]);
   const [recomendados, setRecomendados] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cliente, setCliente] = useState(user || null); // 👈 usamos ese user como cliente
-
-  const { email, displayName, uid, rol } = user;
-  console.log("Cliente autenticado:", { email, displayName, uid, rol });
-
 
   useFocusEffect(
     useCallback(() => {
@@ -51,27 +52,27 @@ export default function InicioCliente({ navigation, route }) {
     }, [route.name])
   );
 
-  // 🔥 Cargar datos desde Firestore
   useEffect(() => {
     const cargarDatos = async () => {
+      if (!user?.uid) {
+        setLoading(false);
+        return;
+      }
       try {
-        // Profesiones
         const profesionesSnap = await getDocs(collection(db, "profesiones"));
 
-        // Prestadores
         const prestadoresQuery = query(
           collection(db, "usuarios"),
           where("rol", "==", "prestador")
         );
         const prestadoresSnap = await getDocs(prestadoresQuery);
 
-        // Cliente (usuario actual)
         const clienteQuery = query(
           collection(db, "usuarios"),
-          where("rol", "==", "cliente")
+          where("uid", "==", user.uid) 
         );
         const clienteSnap = await getDocs(clienteQuery);
-        const clienteData =
+        const clienteFirestoreData =
           clienteSnap.docs.length > 0 ? clienteSnap.docs[0].data() : null;
 
         const listaProfesiones = profesionesSnap.docs.map((doc) => ({
@@ -86,7 +87,7 @@ export default function InicioCliente({ navigation, route }) {
 
         setProfesiones(listaProfesiones);
         setRecomendados(listaPrestadores);
-        setCliente(clienteData);
+        setClienteData(clienteFirestoreData);
       } catch (error) {
         console.error("Error al cargar datos:", error);
       } finally {
@@ -95,12 +96,16 @@ export default function InicioCliente({ navigation, route }) {
     };
 
     cargarDatos();
-  }, []);
+  }, [user?.uid]);
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safe}>
-        <ActivityIndicator size="large" color="#d26e00" style={{ marginTop: 50 }} />
+        <ActivityIndicator
+          size="large"
+          color="#d26e00"
+          style={{ marginTop: 50 }}
+        />
       </SafeAreaView>
     );
   }
@@ -111,10 +116,10 @@ export default function InicioCliente({ navigation, route }) {
         {/* Header dinámico */}
         <View style={styles.header}>
           <Text style={styles.headerText}>
-            Hola {cliente ? cliente.nombre : "Usuario"}
+            Hola {clienteData ? clienteData.nombre : "Usuario"}
           </Text>
           <Text style={styles.locationText}>
-            {cliente ? cliente.domicilio : "Domicilio no disponible"}
+            {clienteData ? clienteData.domicilio : "Domicilio no disponible"}
           </Text>
         </View>
 
@@ -135,7 +140,9 @@ export default function InicioCliente({ navigation, route }) {
         <View style={styles.servicesSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("VerMasServicios")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("VerMasServicios")}
+            >
               <Text style={styles.verMasLink}>Ver más ›</Text>
             </TouchableOpacity>
           </View>
@@ -144,7 +151,9 @@ export default function InicioCliente({ navigation, route }) {
             {profesiones.slice(0, 4).map((serv) => (
               <TouchableOpacity key={serv.id} style={styles.serviceCard}>
                 <Image
-                  source={iconos[serv.icono] || require("../assets/images/sobre.png")}
+                  source={
+                    iconos[serv.icono] || require("../assets/images/sobre.png")
+                  }
                   style={styles.serviceIcon}
                 />
                 <Text style={styles.serviceName}>{serv.nombre}</Text>
@@ -157,7 +166,9 @@ export default function InicioCliente({ navigation, route }) {
         <View style={styles.recommendedSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recomendados</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("VerMasRecomendados")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("VerMasRecomendados")}
+            >
               <Text style={styles.verMasLink}>Ver más ›</Text>
             </TouchableOpacity>
           </View>
@@ -166,10 +177,15 @@ export default function InicioCliente({ navigation, route }) {
             <TouchableOpacity
               key={prov.id}
               style={styles.providerCard}
-              onPress={() => navigation.navigate("VerPerfil", { prestador: prov , user})}
+              onPress={() =>
+                navigation.navigate("VerPerfil", { prestador: prov, user })
+              }
             >
               <Image
-                source={fotosPerfil[prov.foto] || require("../assets/images/defaultUser.png")}
+                source={
+                  fotosPerfil[prov.foto] ||
+                  require("../assets/images/defaultUser.png")
+                }
                 style={styles.providerImage}
               />
               <View style={styles.providerInfo}>

@@ -17,10 +17,12 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { auth, db } from "../config/firebaseConfig.js";
+
+import { useAuth } from "../contexts/AuthContext.js";
 
 import { buttonStyles } from "../styles/buttons";
 import { textStyles } from "../styles/texts";
@@ -32,32 +34,9 @@ WebBrowser.maybeCompleteAuthSession();
 
 const { width } = Dimensions.get("window");
 
-const checkUserRoleAndNavigate = async (user, navigation) => {
-  const userRef = doc(db, "usuarios", user.uid);
-  try {
-    const docSnap = await getDoc(userRef);
-
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
-      const rol = userData.rol;
-
-      if (rol === "prestador") {
-        navigation.navigate("InicioProfesional");
-      } else if (rol === "cliente") {
-        navigation.navigate("InicioCliente", { user: { ...user, rol } });;
-      } else {
-        Alert.alert("Error de Rol", "Tu perfil no tiene un rol válido. Contacta a soporte.");
-      }
-    } else {
-      Alert.alert("Perfil Incompleto", "No encontramos tu información de perfil. Regístrate de nuevo.");
-    }
-  } catch (error) {
-    console.error("Error al obtener el rol:", error.message);
-    Alert.alert("Error de Conexión", "No se pudo verificar tu rol. Inténtalo más tarde.");
-  }
-};
-
 export default function IniciarSesion({ navigation, route }) {
+  const { signIn } = useAuth();
+
   useFocusEffect(
     useCallback(() => {
       console.log("PANTALLA ENFOCADA: " + route.name);
@@ -80,7 +59,8 @@ export default function IniciarSesion({ navigation, route }) {
       const userCredential = await signInWithCredential(auth, credential);
       const user = userCredential.user;
       console.log("Login con Google exitoso.");
-      await checkUserRoleAndNavigate(user, navigation);
+      signIn(user);
+
     } catch (error) {
       console.error("Error al autenticar con Google:", error.message);
       alert("Error al conectar con Google. Inténtalo de nuevo.");
@@ -103,16 +83,22 @@ export default function IniciarSesion({ navigation, route }) {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
       console.log("Usuario logueado con éxito:", user.email);
-      await checkUserRoleAndNavigate(user, navigation);
+      signIn(user);
     } catch (error) {
       let errorMessage = "Error al iniciar sesión. Verifica tus credenciales.";
       if (error.code === "auth/invalid-credential") {
-        errorMessage = "E-mail o contraseña inválidos. Por favor, intenta de nuevo.";
+        errorMessage =
+          "E-mail o contraseña inválidos. Por favor, intenta de nuevo.";
       } else if (error.code === "auth/too-many-requests") {
-        errorMessage = "Acceso bloqueado temporalmente debido a demasiados intentos fallidos.";
+        errorMessage =
+          "Acceso bloqueado temporalmente debido a demasiados intentos fallidos.";
       }
       console.error("Error de Login:", error.message);
       alert(errorMessage);
@@ -173,7 +159,9 @@ export default function IniciarSesion({ navigation, route }) {
           style={styles.forgotPassword}
           onPress={() => console.log("Ir a recuperar contraseña")}
         >
-          <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+          <Text style={styles.forgotPasswordText}>
+            ¿Olvidaste tu contraseña?
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -184,9 +172,17 @@ export default function IniciarSesion({ navigation, route }) {
         </TouchableOpacity>
 
         <View style={styles.orLoginContainer}>
-          <Image source={placeholder} style={styles.orLoginLine} resizeMode="contain" />
+          <Image
+            source={placeholder}
+            style={styles.orLoginLine}
+            resizeMode="contain"
+          />
           <Text style={styles.orLoginText}>O Iniciá con</Text>
-          <Image source={placeholder} style={styles.orLoginLine} resizeMode="contain" />
+          <Image
+            source={placeholder}
+            style={styles.orLoginLine}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={styles.socialButtonsContainer}>
@@ -196,7 +192,9 @@ export default function IniciarSesion({ navigation, route }) {
               style={styles.socialButton}
               onPress={button.onPress}
             >
-              <Text style={[styles.socialIconText, { color: button.color }]}>{button.icon}</Text>
+              <Text style={[styles.socialIconText, { color: button.color }]}>
+                {button.icon}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
