@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebaseConfig';
-import { View, ActivityIndicator } from 'react-native';
 
 const AuthContext = createContext();
 
@@ -14,6 +13,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchUserRole = async (user) => {
+        if (!user) return null;
         const userRef = doc(db, "usuarios", user.uid);
         try {
             const docSnap = await getDoc(userRef);
@@ -29,8 +29,9 @@ export const AuthProvider = ({ children }) => {
         return null;
     };
     
-    const signIn = (firebaseUser) => {
+    const signIn = async (firebaseUser) => {
         setUser(firebaseUser);
+        await fetchUserRole(firebaseUser);
     };
     
     const signOut = async () => {
@@ -41,17 +42,17 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setUser(currentUser);
             if (currentUser) {
-                setUser(currentUser);
                 await fetchUserRole(currentUser); 
             } else {
-                setUser(null);
                 setUserRole(null);
             }
+            // Marcamos la carga como completa al final, después de tener el usuario y el rol.
             setIsLoading(false);
         });
 
-        return unsubscribe;
+        return unsubscribe; // Limpia el listener al desmontar el componente
     }, []);
 
     const value = {
@@ -62,13 +63,6 @@ export const AuthProvider = ({ children }) => {
         signOut,
     };
 
-    if (isLoading) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#d26e00" />
-            </View>
-        );
-    }
-
+    // El proveedor ahora solo se encarga de proveer los datos, no de mostrar UI.
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
