@@ -1,74 +1,96 @@
+import React from 'react';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar } from "react-native"; // <-- CAMBIO 1: Importar StatusBar
+import { StatusBar, View, ActivityIndicator } from "react-native";
 
-// Importación de todas tus pantallas
+// Importa tu AuthProvider y el hook para usarlo
+import { AuthProvider, useAuth } from './src/contexts/AuthContext'; 
+
+// Importa el navegador de pestañas UNIFICADO
+import AppTabs from "./src/components/AppTabs";
+
+// Importa TODAS las pantallas que NO están en los navegadores de pestañas
 import Bienvenida from "./src/screens/Bienvenida.js";
-import Bienvenida02 from "./src/screens/Bienvenida02.js";
 import OnboardingScreen from "./src/screens/OnboardingScreen.js";
-import Bienvenida05 from "./src/screens/Bienvenida05.js";
-import Login from "./src/screens/Login.js";
+import Bienvenida02 from './src/screens/Bienvenida02';
+import Bienvenida05 from './src/screens/Bienvenida05';
+import Login from "./src/screens/Login.js"; 
 import Registro from "./src/screens/Registro.js";
 import Seleccion from "./src/screens/Seleccion.js";
 import Registrarse1 from "./src/screens/Registrarse1.js";
 import VerificarNumero from "./src/screens/VerificarNumero.js";
 import VerificarCodigo from "./src/screens/VerificarCodigo.js";
-import InicioCliente from "./src/screens/InicioCliente.js";
-import MenuUsuario from "./src/screens/MenuUsuario.js";
-import Prestadores from "./src/screens/Prestadores.js";
-import Calificaciones from "./src/screens/Calificaciones.js";
-import MenuProfesional from "./src/screens/MenuProfesional.js";
-import NotificacionesProfesional from "./src/screens/NotificacionesProfesional.js";
-import Categorias from "./src/screens/Categorias.js";
-import InicioProfesional from "./src/screens/InicioProfesional.js";
 import VerPerfil from "./src/screens/VerPerfil.js";
-import AppTabs from "./src/components/AppTabs";
-import VerMasServicios from "./src/screens/VerMasServicios.js";
-import Chat from "./src/screens/Chat.js";
+import Chat from "./src/screens/Chat.js"; 
 import Calificar from "./src/screens/Calificar.js";
+import VerMasServicios from './src/screens/VerMasServicios';
+import MenuUsuario from './src/screens/MenuUsuario';
+import MenuProfesional from './src/screens/MenuProfesional';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
-  return (
-    <NavigationContainer>
-      {/* CAMBIO 2: Establecer un StatusBar por defecto para toda la app */}
-      <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor="transparent" 
-        translucent={true}
-      />
-
-      <Stack.Navigator
-        screenOptions={{ headerShown: false }}
-        initialRouteName="Bienvenida"
-      >
+// --- Navegador para el flujo de Autenticación (cuando el usuario NO está logueado) ---
+const AuthStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Bienvenida">
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
+        <Stack.Screen name="Bienvenida02" component={Bienvenida02} />
+        <Stack.Screen name="OnboardingScreen" component={OnboardingScreen} />
+        <Stack.Screen name="Bienvenida05" component={Bienvenida05} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Registro" component={Registro} />
-
-        {/* Registro */}
         <Stack.Screen name="Seleccion" component={Seleccion} />
         <Stack.Screen name="Registrarse1" component={Registrarse1} />
         <Stack.Screen name="VerificarNumero" component={VerificarNumero} />
         <Stack.Screen name="VerificarCodigo" component={VerificarCodigo} />
+    </Stack.Navigator>
+);
 
-        {/* Cliente */}
-        <Stack.Screen name="InicioCliente" component={AppTabs} />
-        <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
-        <Stack.Screen name="Calificar" component={Calificar} />
-        <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
-
-        {/* Profesional */}
-        <Stack.Screen name="Prestadores" component={Prestadores} />
-        <Stack.Screen name="Calificaciones" component={Calificaciones} />
-        <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
-        <Stack.Screen name="NotificacionesProfesional" component={NotificacionesProfesional} />
-        <Stack.Screen name="Categorias" component={Categorias} />
-        <Stack.Screen name="InicioProfesional" component={AppTabs} />
+// --- Navegador para la App Principal (cuando el usuario SÍ está logueado) ---
+const AppStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="AppTabs">
+        {/* La primera pantalla es el navegador de pestañas unificado */}
+        <Stack.Screen name="AppTabs" component={AppTabs} />
+        
+        {/* Pantallas que se abren ENCIMA de los tabs */}
         <Stack.Screen name="VerPerfil" component={VerPerfil} />
-        <Stack.Screen name="Chat" component={Chat} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+        <Stack.Screen name="ChatIndividual" component={Chat} /> 
+        <Stack.Screen name="Calificar" component={Calificar} />
+        <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
+        <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
+        <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
+    </Stack.Navigator>
+);
+
+// --- EL "CEREBRO" QUE DECIDE QUÉ NAVEGADOR MOSTRAR ---
+const RootNavigator = () => {
+    const { user, isLoading } = useAuth(); // Obtenemos el usuario y el estado de carga del contexto
+
+    // Muestra una pantalla de carga mientras el AuthContext determina el estado inicial del usuario
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#e5e8ec' }}>
+                <ActivityIndicator size="large" color="#d26e00" />
+            </View>
+        );
+    }
+
+    // Cuando termina de cargar, decide a dónde ir.
+    return user ? <AppStack /> : <AuthStack />; 
+};
+
+// --- COMPONENTE PRINCIPAL QUE ENVUELVE TODO ---
+export default function App() {
+    return (
+        <AuthProvider>
+            <NavigationContainer>
+                {/* La StatusBar global se queda aquí */}
+                <StatusBar 
+                    barStyle="dark-content" 
+                    backgroundColor="transparent" 
+                    translucent={true}
+                />
+                <RootNavigator />
+            </NavigationContainer>
+        </AuthProvider>
+    );
 }
