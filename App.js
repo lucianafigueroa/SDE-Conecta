@@ -21,7 +21,8 @@ import Registrarse1 from "./src/screens/Registrarse1.js";
 import VerificarNumero from "./src/screens/VerificarNumero.js";
 import VerificarCodigo from "./src/screens/VerificarCodigo.js";
 import VerPerfil from "./src/screens/VerPerfil.js";
-import Chat from "./src/screens/Chat.js"; 
+import Chat from "./src/screens/Chat.js"; // Pantalla de conversación individual
+import ChatList from "./src/screens/ChatList.js"; // <-- CAMBIO 1: Importa la pantalla de lista de chats
 import Calificar from "./src/screens/Calificar.js";
 import VerMasServicios from './src/screens/VerMasServicios';
 import MenuUsuario from './src/screens/MenuUsuario';
@@ -29,7 +30,7 @@ import MenuProfesional from './src/screens/MenuProfesional';
 
 const Stack = createNativeStackNavigator();
 
-// --- Navegador para el flujo de Autenticación (cuando el usuario NO está logueado) ---
+// --- Navegador para el flujo de Autenticación ---
 const AuthStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Bienvenida">
         <Stack.Screen name="Bienvenida" component={Bienvenida} />
@@ -45,27 +46,27 @@ const AuthStack = () => (
     </Stack.Navigator>
 );
 
-// --- Navegador para la App Principal (cuando el usuario SÍ está logueado) ---
+// --- Navegador para la App Principal ---
 const AppStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="AppTabs">
-        {/* La primera pantalla es el navegador de pestañas unificado */}
         <Stack.Screen name="AppTabs" component={AppTabs} />
         
         {/* Pantallas que se abren ENCIMA de los tabs */}
         <Stack.Screen name="VerPerfil" component={VerPerfil} />
-        <Stack.Screen name="ChatIndividual" component={Chat} /> 
+        <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="Calificar" component={Calificar} />
         <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
+        {/* <-- CAMBIO 2: Añadimos ChatList aquí también, aunque se muestre en un tab */}
+        <Stack.Screen name="ChatList" component={ChatList} />
     </Stack.Navigator>
 );
 
-// --- EL "CEREBRO" QUE DECIDE QUÉ NAVEGADOR MOSTRAR ---
+// --- El "Cerebro" que decide qué navegador mostrar ---
 const RootNavigator = () => {
-    const { user, isLoading } = useAuth(); // Obtenemos el usuario y el estado de carga del contexto
+    const { user, isLoading } = useAuth(); 
 
-    // Muestra una pantalla de carga mientras el AuthContext determina el estado inicial del usuario
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#e5e8ec' }}>
@@ -73,17 +74,14 @@ const RootNavigator = () => {
             </View>
         );
     }
-
-    // Cuando termina de cargar, decide a dónde ir.
     return user ? <AppStack /> : <AuthStack />; 
 };
 
-// --- COMPONENTE PRINCIPAL QUE ENVUELVE TODO ---
+// --- Componente principal que envuelve todo ---
 export default function App() {
     return (
         <AuthProvider>
             <NavigationContainer>
-                {/* La StatusBar global se queda aquí */}
                 <StatusBar 
                     barStyle="dark-content" 
                     backgroundColor="transparent" 

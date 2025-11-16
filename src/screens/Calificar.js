@@ -49,7 +49,7 @@ export default function Calificar({ navigation, route }) {
 
     try {
       setLoading(true);
-      const reseñasRef = collection(db, "usuarios", prestador.id, "reseñas");
+      const reseñasRef = collection(db, "usuarios", prestador.id, "resenias");
 
       await addDoc(reseñasRef, {
         comentario: opinion.trim(),
