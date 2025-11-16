@@ -23,11 +23,15 @@ import VerificarCodigo from "./src/screens/VerificarCodigo.js";
 import VerPerfil from "./src/screens/VerPerfil.js";
 import Chat from "./src/screens/Chat.js"; 
 import Calificar from "./src/screens/Calificar.js";
+import VerMasServicios from './src/screens/VerMasServicios';
 import MenuUsuario from './src/screens/MenuUsuario';
 import MenuProfesional from './src/screens/MenuProfesional';
-import VerMasServicios from './src/screens/VerMasServicios';
-import Citas from './src/screens/Citas';
-
+import RegistrarServicio from './src/screens/RegistrarServicio';
+import Categorias from './src/screens/Categorias';
+import AgregarDescripcion from './src/screens/AgregarDescripcion.js';
+import AgregarDireccion from './src/screens/AgregarDireccion.js';
+import AgregarFoto from './src/screens/AgregarFoto.js';
+import InicioProfesional from './src/screens/InicioProfesional.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -57,10 +61,15 @@ const AppStack = () => (
         <Stack.Screen name="VerPerfil" component={VerPerfil} />
         <Stack.Screen name="ChatIndividual" component={Chat} /> 
         <Stack.Screen name="Calificar" component={Calificar} />
+        <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
-        <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
-        <Stack.Screen name="Citas" component={Citas} />
+        <Stack.Screen name="RegistrarServicio" component={RegistrarServicio} />
+        <Stack.Screen name="Categorias" component={Categorias} />
+        <Stack.Screen name="AgregarDescripcion" component={AgregarDescripcion} />
+        <Stack.Screen name="AgregarDireccion" component={AgregarDireccion} />
+        <Stack.Screen name="AgregarFoto" component={AgregarFoto} />
+        <Stack.Screen name="InicioProfesional" component={InicioProfesional} />
     </Stack.Navigator>
 );
 

@@ -24,7 +24,6 @@ const customerTabs = [
   { name: "Inicio", component: InicioCliente, iconFocused: "home", iconInactive: "home-outline" },
   { name: "Prestadores", component: Prestadores, iconFocused: "search", iconInactive: "search-outline" },
   { name: "Chat", component: Chat, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
-  { name: "Calificaciones", component: Calificaciones, iconFocused: "star", iconInactive: "star-outline" },
   { name: "Perfil", component: MiPerfil, iconFocused: "person-circle", iconInactive: "person-circle-outline" },
 ];
 
