@@ -150,7 +150,6 @@ export default function Calificar({ navigation, route }) {
 
         {/* Tarjeta principal */}
         <View style={styles.card}>
-          {/* ... (Contenido de la tarjeta - Se mantiene igual) ... */}
           <View style={styles.header}>
             <Image
               source={
