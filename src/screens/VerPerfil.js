@@ -91,7 +91,7 @@ export default function VerPerfil({ navigation, route }) {
     if (!prestador?.id) return;
     const fetchReseñas = async () => {
       try {
-        const reseñasRef = collection(db, "usuarios", prestador.id, "reseñas");
+        const reseñasRef = collection(db, "usuarios", prestador.id, "resenias");
         const snapshot = await getDocs(reseñasRef);
         const data = snapshot.docs.map((doc) => doc.data());
         setReseñas(data);
