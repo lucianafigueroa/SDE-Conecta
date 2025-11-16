@@ -1,215 +1,250 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-// --- CAMBIO CLAVE AQUÍ ---
-import { collection, query, where, onSnapshot, getDoc, getDocs, doc, orderBy, limit } from 'firebase/firestore'; // <-- Añadimos getDocs
-import { db } from '../config/firebaseConfig';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { SafeAreaView, View, Text, FlatList, StyleSheet, TouchableOpacity, Image, TextInput, ActivityIndicator } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { auth, db } from "../config/firebaseConfig";
+import { collection, query, where, onSnapshot, getDocs, orderBy, limit } from "firebase/firestore";
 import { Ionicons } from '@expo/vector-icons';
 
-// --- Componente para una sola fila de la lista de chat ---
 const ChatItem = ({ item, navigation }) => {
-  if (!item.otherUser) return null;
+  const isOwnMessage = item.lastMessage?.sender === item.currentUserEmail;
+  const previewText = item.lastMessage
+    ? `${isOwnMessage ? "Yo: " : ""}${item.lastMessage.text}`
+    : "No hay mensajes todavía";
+
+  const timestamp = item.lastMessage?.timestamp?.toDate();
+  const timeString = timestamp
+    ? `${String(timestamp.getHours()).padStart(2, "0")}:${String(timestamp.getMinutes()).padStart(2, "0")}`
+    : "";
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.chatItemContainer}
-      // --- SOLUCIÓN DEFINITIVA: Usamos getParent() para navegar en el Stack principal ---
-      onPress={() => navigation.getParent()?.navigate('Chat', { 
-        prestador: { id: item.otherUser.id, nombre: item.otherUser.nombre, foto: item.otherUser.foto, email: item.otherUser.email }, 
-        user: item.currentUser 
-      })}
+      onPress={() =>
+        navigation.getParent()?.navigate("Chat", {
+          prestador: {
+            email: item.otherUserEmail,
+            nombre: item.otherUser?.nombre,
+            foto: item.otherUser?.foto,
+            id: item.otherUser?.id,
+          },
+        })
+      }
     >
-      <Image 
-        source={item.otherUser.foto ? { uri: item.otherUser.foto } : require('../assets/images/placeholder.png')} 
-        style={styles.avatar} 
-      />
+      {item.otherUser?.foto ? (
+        <Image source={{ uri: item.otherUser.foto }} style={styles.avatar} />
+      ) : (
+        <View style={styles.avatarPlaceholder}>
+          <Ionicons name="person" size={28} color="#6E6E6E" />
+        </View>
+      )}
+
       <View style={styles.chatContent}>
+        {/* Header: fila con nombre y hora */}
         <View style={styles.chatHeader}>
-          <Text style={styles.chatName}>{item.otherUser.nombre}</Text>
-          <Text style={styles.chatTime}>{item.lastMessage?.timestamp ?? ''}</Text>
-        </View>
-        <View style={styles.messageRow}>
-          <Text style={styles.chatLastMessage} numberOfLines={1}>
-            {item.lastMessage?.text ?? 'No hay mensajes todavía'}
+          <Text numberOfLines={1} style={styles.chatName}>
+            {item.otherUser?.nombre || item.otherUserEmail}
           </Text>
+          <Text style={styles.chatTime}>{timeString}</Text>
         </View>
+
+        {/* Mensaje debajo */}
+        <Text numberOfLines={1} style={styles.chatLastMessage}>
+          {previewText}
+        </Text>
       </View>
     </TouchableOpacity>
   );
 };
 
-// --- Componente Principal de la Lista de Chats ---
 export default function ChatList({ navigation }) {
-  const { user } = useAuth();
   const [allChats, setAllChats] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const user = auth.currentUser;
+  const currentUserEmail = user?.email;
 
   useFocusEffect(
-    React.useCallback(() => {
-      if (!user) {
+    useCallback(() => {
+      if (!currentUserEmail) {
         setLoading(false);
         return;
       }
       setLoading(true);
 
-      const chatsQuery = query(
-        collection(db, 'chats'),
-        where('participants', 'array-contains', user.uid)
+      const q = query(
+        collection(db, "chats"),
+        where("participants", "array-contains", currentUserEmail)
       );
 
-      const unsubscribe = onSnapshot(chatsQuery, 
-        async (querySnapshot) => {
-          const chatsDataPromises = querySnapshot.docs.map(async (chatDoc) => {
-            try {
-              const chatData = chatDoc.data();
-              const otherUserId = chatData.participants.find(id => id !== user.uid);
-              if (!otherUserId) return null;
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const chatsDataPromises = snapshot.docs.map(async (chatDoc) => {
+          const chatData = chatDoc.data();
+          const otherUserEmail = chatData.participants.find((email) => email !== currentUserEmail);
+          if (!otherUserEmail) return null;
 
-              const userDoc = await getDoc(doc(db, 'usuarios', otherUserId));
-              const otherUserData = userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
-              
-              const lastMessageQuery = query(collection(db, 'chats', chatDoc.id, 'messages'), orderBy('timestamp', 'desc'), limit(1));
-              const lastMessageSnapshot = await getDocs(lastMessageQuery);
-              let lastMessage = null;
-              if (!lastMessageSnapshot.empty) {
-                const msgData = lastMessageSnapshot.docs[0].data();
-                lastMessage = { 
-                  text: msgData.text, 
-                  timestamp: msgData.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '' 
-                };
-              }
-              return { id: chatDoc.id, otherUser: otherUserData, lastMessage: lastMessage, currentUser: user };
-            } catch (e) {
-              console.error("Error procesando un documento de chat:", e);
-              return null;
-            }
-          });
-          
-          const resolvedChats = (await Promise.all(chatsDataPromises)).filter(Boolean);
-          setAllChats(resolvedChats);
-          setLoading(false);
-        }, 
-        (error) => {
-          console.error("Error al escuchar los chats:", error);
-          Alert.alert("Error de Conexión", "No se pudieron cargar los chats.");
-          setLoading(false);
-        }
-      );
+          let otherUserData = null;
+          const userQuery = query(collection(db, "usuarios"), where("email", "==", otherUserEmail), limit(1));
+          const userSnapshot = await getDocs(userQuery);
+          if (!userSnapshot.empty) {
+            const userDoc = userSnapshot.docs[0];
+            otherUserData = { id: userDoc.id, ...userDoc.data() };
+          }
+
+          const msgsQuery = query(collection(db, "chats", chatDoc.id, "messages"), orderBy("timestamp", "desc"), limit(1));
+          const msgsSnapshot = await getDocs(msgsQuery);
+          const lastMessage = msgsSnapshot.docs.length ? msgsSnapshot.docs[0].data() : null;
+
+          return {
+            id: chatDoc.id,
+            otherUser: otherUserData,
+            otherUserEmail: otherUserEmail,
+            lastMessage,
+            currentUserEmail: currentUserEmail,
+          };
+        });
+
+        const resolvedChats = (await Promise.all(chatsDataPromises)).filter(Boolean);
+        resolvedChats.sort((a, b) => (b.lastMessage?.timestamp?.toMillis() || 0) - (a.lastMessage?.timestamp?.toMillis() || 0));
+
+        setAllChats(resolvedChats);
+        setLoading(false);
+      }, (error) => {
+        console.error("Error al escuchar chats:", error);
+        setLoading(false);
+      });
 
       return () => unsubscribe();
-    }, [user])
+    }, [currentUserEmail])
   );
-  
+
   const filteredChats = useMemo(() => {
-    if (!searchQuery) {
-      return allChats;
-    }
-    return allChats.filter(chat => 
-      chat.otherUser?.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!searchQuery) return allChats;
+    return allChats.filter((item) =>
+      item.otherUser?.nombre?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.otherUserEmail?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery, allChats]);
+  }, [allChats, searchQuery]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chat</Text>
-      </View>
-
+     <View style={styles.header}>
+  <TouchableOpacity onPress={() => navigation.goBack()}>
+    <Ionicons name="arrow-back" size={24} color="#000" />
+  </TouchableOpacity>
+  <Text style={styles.headerTitle}>Chats</Text>
+</View>
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
         <TextInput
-          placeholder="Buscar por nombre"
+          placeholder="Buscar..."
           style={styles.searchInput}
-          placeholderTextColor="#888"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={20} color="#888" />
-          </TouchableOpacity>
-        )}
       </View>
-
       {loading ? (
-        <ActivityIndicator size="large" color="#d26e00" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#d26e00" style={{ marginTop: 30 }} />
       ) : (
         <FlatList
           data={filteredChats}
-          keyExtractor={(item) => item.id}
           renderItem={({ item }) => <ChatItem item={item} navigation={navigation} />}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No tienes chats activos.</Text>
-                <Text style={styles.emptySubText}>Inicia una conversación con un profesional para que aparezca aquí.</Text>
-            </View>
-          }
+          extraData={searchQuery}
         />
       )}
     </SafeAreaView>
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#f7f8fa' },
+  safeArea: { flex: 1, backgroundColor: "#f7f8fa" },
   header: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-    paddingTop: 40,
-    backgroundColor: 'white',
-    borderBottomWidth: 1, 
-    borderBottomColor: '#eee' 
+  flexDirection: "row", 
+  alignItems: "center", 
+  paddingHorizontal: 15, 
+  paddingBottom: 10, 
+  paddingTop: 40, 
+  backgroundColor: "white", 
+  borderBottomWidth: 1, 
+  borderBottomColor: "#eee", 
+},
+headerTitle: { 
+  fontSize: 22, 
+  fontWeight: "bold", 
+  marginLeft: 15, // separa la flecha del título
+},
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e9ecef",
+    margin: 15,
+    borderRadius: 10,
+    paddingHorizontal: 10,
   },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', marginLeft: 15 },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e9ecef', margin: 15, borderRadius: 10, paddingHorizontal: 10 },
-  searchIcon: { marginRight: 10 },
-  searchInput: { flex: 1, height: 40, fontSize: 16 },
-  listContainer: { paddingHorizontal: 15, flexGrow: 1 },
-  chatItemContainer: { flexDirection: 'row', paddingVertical: 15 },
-  avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 15, backgroundColor: '#e0e0e0' },
-  chatContent: { flex: 1, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 15 },
-  chatHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
-  chatName: { fontSize: 16, fontWeight: 'bold' },
-  chatTime: { fontSize: 12, color: '#888' },
-  messageRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  chatLastMessage: { fontSize: 14, color: '#666', flex: 1 },
-  emptyContainer: {
+  searchInput: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    height: 40,
+    fontSize: 16
   },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+  listContainer: {
+    paddingHorizontal: 15,
+    flexGrow: 1
   },
-  emptySubText: {
+  chatItemContainer: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  avatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#e0e0e0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  chatContent: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingVertical: 8,
+  },
+  chatHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  chatName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    flex: 1,
+    marginRight: 8,
+  },
+  chatTime: {
+    fontSize: 12,
+    color: "#888",
+    width: 50, // ancho fijo para la hora
+    textAlign: "right",
+  },
+  chatLastMessage: {
     fontSize: 14,
+    color: "#666",
+    flexShrink: 1,
+  },
+  chatTimeAbsolute: {
+    position: 'absolute',
+    right: 0,
+    top: 10,
+    fontSize: 12,
     color: '#888',
-    textAlign: 'center',
-    marginTop: 10,
-  }
+  },
 });
