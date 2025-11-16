@@ -36,7 +36,7 @@ export default function InicioCliente({ navigation }) {
   useScreenFocusLogger();
 
   // Obtenemos el usuario logueado desde el contexto
-  const { user } = useAuth(); 
+  const { user } = useAuth();
 
   // Estados para los datos de la pantalla
   const [clienteData, setClienteData] = useState(null);
@@ -85,7 +85,7 @@ export default function InicioCliente({ navigation }) {
 
     cargarDatos();
   }, [user?.uid]); // El efecto se ejecuta solo si cambia el UID del usuario
-  
+
   // Calculamos el primer nombre para el saludo
   const firstName = clienteData?.nombre?.split(' ')[0] || "Usuario";
 
@@ -107,10 +107,6 @@ export default function InicioCliente({ navigation }) {
           <Text style={styles.locationText}>
             {clienteData?.domicilio || "Domicilio no disponible"}
           </Text>
-        </View>
-
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchText}>Buscar categoría</Text>
         </View>
 
         <View style={styles.bannerContainer}>
