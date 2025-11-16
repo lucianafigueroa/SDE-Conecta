@@ -15,7 +15,8 @@ import Chat from "../screens/Chat";
 
 // Pantallas de Profesional
 import InicioProfesional from "../screens/InicioProfesional";
-import NotificacionesProfesional from "../screens/NotificacionesProfesional";
+import RegistrarServicio from "../screens/RegistrarServicio";
+import Citas from "../screens/Citas";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,9 +31,9 @@ const customerTabs = [
 // --- CAMBIO AQUÍ: Reordenamos y ajustamos las pestañas del profesional ---
 const professionalTabs = [
   { name: "Inicio", component: InicioProfesional, iconFocused: "home", iconInactive: "home-outline" },
-  { name: "Presupuestos", component: InicioProfesional, iconFocused: "clipboard", iconInactive: "clipboard-outline" },
+  { name: "Citas", component: Citas, iconFocused: "calendar", iconInactive: "calendar-outline" },
   { name: "Chat", component: Chat, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
-  { name: "Notificaciones", component: NotificacionesProfesional, iconFocused: "notifications", iconInactive: "notifications-outline" },
+  { name: "Servicio", component: RegistrarServicio, iconFocused: "clipboard", iconInactive: "clipboard-outline" },
   { name: "Perfil", component: MiPerfil, iconFocused: "person-circle", iconInactive: "person-circle-outline" },
 ];
 

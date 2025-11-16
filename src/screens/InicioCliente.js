@@ -16,6 +16,7 @@ import { useAuth } from "../contexts/AuthContext"; // Importamos el hook del con
 import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 const { width } = Dimensions.get("window");
+import BANNER_IMAGE from "../assets/images/banner.png";
 
 const iconos = {
   carpinteroIcono: require("../assets/images/carpinteroIcono.png"),
@@ -110,16 +111,19 @@ export default function InicioCliente({ navigation }) {
         </View>
 
         <View style={styles.bannerContainer}>
-          <Image
-            source={require("../assets/images/banner.png")}
-            style={styles.bannerImage}
-          />
+                  <Image source={BANNER_IMAGE} style={styles.bannerImage} resizeMode="cover" />
+                  <Text style={styles.bannerText}>Los mejores servicios locales</Text>
+                  <View style={styles.paginationDots}>
+                    <View style={[styles.dot, styles.activeDot]} />
+                    <View style={styles.dot} />
+                    <View style={styles.dot} />
+                    <View style={styles.dot} />
+                  </View>
         </View>
-
         <View style={styles.servicesSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("VerMasServicios")}>
+            <TouchableOpacity onPress={() => navigation.navigate("Prestadores")}>
               <Text style={styles.verMasLink}>Ver más ›</Text>
             </TouchableOpacity>
           </View>
@@ -140,7 +144,7 @@ export default function InicioCliente({ navigation }) {
         <View style={styles.recommendedSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recomendados</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("VerMasRecomendados")}>
+            <TouchableOpacity onPress={() => navigation.navigate("Prestadores")}>
               <Text style={styles.verMasLink}>Ver más ›</Text>
             </TouchableOpacity>
           </View>
@@ -174,13 +178,9 @@ export default function InicioCliente({ navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#e5e8ec" },
   container: { paddingBottom: 100 },
-  header: { width: "100%", backgroundColor: "#d26e00", paddingHorizontal: 20, paddingTop: 60, paddingBottom: 70 },
+  header: { width: "100%", backgroundColor: "#d26e00", paddingHorizontal: 20, paddingTop: 60, paddingBottom: 30 },
   headerText: { fontSize: 28, color: "#fff", fontWeight: "bold" },
   locationText: { fontSize: 14, color: "#fff", fontWeight: "bold" },
-  searchContainer: { position: "absolute", top: 150, left: 20, right: 20, height: 53, backgroundColor: "#fff", borderRadius: 32, justifyContent: "center", paddingHorizontal: 15, shadowColor: "#000", shadowOpacity: 0.25, shadowOffset: { width: 0, height: 4 }, shadowRadius: 9, zIndex: 10 },
-  searchText: { fontSize: 16, color: "#2c3e50" },
-  bannerContainer: { marginTop: 50, marginHorizontal: 20, marginBottom: 10 },
-  bannerImage: { width: "100%", height: 181, borderRadius: 15 },
   servicesSection: { marginHorizontal: 20, marginTop: 20 },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#2c3e50" },
@@ -197,4 +197,24 @@ const styles = StyleSheet.create({
   providerRating: { fontSize: 14, color: "#f39c12" },
   providerService: { fontSize: 14, color: "#7f8c8d" },
   providerArrow: { fontSize: 22, color: "#ccc" },
+  bannerContainer: {
+      marginTop: 30,
+      marginHorizontal: 20,
+      borderRadius: 15,
+      overflow: "hidden",
+      height: 181,
+      marginBottom: 10,
+    },
+    bannerImage: { width: "100%", height: 181, position: "absolute" },
+    bannerText: {
+      position: "absolute",
+      top: 80,
+      left: 15,
+      fontSize: 18,
+      fontWeight: "bold",
+      color: "white",
+      backgroundColor: "rgba(0,0,0,0.4)",
+      padding: 5,
+      borderRadius: 5,
+    }
 });
