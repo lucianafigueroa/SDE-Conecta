@@ -13,7 +13,9 @@ import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
+import { useScreenFocusLogger } from "../hooks/useScreenFocusLogger";
+import { buttonStyles } from "../styles/buttons";
+import { textStyles } from "../styles/texts";
 
 import BANNER_IMAGE from "../assets/images/banner.png";
 import PLACEHOLDER_ICON from "../assets/images/placeholder.png";
@@ -56,20 +58,35 @@ export default function InicioProfesional({ navigation }) {
   const services = [
     { name: "Limpieza", icon: PLACEHOLDER_ICON, screen: "ServicioLimpieza" },
     { name: "Albañil", icon: PLACEHOLDER_ICON, screen: "ServicioAlbañil" },
-    { name: "Electricista", icon: PLACEHOLDER_ICON, screen: "ServicioElectricista" },
+    {
+      name: "Electricista",
+      icon: PLACEHOLDER_ICON,
+      screen: "ServicioElectricista",
+    },
     { name: "Gasista", icon: PLACEHOLDER_ICON, screen: "ServicioGasista" },
     { name: "Cerrajero", icon: PLACEHOLDER_ICON, screen: "ServicioCerrajero" },
     { name: "Plomero", icon: PLACEHOLDER_ICON, screen: "ServicioPlomero" },
     { name: "Pintor", icon: PLACEHOLDER_ICON, screen: "ServicioPintor" },
     { name: "Pileta", icon: PLACEHOLDER_ICON, screen: "ServicioPileta" },
     { name: "Durlock", icon: PLACEHOLDER_ICON, screen: "ServicioDurlock" },
-    { name: "Carpintero", icon: PLACEHOLDER_ICON, screen: "ServicioCarpintero" },
+    {
+      name: "Carpintero",
+      icon: PLACEHOLDER_ICON,
+      screen: "ServicioCarpintero",
+    },
     { name: "Herrero", icon: PLACEHOLDER_ICON, screen: "ServicioHerrero" },
-    { name: "Aire Acondicionado", icon: PLACEHOLDER_ICON, screen: "ServicioAire" },
+    {
+      name: "Aire Acondicionado",
+      icon: PLACEHOLDER_ICON,
+      screen: "ServicioAire",
+    },
   ];
 
   const ServiceCard = ({ name, icon, screen }) => (
-    <TouchableOpacity style={styles.serviceCard} onPress={() => navigation.navigate(screen)}>
+    <TouchableOpacity
+      style={styles.serviceCard}
+      onPress={() => navigation.navigate(screen)}
+    >
       <Image source={icon} style={styles.serviceIcon} />
       <Text style={styles.serviceName}>{name}</Text>
     </TouchableOpacity>
@@ -87,17 +104,21 @@ export default function InicioProfesional({ navigation }) {
           </View>
         </View>
 
-        {/* --- CAMBIO AQUÍ --- */}
         <TouchableOpacity
           style={styles.menuIcon}
-          onPress={() => navigation.navigate("MenuProfesional")} // <-- Navega al menú unificado
+          onPress={() => navigation.navigate("MenuProfesional")}
         >
           <Feather name="menu" size={24} color="white" />
         </TouchableOpacity>
       </SafeAreaView>
 
       <View style={styles.searchBarContainer}>
-        <Feather name="search" size={20} color="#777" style={styles.searchIcon} />
+        <Feather
+          name="search"
+          size={20}
+          color="#777"
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar categoría"
@@ -110,7 +131,11 @@ export default function InicioProfesional({ navigation }) {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.bannerContainer}>
-          <Image source={BANNER_IMAGE} style={styles.bannerImage} resizeMode="cover" />
+          <Image
+            source={BANNER_IMAGE}
+            style={styles.bannerImage}
+            resizeMode="cover"
+          />
           <Text style={styles.bannerText}>Los mejores servicios locales</Text>
           <View style={styles.paginationDots}>
             <View style={[styles.dot, styles.activeDot]} />
@@ -130,9 +155,20 @@ export default function InicioProfesional({ navigation }) {
 
           <View style={styles.servicesGrid}>
             {services.map((service, index) => (
-              <ServiceCard key={index} name={service.name} icon={service.icon} screen={service.screen} />
+              <ServiceCard
+                key={index}
+                name={service.name}
+                icon={service.icon}
+                screen={service.screen}
+              />
             ))}
           </View>
+          <TouchableOpacity
+            style={[styles.registerButtonOverride]}
+            onPress={() => navigation.navigate("RegistrarServicio")}
+          >
+            <Text style={textStyles.secondaryText}>Registrar servicio</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -154,7 +190,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerContent: { flex: 1 },
-  headerText: { fontSize: 28, fontWeight: "bold", color: "#fff", marginBottom: 5 },
+  headerText: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 5,
+  },
   locationContainer: { flexDirection: "row", alignItems: "center" },
   locationText: {
     fontSize: 16,
@@ -162,6 +203,17 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     marginRight: 5,
     fontWeight: "bold",
+  },
+  registerButtonOverride: {
+    backgroundColor: "transparent",
+    width: "80%",
+    maxWidth: 200,
+    paddingVertical: 14,
+    alignSelf: "center",
+    marginTop: 20,
+    marginBottom: 30,
+    marginHorizontal: 25,
+    alignItems: "center",
   },
   menuIcon: { padding: 5 },
   searchBarContainer: {
@@ -213,8 +265,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#CCC", marginHorizontal: 4 },
-  activeDot: { backgroundColor: "white", width: 12, height: 8, borderRadius: 4 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#CCC",
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: "white",
+    width: 12,
+    height: 8,
+    borderRadius: 4,
+  },
   servicesSection: { paddingHorizontal: 20, marginBottom: 10 },
   servicesHeader: {
     flexDirection: "row",
@@ -224,7 +287,11 @@ const styles = StyleSheet.create({
   },
   servicesTitle: { fontSize: 20, fontWeight: "bold", color: "#333" },
   seeMoreText: { fontSize: 14, color: "#FF7F27", fontWeight: "500" },
-  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+  servicesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
   serviceCard: {
     width: "30%",
     alignItems: "center",
@@ -234,6 +301,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     elevation: 2,
   },
-  serviceIcon: { width: 60, height: 60, borderRadius: 30, marginBottom: 5, backgroundColor: "#EAEAEA" },
-  serviceName: { fontSize: 12, fontWeight: "500", textAlign: "center", color: "#333" },
+  serviceIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 5,
+    backgroundColor: "#EAEAEA",
+  },
+  serviceName: {
+    fontSize: 12,
+    fontWeight: "500",
+    textAlign: "center",
+    color: "#333",
+  },
 });

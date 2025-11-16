@@ -6,5 +6,10 @@ export const textStyles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
+  secondaryText: {
+    color: "#154360",
+    fontSize: 18,
+    fontWeight: "bold"
+  },
 });
 
