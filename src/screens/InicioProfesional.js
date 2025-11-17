@@ -97,7 +97,15 @@ export default function InicioProfesional({ navigation }) {
   const ServiceCard = ({ nombre, icono }) => (
     <TouchableOpacity
       style={styles.serviceCard}
-      onPress={() => navigation.navigate("PrestadoresPorProfesion", { profesionNombre: nombre })}
+      onPress={() =>
+        navigation.navigate("RegistrarServicio", {
+          categoriaSeleccionada: {
+            id: nombre,
+            label: nombre,
+          },
+          categoriasActuales: [],
+        })
+      }
     >
       <Image
         source={iconos[icono] || iconos["sobre"]}
@@ -137,9 +145,6 @@ export default function InicioProfesional({ navigation }) {
         <View style={styles.servicesSection}>
           <View style={styles.servicesHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("VerMasServicios")}>
-              <Text style={styles.verMasLink}>Ver más ›</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={styles.servicesGrid}>

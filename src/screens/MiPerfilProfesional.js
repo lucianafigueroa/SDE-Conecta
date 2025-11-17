@@ -1,17 +1,28 @@
-import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   View,
   Text,
-  StyleSheet,
+  ScrollView,
   Image,
   TouchableOpacity,
-  ScrollView,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
   Dimensions,
+  TextInput
 } from "react-native";
-// Ya no se importa el Button genérico
+import { Ionicons } from "@expo/vector-icons";
 import { db } from "../config/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 // Íconos locales
@@ -43,27 +54,33 @@ const ReviewCard = ({ name, date, reviewText, rating = 5 }) => {
     <View style={reviewStyles.card}>
       <View style={reviewStyles.header}>
         <Image source={userProfilePlaceholder} style={reviewStyles.profileImage} />
-        <View style={{ flex: 1, marginRight: 10 }}>
+        <View>
           <Text style={reviewStyles.nameText}>{name}</Text>
           <Text style={reviewStyles.dateTextSmall}>{date}</Text>
         </View>
+
         <View style={reviewStyles.ratingContainer}>
           {[...Array(5)].map((_, i) => (
             <Image
               key={i}
-              source={i < rating ? starIcon : starEmptyIcon}
-              style={reviewStyles.starIcon}
+              source={starIcon}
+              style={[
+                reviewStyles.starIcon,
+                { tintColor: i < rating ? "#D26E00" : "#ccc" }
+              ]}
             />
           ))}
         </View>
       </View>
-      <Text style={reviewStyles.reviewText} numberOfLines={expanded ? undefined : MAX_LINES}>
+
+      <Text numberOfLines={expanded ? undefined : 3} style={reviewStyles.reviewText}>
         {reviewText}
       </Text>
-      {reviewText.length > 150 && (
+
+      {reviewText?.length > 100 && (
         <TouchableOpacity onPress={toggleExpanded}>
           <Text style={reviewStyles.readMoreText}>
-            {expanded ? "Leer menos" : "Leer más"}
+            {expanded ? "Ver menos" : "Leer más"}
           </Text>
         </TouchableOpacity>
       )}
@@ -71,65 +88,67 @@ const ReviewCard = ({ name, date, reviewText, rating = 5 }) => {
   );
 };
 
-export default function VerPerfil({ navigation, route }) {
-  useScreenFocusLogger();
-  const { prestador, user } = route.params || {};
+export default function MiPerfilProfesional({ navigation, route }) {
+  const { uid } = route.params; // ID del prestador
+  const [prestador, setPrestador] = useState(null);
+  const [servicios, setServicios] = useState([]);
   const [reseñas, setReseñas] = useState([]);
-  const [fotosServiciosDB, setFotosServiciosDB] = useState([]);
-  const [serviciosDB, setServiciosDB] = useState([]);
 
   const handleGoBack = () => navigation.goBack();
+  // Cargar datos del profesional
+  const obtenerPrestador = async () => {
+    const ref = doc(db, "usuarios", uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) setPrestador({ id: snap.id, ...snap.data() });
+  };
+
+  // Cargar servicios del profesional
+  const obtenerServicios = async () => {
+    const q = query(collection(db, "servicios"), where("usuarioId", "==", uid));
+    const snap = await getDocs(q);
+    let lista = [];
+    snap.forEach((d) => lista.push({ id: d.id, ...d.data() }));
+    setServicios(lista);
+  };
+
+  const guardarCambios = async () => {
+    try {
+      await updateDoc(doc(db, "usuarios", prestador.id), {
+        domicilio: prestador.domicilio,
+        descripcion: prestador.descripcion,
+        disponibilidad: prestador.disponibilidad,
+        horario: prestador.horario
+      });
+
+      Alert.alert("Éxito", "Cambios guardados correctamente");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "No se pudieron guardar los cambios");
+    }
+  };
 
   useEffect(() => {
-    if (!prestador?.id) return;
-    const fetchReseñas = async () => {
-      try {
-        const reseñasRef = collection(db, "usuarios", prestador.id, "resenias");
-        const snapshot = await getDocs(reseñasRef);
-        const data = snapshot.docs.map((doc) => doc.data());
-        setReseñas(data);
-      } catch (error) {
-        console.error("Error al cargar reseñas:", error);
-      }
-    };
-    fetchReseñas();
-  }, [prestador?.id]);
+    obtenerPrestador();
+    obtenerServicios();
+  }, []);
 
-  useEffect(() => {
-    if (!prestador?.id) return;
+  // Eliminar servicio
+  const eliminarServicio = (id) => {
+    Alert.alert("Eliminar servicio", "¿Estás seguro de borrar este servicio?", [
+      { text: "Cancelar" },
+      {
+        text: "Eliminar",
+        onPress: async () => {
+          await deleteDoc(doc(db, "servicios", id));
+          obtenerServicios();
+        },
+      },
+    ]);
+  };
 
-    const fetchServicios = async () => {
-      try {
-        const serviciosRef = collection(db, "servicios");
-        const snapshot = await getDocs(serviciosRef);
+  if (!prestador) return <Text>Cargando...</Text>;
 
-        const servicios = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(s => s.usuarioId === prestador.id);
-
-        setServiciosDB(servicios);
-      } catch (error) {
-        console.error("Error cargando servicios:", error);
-      }
-    };
-
-    fetchServicios();
-  }, [prestador?.id]);
-
-  if (!prestador) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <Text style={{ margin: 40, fontSize: 18, color: "#2C3E50" }}>
-          No se encontró la información del prestador.
-        </Text>
-        <TouchableOpacity onPress={handleGoBack} style={{ marginLeft: 40 }}>
-          <Text style={{ color: "#D26E00", fontWeight: "600" }}>← Volver</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-
-  let fotoPerfil = userProfilePlaceholder;
+let fotoPerfil = userProfilePlaceholder;
   if (prestador.foto) {
     if (fotosPerfil[prestador.foto]) {
       fotoPerfil = fotosPerfil[prestador.foto];
@@ -164,9 +183,37 @@ export default function VerPerfil({ navigation, route }) {
           </View>
           <View style={styles.locationContainer}>
             <Image source={locationOnIcon} style={styles.locationIcon} />
-            <Text style={styles.locationText}>{prestador.domicilio || "Catamarca 50, Sgo. del Estero"}</Text>
+            <TextInput
+              style={[styles.locationText, styles.inputEditable]}
+              value={prestador.domicilio}
+              onChangeText={(text) => setPrestador({ ...prestador, domicilio: text })}
+            />
           </View>
-          <Text style={styles.descriptionText}>{prestador.descripcion || `Profesional especializado en ${prestador.profesion?.toLowerCase() || "servicios generales"}.`}</Text>
+            <TextInput
+              style={[
+                styles.descriptionText,
+                {
+                  backgroundColor: "#F7F7F7",
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: "#D6D6D6",
+                  marginTop: 10,
+                  elevation: 2,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 2,
+                },
+              ]}
+              multiline
+              value={
+                prestador.descripcion ||
+                `Profesional especializado en ${prestador.profesion?.toLowerCase() || "servicios generales"}.`
+              }
+              onChangeText={(text) => setPrestador({ ...prestador, descripcion: text })}
+            />
           <Text style={[styles.descriptionText, styles.serviceListTitle]}>Servicios:</Text>
           <View style={styles.serviceListContainer}>
             {Array.isArray(prestador.profesion)
@@ -175,10 +222,22 @@ export default function VerPerfil({ navigation, route }) {
           </View>
           <View style={styles.availabilityContainer}>
             <View style={styles.availabilityRow}>
-              <Image source={alarmIcon} style={styles.alarmIcon} />
-              <Text style={styles.availabilityText}>{prestador.disponibilidad || "Sin información"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={styles.availabilityText}>Disponibilidad: </Text>
+
+              <TextInput
+                style={[styles.availabilityText, styles.inputEditable, { flex: 1 }]}
+                value={prestador.disponibilidad || "Sin información"}
+                onChangeText={(text) => setPrestador({ ...prestador, disponibilidad: text })}
+              />
             </View>
-            <Text style={styles.hoursText}>{prestador.horario || "Sin información"}</Text>
+            </View>
+            <Image source={alarmIcon} style={styles.alarmIcon} />
+            <TextInput
+              style={[styles.hoursText, styles.inputEditable]}
+              value={prestador.horario || "Todo el día"}
+              onChangeText={(text) => setPrestador({ ...prestador, horario: text })}
+            />
           </View>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Servicios</Text>
@@ -187,23 +246,46 @@ export default function VerPerfil({ navigation, route }) {
               <Image source={arrowForwardIosIcon} style={styles.arrowIcon} />
             </TouchableOpacity>
           </View>
-         <View style={{ flexDirection: "row", gap: 12 }}>
-            {serviciosDB.length > 0 ? (
-              serviciosDB.slice(0, 3).map((servicio, i) => (
-                <TouchableOpacity
-                  key={i}
-                  onPress={() =>
-                    navigation.navigate("DetalleServicio", {
-                      servicio,      // Envía el objeto completo
-                      prestador      // Envía el profesional
-                    })
-                  }
-                >
-                  <Image
-                    source={{ uri: servicio.fotosUrls?.[0] }}
-                    style={styles.serviceImage}
-                  />
-                </TouchableOpacity>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            {servicios.length > 0 ? (
+              servicios.slice(0, 3).map((servicio, i) => (
+                <View key={i} style={{ position: "relative" }}>
+
+                  {/* BOTÓN ELIMINAR */}
+                  <TouchableOpacity
+                    onPress={() => eliminarServicio(servicio.id)}
+                    style={{
+                      position: "absolute",
+                      top: -6,
+                      right: -6,
+                      backgroundColor: "red",
+                      width: 22,
+                      height: 22,
+                      borderRadius: 11,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      zIndex: 2
+                    }}
+                  >
+                    <Text style={{ color: "white", fontWeight: "bold" }}>X</Text>
+                  </TouchableOpacity>
+
+                  {/* IMAGEN DEL SERVICIO */}
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("DetalleServicio", {
+                        servicio,
+                        prestador
+                      })
+                    }
+                  >
+                    <Image
+                      source={{ uri: servicio.fotosUrls?.[0] }}
+                      style={styles.serviceImage}
+                    />
+                  </TouchableOpacity>
+
+                </View>
               ))
             ) : (
               <Text style={{ color: "#606060", fontSize: 12 }}>
@@ -230,23 +312,15 @@ export default function VerPerfil({ navigation, route }) {
               ))
             : <Text style={{ color: "#606060", fontSize: 12, marginBottom: 10 }}>No hay opiniones todavía.</Text>}
         </View>
-      </ScrollView>
+        <TouchableOpacity
+          style={styles.saveButtonModern}
+          onPress={guardarCambios}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.saveButtonModernText}>Guardar cambios</Text>
+        </TouchableOpacity>
 
-      {/* --- BOTONES INFERIORES ACTUALIZADOS --- */}
-      <View style={styles.bottomButtonsContainer}>
-        <TouchableOpacity
-          style={[styles.bottomButton, styles.calificarButton]}
-          onPress={() => navigation.navigate("Calificar", { prestador, user })}
-        >
-          <Text style={styles.bottomButtonText}>Calificar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.bottomButton, styles.orangeButton]}
-          onPress={() => navigation.navigate("ChatIndividual", { prestador, user })}
-        >
-          <Text style={styles.bottomButtonText}>Contactarse</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -301,4 +375,67 @@ const styles = StyleSheet.create({
   calificarButton: { backgroundColor: "#2c3e50", opacity: 0.9 },
   orangeButton: { backgroundColor: "#D26E00" },
   bottomButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  inputEditable: {
+    backgroundColor: "#F7F7F7",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#D6D6D6",
+    marginTop: 10,
+    elevation: 2,
+
+    // Sombras iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  saveButton: {
+    marginTop: 25,
+    backgroundColor: "#2c3e50",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  saveButtonModern: {
+    marginTop: 25,
+    width: "100%",
+    paddingVertical: 16,
+    borderRadius: 18,
+    backgroundColor: "#2c3e50",
+
+    // Sombra elegante
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+
+    // Centrado
+    justifyContent: "center",
+    alignItems: "center",
+
+    // Efecto visual de botón 3D
+    borderWidth: 1,
+    borderColor: "#1f2a36",
+  },
+
+  saveButtonModernText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "white",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+
+
+
 });
