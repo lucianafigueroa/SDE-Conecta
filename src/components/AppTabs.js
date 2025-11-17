@@ -11,7 +11,8 @@ import InicioCliente from "../screens/InicioCliente";
 import Prestadores from "../screens/Prestadores";
 import Calificaciones from "../screens/Calificaciones";
 import MiPerfil from "../screens/MiPerfil";
-import Chat from "../screens/Chat";
+// --- CAMBIO 1: Importamos la nueva pantalla de lista de chats ---
+import ChatList from "../screens/ChatList"; 
 
 // Pantallas de Profesional
 import InicioProfesional from "../screens/InicioProfesional";
@@ -22,16 +23,17 @@ const Tab = createBottomTabNavigator();
 const customerTabs = [
   { name: "Inicio", component: InicioCliente, iconFocused: "home", iconInactive: "home-outline" },
   { name: "Prestadores", component: Prestadores, iconFocused: "search", iconInactive: "search-outline" },
-  { name: "Chat", component: Chat, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
+  // --- CAMBIO 2: La pestaña "Chat" ahora usa el componente ChatList ---
+  { name: "Chat", component: ChatList, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
   { name: "Calificaciones", component: Calificaciones, iconFocused: "star", iconInactive: "star-outline" },
   { name: "Perfil", component: MiPerfil, iconFocused: "person-circle", iconInactive: "person-circle-outline" },
 ];
 
-// --- CAMBIO AQUÍ: Reordenamos y ajustamos las pestañas del profesional ---
 const professionalTabs = [
   { name: "Inicio", component: InicioProfesional, iconFocused: "home", iconInactive: "home-outline" },
   { name: "Presupuestos", component: InicioProfesional, iconFocused: "clipboard", iconInactive: "clipboard-outline" },
-  { name: "Chat", component: Chat, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
+  // --- CAMBIO 3: La pestaña "Chat" del profesional también usa ChatList ---
+  { name: "Chat", component: ChatList, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
   { name: "Notificaciones", component: NotificacionesProfesional, iconFocused: "notifications", iconInactive: "notifications-outline" },
   { name: "Perfil", component: MiPerfil, iconFocused: "person-circle", iconInactive: "person-circle-outline" },
 ];

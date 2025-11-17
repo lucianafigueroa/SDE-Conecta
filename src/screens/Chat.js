@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   SafeAreaView,
   View,
@@ -6,9 +6,10 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  Animated,
+  Keyboard,
 } from "react-native";
 import { auth, db } from "../config/firebaseConfig";
 import {
@@ -20,214 +21,248 @@ import {
   doc,
   setDoc,
   getDoc,
+  serverTimestamp,
 } from "firebase/firestore";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
+import { Ionicons } from '@expo/vector-icons';
+import { useScreenFocusLogger } from "../hooks/useScreenFocusLogger";
 
 export default function Chat({ navigation, route }) {
-  useScreenFocusLogger(); // <-- 2. Hook en uso
-
+  useScreenFocusLogger();
   const { prestador } = route.params || {};
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
 
+  const flatListRef = useRef(null);
+  const inputTranslate = useRef(new Animated.Value(0)).current;
+
   const user = auth.currentUser;
-  const clienteEmail = user?.email || "cliente3@gmail.com";
+  const currentUserEmail = user?.email;
 
-  console.log("💬 Prestador recibido:", prestador?.email);
-  console.log("👤 Cliente logueado:", clienteEmail);
+  if (!currentUserEmail || !prestador?.email) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}><Text>Error: Faltan datos para cargar el chat.</Text></View>
+      </SafeAreaView>
+    );
+  }
 
-  // ✅ Crear ID del chat ordenado y limpio
-  const chatId = [prestador?.email?.trim(), clienteEmail.trim()]
-    .sort()
-    .join("_");
+  const chatId = [prestador.email.trim(), currentUserEmail.trim()].sort().join("_");
 
-  console.log("🧩 Escuchando chatId:", chatId);
+  useEffect(() => {
+  const show = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+  const hide = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
-  // 🔄 Escucha los mensajes del chat en tiempo real
+  const showListener = Keyboard.addListener(show, (e) => {
+    Animated.timing(inputTranslate, {
+      toValue: e.endCoordinates.height + 10,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+
+    // 👇 Scroll automático al último mensaje al abrir teclado
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  });
+
+  const hideListener = Keyboard.addListener(hide, () => {
+    Animated.timing(inputTranslate, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  });
+
+  return () => {
+    showListener.remove();
+    hideListener.remove();
+  };
+}, []);
+
+
   useEffect(() => {
     const chatRef = doc(db, "chats", chatId);
     const messagesRef = collection(chatRef, "messages");
-
     const q = query(messagesRef, orderBy("timestamp", "asc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log("📸 Snapshot size:", snapshot.size);
-      if (snapshot.empty) {
-        console.warn("⚠️ No se encontraron mensajes en Firestore");
-        setMessages([]);
-      } else {
-        const newMessages = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log("✅ Mensajes recibidos:", newMessages.length);
-        setMessages(newMessages);
-      }
+      const newMessages = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setMessages(newMessages);
+
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 120);
+
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 350);
     });
 
     return () => unsubscribe();
   }, [chatId]);
 
-  // ✉️ Enviar mensaje
   const handleSendMessage = useCallback(async () => {
-    if (inputText.trim() === "") return;
+    if (!inputText.trim()) return;
 
     const chatRef = doc(db, "chats", chatId);
     const messagesRef = collection(chatRef, "messages");
 
     try {
-      // ✅ Verificar si el chat ya existe, sino crearlo
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
         await setDoc(chatRef, {
-          participants: [prestador.email.trim(), clienteEmail.trim()],
-          createdAt: new Date(),
+          participants: [prestador.email.trim(), currentUserEmail.trim()],
+          createdAt: serverTimestamp(),
         });
-        console.log("🆕 Chat creado en Firestore");
       }
 
-      // ✅ Agregar mensaje
       await addDoc(messagesRef, {
-        sender: clienteEmail,
-        text: inputText,
-        timestamp: new Date(),
-        type: "text",
+        sender: currentUserEmail,
+        text: inputText.trim(),
+        timestamp: serverTimestamp(),
       });
 
-      console.log("💬 Mensaje enviado correctamente:", inputText);
       setInputText("");
-    } catch (error) {
-      console.error("🚨 Error enviando mensaje:", error);
-    }
-  }, [inputText, chatId, clienteEmail]);
 
-  // 💬 Render de mensaje individual
-  const renderMessage = ({ item }) => (
-    <View
-      style={[
-        styles.messageBubble,
-        item.sender === clienteEmail
-          ? styles.myMessage
-          : styles.theirMessage,
-      ]}
-    >
-      <Text
-        style={{
-          color: item.sender === clienteEmail ? "#fff" : "#000",
-        }}
-      >
-        {item.text}
-      </Text>
-    </View>
-  );
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 50);
+
+    } catch (error) {
+      console.error("Error al enviar mensaje:", error);
+    }
+  }, [inputText, chatId, currentUserEmail, prestador]);
+
+  const renderMessage = ({ item }) => {
+    const isMyMessage = item.sender === currentUserEmail;
+
+    return (
+      <View style={[styles.messageRow, { justifyContent: isMyMessage ? 'flex-end' : 'flex-start' }]}>
+        <View
+          style={[
+            styles.messageBubble,
+            isMyMessage ? styles.myMessage : styles.theirMessage,
+          ]}
+        >
+          <Text style={[styles.messageText, { color: isMyMessage ? 'white' : 'black' }]}>
+            {`${item.text} `}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* --- Header con botón atrás y nombre del prestador --- */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#2C3E50" style={styles.backArrow} />
         </TouchableOpacity>
-        <Text style={styles.title}>
-          {prestador?.nombre
-            ? prestador.nombre
-            : prestador?.email || "Chat"}
-        </Text>
+        <Text style={styles.title}>{prestador?.nombre || prestador?.email || "Chat"}</Text>
       </View>
 
-      {/* --- Contenido del chat --- */}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      <View style={{ flex: 1 }}>
         <FlatList
+          ref={flatListRef}
           data={messages}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 10 }}
+          contentContainerStyle={{ paddingVertical: 10 }}
+          style={styles.messageList}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
 
-        {/* --- Input para enviar mensaje --- */}
-        <View style={styles.inputContainer}>
+        <Animated.View style={[
+          styles.inputContainer,
+          {
+            transform: [{
+              translateY: inputTranslate.interpolate({
+                inputRange: [0, 500],
+                outputRange: [0, -500],
+                extrapolate: "clamp"
+              })
+            }]
+          }
+        ]}>
           <TextInput
             style={styles.input}
             value={inputText}
             onChangeText={setInputText}
             placeholder="Escribe un mensaje..."
+            placeholderTextColor="#8e8e93"
           />
           <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
-            <Text style={styles.sendText}>Enviar</Text>
+            <Ionicons name="arrow-up-circle" size={32} color="white" />
           </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+        </Animated.View>
+      </View>
     </SafeAreaView>
   );
 }
 
-// --- 🎨 Estilos ---
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f7f8fa",
-  },
+  safeArea: { flex: 1, backgroundColor: "white" },
   header: {
-    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 60,
-    marginBottom: 20,
-    paddingHorizontal: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    paddingTop: 50,
+    backgroundColor: '#f7f8fa',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  backArrow: {
-    fontSize: 24,
-    color: "#2C3E50",
-    marginRight: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#2C3E50",
-  },
+  backArrow: { marginRight: 15 },
+  title: { fontSize: 20, fontWeight: "bold", color: "#2C3E50" },
+  messageList: { flex: 1, paddingHorizontal: 10 },
+  messageRow: { marginVertical: 4, flexDirection: 'row' },
   messageBubble: {
-    padding: 10,
-    borderRadius: 10,
-    marginVertical: 4,
-    maxWidth: "75%",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    maxWidth: "80%",
   },
   myMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#FF8C00",
+    backgroundColor: "#d26e00",
+    borderBottomRightRadius: 5,
   },
   theirMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#ECECEC",
+    backgroundColor: "#e5e5ea",
+    borderBottomLeftRadius: 5,
   },
+  messageText: {
+  fontSize: 18,
+  paddingHorizontal: 2, // ⬅️ NUEVO: da espacio a la última letra
+},
+
+  // 👉 ÚNICA MODIFICACIÓN
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 5,
+    paddingVertical: 8,
     paddingHorizontal: 10,
+    backgroundColor: '#f7f8fa',
     borderTopWidth: 1,
-    borderTopColor: "#ccc",
-    backgroundColor: "#fff",
+    borderTopColor: '#e0e0e0',
+    marginBottom: 12, // 🔼 Subido más arriba del teclado
   },
+
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    backgroundColor: '#e5e5ea',
     borderRadius: 20,
     paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 8,
     marginRight: 10,
+    fontSize: 16,
+    borderWidth: 0,
   },
   sendButton: {
-    backgroundColor: "#FF8C00",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-  },
-  sendText: {
-    color: "#fff",
-    fontWeight: "bold",
+    backgroundColor: "#d26e00",
+    borderRadius: 25,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
