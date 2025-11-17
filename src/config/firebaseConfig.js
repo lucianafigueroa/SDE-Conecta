@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
-// --- 1. Importa enablePersistence ---
-import { getFirestore, enablePersistence } from "firebase/firestore";
+// 1. Se quitó 'enablePersistence' de esta línea
+import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -17,27 +17,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Inicialización de Firebase Authentication
-// (Esto ya estaba correcto)
+// Inicialización de Auth (Esto ya estaba bien)
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
 
-// Inicialización de Cloud Firestore
+// Inicialización de Firestore
 export const db = getFirestore(app);
 
-// --- 2. Habilita la persistencia de Firestore ---
-enablePersistence(db)
-  .then(() => console.log("Persistencia de Firestore habilitada."))
-  .catch((err) => {
-    if (err.code == 'failed-precondition') {
-      // Múltiples pestañas de la app abiertas
-      console.warn("Error de persistencia: Múltiples pestañas abiertas.");
-    } else if (err.code == 'unimplemented') {
-      // El dispositivo no soporta persistencia
-      console.warn("Error de persistencia: No soportado en este dispositivo.");
-    }
-  });
+// --- 2. SE QUITÓ EL BLOQUE 'enablePersistence(db)' ---
+// (Aquí es donde estaba el código de persistencia)
 // ---
 
 // Inicialización de Storage
