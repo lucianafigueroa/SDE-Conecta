@@ -127,12 +127,12 @@ export default function ChatList({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-     <View style={styles.header}>
-  <TouchableOpacity onPress={() => navigation.goBack()}>
-    <Ionicons name="arrow-back" size={24} color="#000" />
-  </TouchableOpacity>
-  <Text style={styles.headerTitle}>Chats</Text>
-</View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Chats</Text>
+      </View>
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Buscar..."
@@ -159,21 +159,21 @@ export default function ChatList({ navigation }) {
 // Estilos
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#f7f8fa" },
-  header: { 
-  flexDirection: "row", 
-  alignItems: "center", 
-  paddingHorizontal: 15, 
-  paddingBottom: 10, 
-  paddingTop: 40, 
-  backgroundColor: "white", 
-  borderBottomWidth: 1, 
-  borderBottomColor: "#eee", 
-},
-headerTitle: { 
-  fontSize: 22, 
-  fontWeight: "bold", 
-  marginLeft: 15, // separa la flecha del título
-},
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+    paddingTop: 40,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginLeft: 15, // separa la flecha del título
+  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
