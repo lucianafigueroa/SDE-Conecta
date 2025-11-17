@@ -70,7 +70,7 @@ const AppStack = () => (
         <Stack.Screen name="AgregarDescripcion" component={AgregarDescripcion} />
         <Stack.Screen name="AgregarDireccion" component={AgregarDireccion} />
         <Stack.Screen name="AgregarFoto" component={AgregarFoto} />
-        <Stack.Screen name="InicioProfesional" component={InicioProfesional} />
+        <Stack.Screen name="InicioProfesional" component={AppTabs} />
         {/* <-- CAMBIO 2: Añadimos ChatList aquí también, aunque se muestre en un tab */}
         <Stack.Screen name="ChatList" component={ChatList} />
         

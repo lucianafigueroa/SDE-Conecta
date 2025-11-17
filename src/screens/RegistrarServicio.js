@@ -180,7 +180,7 @@ export default function RegistrarServicio({ navigation, route }) {
   const manejarAgregarCategoria = () => navegarConDatosActuales("Categorias");
 
   const manejarVolverAtras = () => {
-    navigation.goBack();
+    navigation.navigate("InicioProfesional");
   };
 
   const manejarEliminarFoto = (index) => {

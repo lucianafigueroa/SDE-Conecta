@@ -74,12 +74,18 @@ export default function Categorias({ route }) {
     });
   };
 
+  const manejarVolverAtras = () => {
+    navigation.navigate("RegistrarServicio", {
+      ...route.params
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Bienvenida")}
+          onPress={() => manejarVolverAtras()}
           style={styles.backButton}
         >
           <ArrowLeftSVG size={24} color="#2c3e50" />

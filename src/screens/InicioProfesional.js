@@ -24,6 +24,7 @@ const iconos = {
   electricistaIcono: require("../assets/images/electricistaIcono.png"),
   niñeraIcono: require("../assets/images/niñeraIcono.png"),
   sobre: require("../assets/images/sobre.png"),
+  PlomeroIcono: require("../assets/images/plomeroIcono.png")
 };
 
 export default function InicioProfesional({ navigation }) {
