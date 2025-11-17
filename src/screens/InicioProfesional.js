@@ -1,141 +1,137 @@
 import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Image,
   SafeAreaView,
+  ScrollView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
-import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
-import { useScreenFocusLogger } from "../hooks/useScreenFocusLogger";
-import { buttonStyles } from "../styles/buttons";
-import { textStyles } from "../styles/texts";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 import BANNER_IMAGE from "../assets/images/banner.png";
-import PLACEHOLDER_ICON from "../assets/images/placeholder.png";
+
+const iconos = {
+  carpinteroIcono: require("../assets/images/carpinteroIcono.png"),
+  limpiezaIcono: require("../assets/images/limpiezaIcono.png"),
+  plomeroIcono: require("../assets/images/plomeroIcono.png"),
+  pintorIcono: require("../assets/images/pintorIcono.png"),
+  albañilIcono: require("../assets/images/albañilIcono.png"),
+  electricistaIcono: require("../assets/images/electricistaIcono.png"),
+  niñeraIcono: require("../assets/images/niñeraIcono.png"),
+  sobre: require("../assets/images/sobre.png"),
+};
 
 export default function InicioProfesional({ navigation }) {
   useScreenFocusLogger();
-  const [userName, setUserName] = useState("Cargando...");
 
+  const [userName, setUserName] = useState("Cargando...");
+  const [userAddress, setUserAddress] = useState("Domicilio no disponible");
+  const [profesiones, setProfesiones] = useState([]);
+  const [loadingServicios, setLoadingServicios] = useState(true);
+
+  // cargar nombre del usuario
   useEffect(() => {
+    let mounted = true;
+
     const fetchUserData = async (user) => {
       try {
         const userDocRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const nameFromDB = userData.nombre || "Usuario";
-          let displayableName = nameFromDB.split(" ")[0];
-          setUserName(displayableName);
-        } else {
-          setUserName("Usuario");
+        if (userDoc.exists() && mounted) {
+          const data = userDoc.data();
+          const nombre = data.nombre || "Usuario";
+          const domicilio = data.domicilio || "Domicilio no disponible";
+
+          setUserName(nombre.split(" ")[0]);
+          setUserAddress(domicilio);
         }
       } catch (e) {
-        console.error("Error al obtener datos de Firestore:", e);
-        setUserName("Error");
+        console.error("Error Firestore:", e);
       }
     };
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchUserData(user);
-      } else {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u) fetchUserData(u);
+      else {
         setUserName("Invitado");
+        setUserAddress("Domicilio no disponible");
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
-  const services = [
-    { name: "Limpieza", icon: PLACEHOLDER_ICON, screen: "ServicioLimpieza" },
-    { name: "Albañil", icon: PLACEHOLDER_ICON, screen: "ServicioAlbañil" },
-    {
-      name: "Electricista",
-      icon: PLACEHOLDER_ICON,
-      screen: "ServicioElectricista",
-    },
-    { name: "Gasista", icon: PLACEHOLDER_ICON, screen: "ServicioGasista" },
-    { name: "Cerrajero", icon: PLACEHOLDER_ICON, screen: "ServicioCerrajero" },
-    { name: "Plomero", icon: PLACEHOLDER_ICON, screen: "ServicioPlomero" },
-    { name: "Pintor", icon: PLACEHOLDER_ICON, screen: "ServicioPintor" },
-    { name: "Pileta", icon: PLACEHOLDER_ICON, screen: "ServicioPileta" },
-    { name: "Durlock", icon: PLACEHOLDER_ICON, screen: "ServicioDurlock" },
-    {
-      name: "Carpintero",
-      icon: PLACEHOLDER_ICON,
-      screen: "ServicioCarpintero",
-    },
-    { name: "Herrero", icon: PLACEHOLDER_ICON, screen: "ServicioHerrero" },
-    {
-      name: "Aire Acondicionado",
-      icon: PLACEHOLDER_ICON,
-      screen: "ServicioAire",
-    },
-  ];
+  // cargar profesiones igual que InicioCliente
+  useEffect(() => {
+    let mounted = true;
 
-  const ServiceCard = ({ name, icon, screen }) => (
+    const cargarProfesiones = async () => {
+      try {
+        const snap = await getDocs(collection(db, "profesiones"));
+        if (!mounted) return;
+        const lista = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setProfesiones(lista);
+      } catch (err) {
+        console.error("Error cargando profesiones:", err);
+      } finally {
+        if (mounted) setLoadingServicios(false);
+      }
+    };
+
+    cargarProfesiones();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const ServiceCard = ({ nombre, icono }) => (
     <TouchableOpacity
       style={styles.serviceCard}
-      onPress={() => navigation.navigate(screen)}
+      onPress={() =>
+        navigation.navigate("RegistrarServicio", {
+          categoriaSeleccionada: {
+            id: nombre,
+            label: nombre,
+          },
+          categoriasActuales: [],
+        })
+      }
     >
-      <Image source={icon} style={styles.serviceIcon} />
-      <Text style={styles.serviceName}>{name}</Text>
+      <Image
+        source={iconos[icono] || iconos["sobre"]}
+        style={styles.serviceIcon}
+      />
+      <Text style={styles.serviceName}>{nombre}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.header}>
-        <View style={styles.headerContent}>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.container}>
+
+        {/* ------------------ HEADER IGUAL A INICIOCLIENTE ------------------ */}
+        <View style={styles.header}>
           <Text style={styles.headerText}>Hola {userName}</Text>
-          <View style={styles.locationContainer}>
-            <Ionicons name="location-sharp" size={16} color="white" />
-            <Text style={styles.locationText}>Dirección no registrada</Text>
-            <MaterialIcons name="keyboard-arrow-down" size={20} color="white" />
-          </View>
+
+          <Text style={styles.locationText}>
+            {userAddress}
+          </Text>
         </View>
+        {/* ------------------------------------------------------------------ */}
 
-        <TouchableOpacity
-          style={styles.menuIcon}
-          onPress={() => navigation.navigate("MenuProfesional")}
-        >
-          <Feather name="menu" size={24} color="white" />
-        </TouchableOpacity>
-      </SafeAreaView>
-
-      <View style={styles.searchBarContainer}>
-        <Feather
-          name="search"
-          size={20}
-          color="#777"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar categoría"
-          placeholderTextColor="#999"
-        />
-        <TouchableOpacity style={styles.filterIcon}>
-          <Feather name="sliders" size={20} color="#777" />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Banner */}
         <View style={styles.bannerContainer}>
-          <Image
-            source={BANNER_IMAGE}
-            style={styles.bannerImage}
-            resizeMode="cover"
-          />
+          <Image source={BANNER_IMAGE} style={styles.bannerImage} resizeMode="cover" />
           <Text style={styles.bannerText}>Los mejores servicios locales</Text>
           <View style={styles.paginationDots}>
             <View style={[styles.dot, styles.activeDot]} />
@@ -145,105 +141,63 @@ export default function InicioProfesional({ navigation }) {
           </View>
         </View>
 
+        {/* Servicios dinámicos */}
         <View style={styles.servicesSection}>
           <View style={styles.servicesHeader}>
-            <Text style={styles.servicesTitle}>Servicios</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeMoreText}>Ver más &gt;</Text>
-            </TouchableOpacity>
+            <Text style={styles.sectionTitle}>Servicios</Text>
           </View>
 
           <View style={styles.servicesGrid}>
-            {services.map((service, index) => (
-              <ServiceCard
-                key={index}
-                name={service.name}
-                icon={service.icon}
-                screen={service.screen}
-              />
-            ))}
+            {loadingServicios ? (
+              <Text style={{ color: "#555" }}>Cargando...</Text>
+            ) : (
+              profesiones.map((serv) => (
+                <ServiceCard
+                  key={serv.id}
+                  nombre={serv.nombre}
+                  icono={serv.icono}
+                />
+              ))
+            )}
           </View>
-          <TouchableOpacity
-            style={[styles.registerButtonOverride]}
-            onPress={() => navigation.navigate("RegistrarServicio")}
-          >
-            <Text style={textStyles.secondaryText}>Registrar servicio</Text>
-          </TouchableOpacity>
         </View>
+
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F5F5" },
+  safe: { flex: 1, backgroundColor: "#e5e8ec" },
+  container: { paddingBottom: 100 },
+
+  /* ---------- HEADER IGUAL A INICIOCLIENTE ---------- */
   header: {
     width: "100%",
     backgroundColor: "#d26e00",
     paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 70,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 30,
   },
-  headerContent: { flex: 1 },
   headerText: {
     fontSize: 28,
-    fontWeight: "bold",
     color: "#fff",
-    marginBottom: 5,
-  },
-  locationContainer: { flexDirection: "row", alignItems: "center" },
-  locationText: {
-    fontSize: 16,
-    color: "white",
-    marginLeft: 5,
-    marginRight: 5,
     fontWeight: "bold",
   },
-  registerButtonOverride: {
-    backgroundColor: "transparent",
-    width: "80%",
-    maxWidth: 200,
-    paddingVertical: 14,
-    alignSelf: "center",
-    marginTop: 20,
-    marginBottom: 30,
-    marginHorizontal: 25,
-    alignItems: "center",
+  locationText: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "bold",
   },
-  menuIcon: { padding: 5 },
-  searchBarContainer: {
-    position: "absolute",
-    top: 150,
-    left: 20,
-    right: 20,
-    zIndex: 10,
-    height: 53,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 32,
-    paddingHorizontal: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 9,
-    elevation: 10,
-  },
-  searchInput: { flex: 1, fontSize: 16, paddingHorizontal: 10 },
-  filterIcon: { marginLeft: 8, padding: 5 },
-  scrollContent: { paddingBottom: 20 },
+  /* --------------------------------------------------- */
+
   bannerContainer: {
-    marginTop: 50,
+    marginTop: 30,
     marginHorizontal: 20,
     borderRadius: 15,
     overflow: "hidden",
     height: 181,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   bannerImage: { width: "100%", height: 181, position: "absolute" },
   bannerText: {
@@ -263,55 +217,29 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#CCC",
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: "white",
-    width: 12,
-    height: 8,
-    borderRadius: 4,
-  },
-  servicesSection: { paddingHorizontal: 20, marginBottom: 10 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#CCC", marginHorizontal: 4 },
+  activeDot: { backgroundColor: "white", width: 12, height: 8, borderRadius: 4 },
+
+  servicesSection: { marginHorizontal: 20, marginTop: 20 },
   servicesHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 10,
   },
-  servicesTitle: { fontSize: 20, fontWeight: "bold", color: "#333" },
-  seeMoreText: { fontSize: 14, color: "#FF7F27", fontWeight: "500" },
-  servicesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#2c3e50" },
+  verMasLink: { fontSize: 14, color: "#d26e00", fontWeight: "600" },
+
+  servicesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   serviceCard: {
-    width: "30%",
-    alignItems: "center",
-    marginBottom: 15,
-    backgroundColor: "white",
+    width: "47%",
+    backgroundColor: "#fff",
     borderRadius: 10,
+    marginBottom: 20,
+    alignItems: "center",
     paddingVertical: 10,
-    elevation: 2,
   },
-  serviceIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 5,
-    backgroundColor: "#EAEAEA",
-  },
-  serviceName: {
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "center",
-    color: "#333",
-  },
+  serviceIcon: { width: 60, height: 60, marginBottom: 5 },
+  serviceName: { fontSize: 14, color: "#2c3e50" },
 });

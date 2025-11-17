@@ -10,11 +10,10 @@ import {
   Dimensions,
   FlatList,
 } from "react-native";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
 // Importaciones de assets (usaremos placeholder para simular todos los SVG/PNG)
-import placeholder from "../assets/images/placeholder.png"; // Usaremos uno general
-const ArrowPrevSmall = placeholder; // Simulación
+import placeholder from "../assets/images/placeholder.png";
+const ArrowPrevSmall = placeholder;
 
 // --- Componente CustomerReviews (Filtro) ---
 const CustomerReviews = ({ text, text1, style }) => (
@@ -41,22 +40,22 @@ const ReviewCard = ({ name, date, text, image }) => (
 
         {/* Fila del Título (Nombre, Fecha, Estrellas) */}
         <View style={reviewStyles.headerRow}>
-          <Text style={reviewStyles.name}>{name}</Text>
-          <View style={reviewStyles.ratingDateColumn}>
+            <Text style={reviewStyles.name}>{name}</Text>
+            <View style={reviewStyles.ratingDateColumn}>
 
-            {/* Fecha */}
-            <Text style={reviewStyles.dateText}>{date}</Text>
+                {/* Fecha */}
+                <Text style={reviewStyles.dateText}>{date}</Text>
 
-            {/* Estrellas de Calificación */}
-            <View style={reviewStyles.starContainer}>
-              {/* 4 estrellas rellenas y 1 vacía para simular 4.0 */}
-              <Text style={reviewStyles.star}>★</Text>
-              <Text style={reviewStyles.star}>★</Text>
-              <Text style={reviewStyles.star}>★</Text>
-              <Text style={reviewStyles.star}>★</Text>
-              <Text style={reviewStyles.starEmpty}>★</Text>
+                {/* Estrellas de Calificación */}
+                <View style={reviewStyles.starContainer}>
+                    {/* 4 estrellas rellenas y 1 vacía para simular 4.0 */}
+                    <Text style={reviewStyles.star}>★</Text>
+                    <Text style={reviewStyles.star}>★</Text>
+                    <Text style={reviewStyles.star}>★</Text>
+                    <Text style={reviewStyles.star}>★</Text>
+                    <Text style={reviewStyles.starEmpty}>★</Text>
+                </View>
             </View>
-          </View>
         </View>
 
         {/* Texto de la Reseña */}
@@ -64,7 +63,7 @@ const ReviewCard = ({ name, date, text, image }) => (
 
         {/* Enlace Leer más */}
         <TouchableOpacity>
-          <Text style={reviewStyles.readMore}>Leer más</Text>
+            <Text style={reviewStyles.readMore}>Leer más</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -98,107 +97,295 @@ const reviewsData = [
 
 
 export default function Calificaciones({ navigation }) {
-  useScreenFocusLogger(); // <-- 2. Hook en uso
 
-  const navTabs = [
-    { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
-    { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
-    { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
-    { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' },
-  ];
+      const navTabs = [
+        { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
+        { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
+        { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
+        { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' },
+      ];
 
-  const handleNavigation = (screenName) => {
-    if (screenName) {
-      navigation.navigate(screenName)
-    }
-  };
+    const handleNavigation = (screenName) => {
+        if (screenName) {
+            navigation.navigate(screenName)
+        }
+    };
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
+    return (
+        <SafeAreaView style={styles.safeArea}>
 
-      {/* --- Header Fijo Blanco --- */}
-      <View style={styles.headerBackground} />
+            {/* --- Header Fijo Blanco --- */}
+            <View style={styles.headerBackground} />
 
-      {/* --- Título de la Vista --- */}
-      <View style={styles.titleContainer}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Image source={ArrowPrevSmall} style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Calificaciones</Text>
-      </View>
+            {/* --- Título de la Vista --- */}
+            <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Image source={ArrowPrevSmall} style={styles.backIcon} />
+                </TouchableOpacity>
+                <Text style={styles.title}>Calificaciones</Text>
+            </View>
 
-      {/* --- Componente de Filtrado (CustomerReviews) --- */}
-      <View style={styles.filterContainer}>
-        <CustomerReviews
-          text="Historial de tus calificaciones"
-          text1="Ordenado por (Más reciente)"
-          style={styles.reviewsFilter}
-        />
-        <Image source={placeholder} style={styles.filterIcon} />
-      </View>
+            {/* --- Componente de Filtrado (CustomerReviews) --- */}
+            <View style={styles.filterContainer}>
+                <CustomerReviews
+                    text="Historial de tus calificaciones"
+                    text1="Ordenado por (Más reciente)"
+                    style={styles.reviewsFilter}
+                />
+                <Image source={placeholder} style={styles.filterIcon} />
+            </View>
 
-      {/* ScrollView para el contenido listado */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+            {/* ScrollView para el contenido listado */}
+            {/* Se usa FlatList dentro de ScrollView con scrollEnabled={false} para evitar problemas de anidamiento */}
+            <ScrollView contentContainerStyle={styles.scrollContent}>
 
-        {/* Lista de Calificaciones */}
-        <FlatList
-          data={reviewsData}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <ReviewCard
-              name={item.name}
-              date={item.date}
-              text={item.text}
-              image={item.image}
-            />
-          )}
-        />
+                {/* Lista de Calificaciones */}
+                <FlatList
+                    data={reviewsData}
+                    keyExtractor={(item) => item.id}
+                    scrollEnabled={false}
+                    renderItem={({ item }) => (
+                        <ReviewCard
+                            name={item.name}
+                            date={item.date}
+                            text={item.text}
+                            image={item.image}
+                        />
+                    )}
+                />
 
-        {/* --- Paginación/Indicadores (Simulación) --- */}
-        <View style={styles.paginationContainer}>
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View>
+                {/* --- Paginación/Indicadores (Simulación) --- */}
+                <View style={styles.paginationContainer}>
+                    <View style={[styles.dot, styles.dotActive]} />
+                    <View style={styles.dot} />
+                    <View style={styles.dot} />
+                </View>
 
-        {/* Espacio final para evitar que el Tab Bar oculte contenido */}
-        <View style={{ height: 30 }} />
+                {/* Espacio final para evitar que el Tab Bar oculte contenido */}
+                <View style={{ height: 30 }} />
 
-      </ScrollView>
-
-      {/* --- Barra de Navegación Inferior (bottomNav) --- */}
-      <View style={styles.bottomNav}>
-        {navTabs.map((tab, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.navItem}
-            onPress={() => handleNavigation(tab.screen)} // Uso de la función de navegación
-          >
-            <Image
-              source={tab.icon}
-              style={[styles.navIcon, tab.name === 'Inicio' && styles.navIconActive]}
-            />
-            <Text
-              style={[
-                styles.navText,
-                tab.name === 'Inicio' && styles.navTextActive // 'Inicio' como activo
-              ]}
-            >
-              {tab.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </SafeAreaView>
-  );
+            </ScrollView>
+        </SafeAreaView>
+    );
 }
 
-// --- NOTA: Añade aquí tus objetos de estilo completos para `reviewStyles` y `styles` ---
+// --- Estilos de la Tarjeta de Revisión (Ajustados) ---
 const reviewStyles = StyleSheet.create({
-  // ... tus estilos para las tarjetas de revisión
+    card: {
+        width: width * 0.9,
+        backgroundColor: 'white',
+        borderRadius: 32,
+        padding: 15,
+        marginHorizontal: width * 0.05,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        marginTop: 5
+    },
+    contentContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    mainImage: {
+        width: 118,
+        height: 147,
+        borderRadius: 15,
+        marginRight: 10,
+        resizeMode: 'cover',
+    },
+    details: {
+        flex: 1,
+        paddingTop: 5,
+    },
+    headerRow: {
+        flexDirection: 'column',
+        marginBottom: 8,
+    },
+    ratingDateColumn: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 5,
+        width: '100%',
+    },
+    name: {
+        fontFamily: 'Poppins-Bold',
+        fontWeight: 'bold',
+        fontSize: 20,
+        color: '#2c3e50',
+    },
+    starContainer: {
+        flexDirection: 'row',
+        order: 2, // Mueve las estrellas a la derecha de la fecha
+    },
+    star: {
+        fontSize: 16,
+        color: '#ffc107',
+        marginRight: 2,
+    },
+    starEmpty: {
+        fontSize: 16,
+        color: '#c4c4c4',
+        marginRight: 2,
+    },
+    dateText: {
+        fontFamily: 'Inter-Medium',
+        fontWeight: '500',
+        fontSize: 12,
+        color: '#606060',
+        order: 1, // Mueve la fecha a la izquierda
+    },
+    reviewText: {
+        fontFamily: 'Poppins-Medium',
+        fontWeight: '500',
+        fontSize: 10,
+        color: '#606060',
+        lineHeight: 17,
+        marginBottom: 8,
+        textAlign: 'left',
+    },
+    readMore: {
+        fontFamily: 'Inter-Medium',
+        fontWeight: '500',
+        fontSize: 14,
+        color: '#d26e00',
+        alignSelf: 'flex-start',
+    }
 });
 
+
+// --- Estilos Base ---
 const styles = StyleSheet.create({
-  // ... tus estilos principales para la pantalla
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#e5e8ec',
+    },
+    headerBackground: {
+        position: 'absolute',
+        top: 0,
+        width: width,
+        height: HEADER_HEIGHT,
+        backgroundColor: 'white',
+        zIndex: 1,
+    },
+    statusIcons: {},
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 50,
+        paddingHorizontal: 32,
+        zIndex: 10,
+        width: '100%',
+    },
+    backButton: {
+        paddingRight: 15,
+    },
+    backIcon: {
+        width: 24,
+        height: 24,
+        tintColor: '#2C3E50',
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#2c3e50',
+        fontFamily: 'Poppins-Bold',
+    },
+    // --- NUEVO CONTENEDOR DE FILTRO PARA ALINEAR EL ICONO ---
+    filterContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        paddingHorizontal: 50,
+        zIndex: 5,
+        width: '100%',
+    },
+    reviewsFilter: {
+    },
+    filterIcon: {
+        width: 24, // Tamaño del icono de filtro (como en la imagen)
+        height: 24,
+        marginTop: 10, // Ajuste para alineación visual
+        tintColor: '#2C3E50',
+    },
+    customerReviewsContainer: {
+        marginBottom: 10,
+    },
+    customerReviewsTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#2c3e50',
+    },
+    customerReviewsSubtitle: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: '#606060',
+    },
+    scrollContent: {
+        flexGrow: 1,
+        paddingTop: 10, // Ajuste para espacio debajo del filtro
+        paddingBottom: 100, // Espacio para el Tab Bar
+    },
+    paginationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+        marginBottom: 10,
+        gap: 8,
+    },
+    dot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#c4c4c4',
+    },
+    dotActive: {
+        backgroundColor: '#2c3e50',
+    },
+    bottomNav: {
+        position: 'absolute',
+        bottom: 0,
+        width: width,
+        height: 84, // Altura mayor que el otro ejemplo
+        backgroundColor: 'white',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingBottom: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+        zIndex: 20,
+    },
+    navItem: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    navIcon: {
+        width: 24,
+        height: 24,
+        marginBottom: 4,
+        opacity: 0.3,
+        tintColor: 'black',
+    },
+    navIconActive: {
+        opacity: 1,
+        tintColor: '#2c3e50',
+    },
+    navText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: 'black',
+        opacity: 0.3,
+    },
+    navTextActive: {
+        opacity: 1,
+        fontWeight: '600',
+        color: '#2c3e50',
+        fontFamily: 'Roboto-Medium',
+    }
 });

@@ -24,7 +24,6 @@ import VerPerfil from "./src/screens/VerPerfil.js";
 import Chat from "./src/screens/Chat.js"; // Pantalla de conversación individual
 import ChatList from "./src/screens/ChatList.js"; // <-- CAMBIO 1: Importa la pantalla de lista de chats
 import Calificar from "./src/screens/Calificar.js";
-import VerMasServicios from './src/screens/VerMasServicios';
 import MenuUsuario from './src/screens/MenuUsuario';
 import MenuProfesional from './src/screens/MenuProfesional';
 import RegistrarServicio from './src/screens/RegistrarServicio';
@@ -33,6 +32,9 @@ import AgregarDescripcion from './src/screens/AgregarDescripcion.js';
 import AgregarDireccion from './src/screens/AgregarDireccion.js';
 import AgregarFoto from './src/screens/AgregarFoto.js';
 import InicioProfesional from './src/screens/InicioProfesional.js';
+import ServiciosProfesional from './src/screens/ServiciosProfesional.js';
+import DetalleServicio from './src/screens/DetalleServicio.js';
+import MiPerfilProfesional from './src/screens/MiPerfilProfesional.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,7 +63,6 @@ const AppStack = () => (
         <Stack.Screen name="VerPerfil" component={VerPerfil} />
         <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="Calificar" component={Calificar} />
-        <Stack.Screen name="VerMasServicios" component={VerMasServicios} />
         <Stack.Screen name="MenuUsuario" component={MenuUsuario} />
         <Stack.Screen name="MenuProfesional" component={MenuProfesional} />
         <Stack.Screen name="RegistrarServicio" component={RegistrarServicio} />
@@ -72,6 +73,10 @@ const AppStack = () => (
         <Stack.Screen name="InicioProfesional" component={InicioProfesional} />
         {/* <-- CAMBIO 2: Añadimos ChatList aquí también, aunque se muestre en un tab */}
         <Stack.Screen name="ChatList" component={ChatList} />
+        
+        <Stack.Screen name="ServiciosProfesional" component={ServiciosProfesional} />
+        <Stack.Screen name="DetalleServicio" component={DetalleServicio} />
+        <Stack.Screen name="MiPerfilProfesional" component={MiPerfilProfesional} />
     </Stack.Navigator>
 );
 

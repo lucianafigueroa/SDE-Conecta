@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // <-- Agregué useEffect
 import {
   SafeAreaView,
   ScrollView,
@@ -11,8 +11,15 @@ import {
   Alert,
 } from "react-native";
 import { db } from "../config/firebaseConfig";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query, // <-- Importación para consulta
+  where, // <-- Importación para filtro
+  getDocs, // <-- Importación para ejecutar
+} from "firebase/firestore";
+import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger';
 
 // Íconos locales
 import iconLocation from "../assets/images/localizacion.png";
@@ -29,22 +36,81 @@ const fotosPerfil = {
 };
 
 export default function Calificar({ navigation, route }) {
-  useScreenFocusLogger(); // <-- 2. Hook en uso
+  useScreenFocusLogger();
   const { prestador, user } = route.params || {};
 
   const [rating, setRating] = useState(0);
   const [opinion, setOpinion] = useState("");
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false); // <-- Nuevo estado de control
+
+  const clientEmail = user?.email || "desconocido";
+
+  // Función de verificación de reseña existente
+  const checkExistingReview = async () => {
+    if (!prestador?.id || clientEmail === "desconocido") return;
+
+    try {
+      const reseñasRef = collection(db, "usuarios", prestador.id, "resenias");
+      // Consulta: ¿Existe una reseña de este cliente para este prestador?
+      const q = query(reseñasRef, where("clienteEmail", "==", clientEmail));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setHasReviewed(true);
+        // Alert.alert(
+        //   "Ya has calificado",
+        //   "Ya calificaste a este prestador. Solo puedes enviar una reseña."
+        // );
+      }
+    } catch (error) {
+      console.error("Error al verificar reseña existente:", error);
+    }
+  };
+
+  // Ejecutar la verificación al cargar
+  useEffect(() => {
+    checkExistingReview();
+  }, [prestador?.id, clientEmail]);
 
   const handleUploadPhoto = () => {
     Alert.alert("Función no implementada", "Aquí se podrá subir una foto pronto.");
   };
 
   const handleSubmit = async () => {
+    // 1. Verificación preliminar (Estado local)
+    if (hasReviewed) {
+      Alert.alert(
+        "No permitido",
+        "Ya has calificado a este prestador. No puedes enviar otra reseña."
+      );
+      return;
+    }
+
     if (!rating || !opinion) {
       Alert.alert("Completa los campos", "Debes dar una calificación y escribir una opinión.");
       return;
+    }
+
+    // 2. Verificación final (Seguridad contra reenvíos rápidos)
+    try {
+      const reseñasRef = collection(db, "usuarios", prestador.id, "resenias");
+      const q = query(reseñasRef, where("clienteEmail", "==", clientEmail));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setHasReviewed(true);
+        Alert.alert(
+          "Ya has calificado",
+          "Ya calificaste a este prestador. Solo puedes enviar una reseña."
+        );
+        return;
+      }
+    } catch (error) {
+        console.error("Error de verificación final:", error);
+        Alert.alert("Error de verificación", "Hubo un problema. Inténtalo de nuevo.");
+        return;
     }
 
     try {
@@ -54,12 +120,13 @@ export default function Calificar({ navigation, route }) {
       await addDoc(reseñasRef, {
         comentario: opinion.trim(),
         calificacion: rating,
-        clienteEmail: user?.email || "desconocido",
+        clienteEmail: clientEmail, // Usamos el email del cliente para la restricción
         clienteNombre:
           user?.nombre || user?.displayName || user?.fullName || "Anónimo",
         fecha: Timestamp.now(),
       });
 
+      setHasReviewed(true); // Evitar reenvíos tras el éxito
       Alert.alert("Éxito", "Tu reseña se ha enviado correctamente.");
       navigation.navigate("VerPerfil", { prestador, user });
     } catch (error) {
@@ -113,9 +180,13 @@ export default function Calificar({ navigation, route }) {
 
           {/* Calificación */}
           <Text style={styles.subtitle}>¿Cómo calificarías el servicio?</Text>
-          <View style={styles.starsContainer}>
+          <View style={[styles.starsContainer, hasReviewed && { opacity: 0.5 }]}>
             {[1, 2, 3, 4, 5].map((star) => (
-              <TouchableOpacity key={star} onPress={() => setRating(star)}>
+              <TouchableOpacity
+                key={star}
+                onPress={() => !hasReviewed && setRating(star)} // <-- Evita la acción si ya calificó
+                disabled={hasReviewed} // <-- Deshabilita la interacción
+              >
                 <Image
                   source={star <= rating ? starFilled : starEmpty}
                   style={styles.star}
@@ -126,7 +197,11 @@ export default function Calificar({ navigation, route }) {
 
           {/* Subir foto */}
           <Text style={styles.subtitle}>Subir foto del servicio</Text>
-          <TouchableOpacity style={styles.uploadBox} onPress={handleUploadPhoto}>
+          <TouchableOpacity
+            style={[styles.uploadBox, hasReviewed && { opacity: 0.5 }]} // <-- Opacidad si ya calificó
+            onPress={handleUploadPhoto}
+            disabled={hasReviewed} // <-- Deshabilita la interacción
+          >
             <Text style={styles.uploadText}>Subir foto</Text>
             <Image source={uploadIcon} style={styles.uploadIcon} />
           </TouchableOpacity>
@@ -134,22 +209,26 @@ export default function Calificar({ navigation, route }) {
           {/* Opinión */}
           <Text style={styles.subtitle}>Escribir tu opinión</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Escribe tu experiencia..."
+            style={[styles.input, hasReviewed && { backgroundColor: '#E0E0E0' }]} // <-- Cambia color si ya calificó
+            placeholder={hasReviewed ? "Ya enviaste tu reseña para este servicio." : "Escribe tu experiencia..."} // <-- Placeholder informativo
             value={opinion}
             onChangeText={setOpinion}
             multiline
+            editable={!hasReviewed} // <-- Deshabilita la edición
           />
         </View>
 
         {/* Botón */}
         <TouchableOpacity
-          style={[styles.submitButton, loading && { opacity: 0.6 }]}
+          style={[
+            styles.submitButton,
+            (loading || hasReviewed) && { opacity: 0.6, backgroundColor: hasReviewed ? '#95A5A6' : '#0A3D62' } // <-- Cambia color y opacidad
+          ]}
           onPress={handleSubmit}
-          disabled={loading}
+          disabled={loading || hasReviewed} // <-- Deshabilita si cargando o si ya calificó
         >
           <Text style={styles.submitText}>
-            {loading ? "Enviando..." : "Subir"}
+            {loading ? "Enviando..." : hasReviewed ? "Ya Calificado" : "Subir"}
           </Text>
         </TouchableOpacity>
       </ScrollView>

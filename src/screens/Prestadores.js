@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -8,386 +8,260 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
   Dimensions,
   FlatList,
 } from "react-native";
-import { useScreenFocusLogger } from '../hooks/useScreenFocusLogger'; // <-- 1. Importación añadida
 
-import placeholder from "../assets/images/placeholder.png";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../config/firebaseConfig";
+import { useScreenFocusLogger } from "../hooks/useScreenFocusLogger";
+import { useAuth } from "../contexts/AuthContext";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
-const mainCategories = [
-  { id: 't1', name: 'Todos', active: true },
-  { id: 't2', name: 'Albañil', active: false },
-  { id: 't3', name: 'Carpintero', active: false },
-  { id: 't4', name: 'Electricista', active: false },
-  { id: 't5', name: 'Gasista', active: false },
-];
+const fotosPerfil = {
+  mujer: require("../assets/images/mujer.png"),
+  fotoNicolas: require("../assets/images/fotoNicolas.jpg"),
+};
 
-const featuredProviders = [
-  { id: 'f1', name: 'Jackson', service: 'Electrician', rating: 3.9, image: placeholder },
-  { id: 'f2', name: 'Emily Jani', service: 'Electrician', rating: 4.8, image: placeholder },
-  { id: 'f3', name: 'Shams Jack', service: 'Electrician', rating: 4.8, image: placeholder },
-];
+const ProviderCard = ({ item, navigation, user }) => (
+  <TouchableOpacity
+    style={styles.providerCard}
+    onPress={() => navigation.navigate("VerPerfil", { prestador: item, user })}
+  >
+    <Image
+      source={fotosPerfil[item.foto] || require("../assets/images/defaultUser.png")}
+      style={styles.providerImage}
+    />
 
-const cleaningProviders = [
-  { id: 'c1', name: 'Luisina Martinez', service: 'Limpieza', rating: 3.9, image: placeholder, isVerified: true },
-  { id: 'c2', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
-  { id: 'c3', name: 'Luisina Martinez', service: 'Limpieza', rating: 4.8, image: placeholder, isVerified: true },
-];
-
-const HorizontalProviderCard = ({ name, service, rating, image, navigation }) => (
-  <TouchableOpacity style={newStyles.providerCardHorizontal}>
-    <View style={newStyles.imageContainer}>
-      <Image source={image} style={newStyles.providerImageHorizontal} />
-    </View>
-    <Text style={newStyles.providerNameHorizontal}>{name}</Text>
-    <Text style={newStyles.providerServiceHorizontal}>{service}</Text>
-    <View style={newStyles.ratingRow}>
-      <Text style={newStyles.providerRatingText}>⭐ {rating}</Text>
-    </View>
-    <TouchableOpacity style={newStyles.verPerfilButton}>
-      <Text style={newStyles.verPerfilText}>Ver Perfil</Text>
-    </TouchableOpacity>
+    <Text style={styles.providerName}>{item.nombre}</Text>
+    <Text style={styles.providerService}>{item.profesion}</Text>
+    <Text style={styles.rating}>⭐ {item.puntuacion || 0}</Text>
   </TouchableOpacity>
 );
 
-export default function Prestadores({ navigation }) {
-  useScreenFocusLogger(); // <-- 2. Hook en uso
+export default function Prestadores({ navigation, route }) {
+  useScreenFocusLogger();
+  const { user } = useAuth();
 
-  const navTabs = [
-    { name: "Inicio", icon: placeholder, screen: 'InicioCliente' },
-    { name: "Prestadores", icon: placeholder, screen: 'Prestadores' },
-    { name: "Calificaciones", icon: placeholder, screen: 'Calificaciones' },
-    { name: "Perfil", icon: placeholder, screen: 'MenuUsuario' },
-  ];
+  const categoriaInicial = route?.params?.categoria || "Todos";
 
-  const handleNavigation = (screenName) => {
-    if (screenName) {
-      navigation.navigate(screenName);
+  const [profesiones, setProfesiones] = useState([]);
+  const [prestadores, setPrestadores] = useState([]);
+
+  const [categoriaActiva, setCategoriaActiva] = useState(categoriaInicial);
+  const [busqueda, setBusqueda] = useState("");
+  const [cargando, setCargando] = useState(true);
+
+  // Actualiza categoría si se navega desde InicioCliente
+  useEffect(() => {
+    if (route?.params?.categoria) {
+      setCategoriaActiva(route.params.categoria);
     }
-  };
+  }, [route?.params?.categoria]);
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        setCargando(true);
+
+        const [profesionesSnap, prestadoresSnap] = await Promise.all([
+          getDocs(collection(db, "profesiones")),
+          getDocs(query(collection(db, "usuarios"), where("rol", "==", "prestador"))),
+        ]);
+
+        setProfesiones(profesionesSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setPrestadores(prestadoresSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      } catch (e) {
+        console.log("Error cargando prestadores:", e);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarDatos();
+  }, []);
+
+  const prestadoresFiltrados = prestadores.filter((p) => {
+    const coincideCategoria =
+      categoriaActiva === "Todos" ||
+      p.profesion?.toLowerCase() === categoriaActiva.toLowerCase();
+
+    const coincideTexto =
+      p.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.profesion?.toLowerCase().includes(busqueda.toLowerCase());
+
+    return coincideCategoria && coincideTexto;
+  });
+
+  if (cargando) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator size="large" color="#d26e00" style={{ marginTop: 50 }} />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safe}>
       <View style={styles.headerBackground}>
         <Text style={styles.title}>Prestadores</Text>
       </View>
 
-      <View style={styles.searchBarContainer}>
-        <Image source={placeholder} style={styles.searchIcon} />
+      <View style={styles.searchContainer}>
         <TextInput
+          placeholder="Buscar prestador o categoría"
+          placeholderTextColor="#777"
           style={styles.searchInput}
-          placeholder="Buscar categoría"
-          placeholderTextColor="#2c3e5080"
+          value={busqueda}
+          onChangeText={setBusqueda}
         />
-        <Image source={placeholder} style={styles.filterIcon} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <FlatList
-          data={mainCategories}
-          keyExtractor={(item) => item.id}
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={newStyles.mainCategoryList}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[newStyles.categoryPillMain, item.active && newStyles.categoryPillMainActive]}
-            >
-              <Text style={[newStyles.categoryTextMain, item.active && newStyles.categoryTextMainActive]}>
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-
-        <View style={newStyles.sectionContainer}>
-          <FlatList
-            data={featuredProviders}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={newStyles.horizontalCardList}
-            renderItem={({ item }) => (
-              <HorizontalProviderCard
-                {...item}
-                image={placeholder}
-                navigation={navigation}
-              />
-            )}
-          />
-        </View>
-
-        <View style={newStyles.sectionHeaderRow}>
-          <Text style={newStyles.sectionTitleHorizontal}>Limpieza</Text>
-          <TouchableOpacity>
-            <Text style={newStyles.verMasHorizontal}>Ver más ›</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={newStyles.sectionContainer}>
-          <FlatList
-            data={cleaningProviders}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={newStyles.horizontalCardList}
-            renderItem={({ item }) => (
-              <HorizontalProviderCard
-                {...item}
-                image={placeholder}
-                navigation={navigation}
-              />
-            )}
-          />
-        </View>
-
-        <View style={{ height: 30 }} />
-      </ScrollView>
-
-      <View style={styles.bottomNav}>
-        {navTabs.map((tab, index) => (
+          contentContainerStyle={styles.categoryScroll}
+        >
           <TouchableOpacity
-            key={index}
-            style={styles.navItem}
-            onPress={() => handleNavigation(tab.screen)}
+            onPress={() => setCategoriaActiva("Todos")}
+            style={[
+              styles.categoryPill,
+              categoriaActiva === "Todos" && styles.categoryPillActive,
+            ]}
           >
-            <Image
-              source={tab.icon}
-              style={[
-                styles.navIcon,
-                tab.name === 'Prestadores' && styles.navIconActive
-              ]}
-            />
             <Text
               style={[
-                styles.navText,
-                tab.name === 'Prestadores' && styles.navTextActive
+                styles.categoryText,
+                categoriaActiva === "Todos" && styles.categoryTextActive,
               ]}
             >
-              {tab.name}
+              Todos
             </Text>
           </TouchableOpacity>
-        ))}
-      </View>
+
+          {profesiones.map((prof) => (
+            <TouchableOpacity
+              key={prof.id}
+              onPress={() => setCategoriaActiva(prof.nombre)}
+              style={[
+                styles.categoryPill,
+                categoriaActiva === prof.nombre && styles.categoryPillActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  categoriaActiva === prof.nombre && styles.categoryTextActive,
+                ]}
+              >
+                {prof.nombre}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <FlatList
+          key={"grid2"}
+          data={prestadoresFiltrados}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          scrollEnabled={false}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={{ paddingHorizontal: 10, paddingTop: 20 }}
+          renderItem={({ item }) => (
+            <ProviderCard item={item} navigation={navigation} user={user} />
+          )}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-const newStyles = StyleSheet.create({
-  mainCategoryList: {
-    paddingHorizontal: 20,
-    marginTop: 15,
-    marginBottom: 20,
-  },
-  categoryPillMain: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  categoryPillMainActive: {
-    backgroundColor: '#d26e00',
-    borderColor: '#d26e00',
-  },
-  categoryTextMain: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#2c3e50',
-  },
-  categoryTextMainActive: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  sectionTitleHorizontal: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  verMasHorizontal: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2c3e50',
-  },
-  sectionContainer: {},
-  horizontalCardList: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  providerCardHorizontal: {
-    width: width * 0.45,
-    marginRight: 15,
-    borderRadius: 15,
-    padding: 10,
-    alignItems: 'center',
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  imageContainer: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 15,
-    overflow: 'hidden',
-    marginBottom: 10,
-    backgroundColor: 'white',
-  },
-  providerImageHorizontal: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  providerNameHorizontal: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 2,
-  },
-  providerServiceHorizontal: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#2c3e50',
-    opacity: 0.7,
-    marginBottom: 5,
-  },
-  ratingRow: {
-    alignSelf: 'flex-start',
-    marginLeft: 5,
-    marginBottom: 10,
-  },
-  providerRatingText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#2c3e50',
-  },
-  verPerfilButton: {
-    backgroundColor: '#d26e00',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 5,
-  },
-  verPerfilText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '700',
-  }
-});
+const CARD_WIDTH = width * 0.42;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#e5e8ec',
-  },
+  safe: { flex: 1, backgroundColor: "#e5e8ec" },
+
   headerBackground: {
-    position: 'absolute',
-    top: 0,
-    width: width,
-    height: 140,
-    backgroundColor: 'white',
-    zIndex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingTop: 140,
-    paddingBottom: 100,
+    backgroundColor: "#d26e00",
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 50,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginTop: 70,
-    alignSelf: 'center',
-    zIndex: 1,
+    fontWeight: "bold",
+    color: "#fff",
   },
-  searchBarContainer: {
-    width: '85%',
-    height: 53,
-    backgroundColor: 'white',
-    borderRadius: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
+
+  searchContainer: {
+    marginTop: -25,
+    marginHorizontal: 20,
+    backgroundColor: "#fff",
+    paddingVertical: 8,
     paddingHorizontal: 15,
-    alignSelf: 'center',
-    position: 'absolute',
-    top: 105,
-    zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    borderRadius: 30,
+    elevation: 4,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#2c3e50',
+  searchInput: { fontSize: 16, color: "#333" },
+
+  categoryScroll: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  categoryPill: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  categoryPillActive: {
+    backgroundColor: "#d26e00",
+  },
+  categoryText: {
+    color: "#2c3e50",
+  },
+  categoryTextActive: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  row: {
+    justifyContent: "space-between",
+    marginBottom: 20,
     paddingHorizontal: 10,
   },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    opacity: 0.5,
+
+  providerCard: {
+    width: CARD_WIDTH,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: 12,
+    alignItems: "center",
+    elevation: 3,
   },
-  filterIcon: {
-    width: 20,
-    height: 20,
-    marginLeft: 10,
-    opacity: 0.5,
+  providerImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 10,
   },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    width: width,
-    height: 84,
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    zIndex: 20,
+  providerName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
   },
-  navItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  providerService: {
+    fontSize: 14,
+    color: "#666",
   },
-  navIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: 4,
-    opacity: 0.3,
-  },
-  navIconActive: {
-    opacity: 1,
-  },
-  navText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: 'black',
-    opacity: 0.3,
-  },
-  navTextActive: {
-    opacity: 1,
-    fontWeight: '600',
-    color: '#2c3e50',
+  rating: {
+    marginTop: 5,
+    fontSize: 14,
+    color: "#d26e00",
   },
 });

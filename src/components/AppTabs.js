@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../config/firebaseConfig";
+import { auth, db } from "../config/firebaseConfig"; // Asegúrate de que las rutas de importación sean correctas
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 
 // Pantallas de Cliente
@@ -16,10 +16,13 @@ import ChatList from "../screens/ChatList";
 
 // Pantallas de Profesional
 import InicioProfesional from "../screens/InicioProfesional";
-import NotificacionesProfesional from "../screens/NotificacionesProfesional";
+import RegistrarServicio from "../screens/RegistrarServicio";
+import Citas from "../screens/Citas";
+import MiPerfilProfesional from "../screens/MiPerfilProfesional";
 
 const Tab = createBottomTabNavigator();
 
+// Definición de las pestañas para Clientes
 const customerTabs = [
   { name: "Inicio", component: InicioCliente, iconFocused: "home", iconInactive: "home-outline" },
   { name: "Prestadores", component: Prestadores, iconFocused: "search", iconInactive: "search-outline" },
@@ -40,18 +43,29 @@ const professionalTabs = [
 
 export default function AppTabs() {
   const [userRole, setUserRole] = useState(null);
+  const [userUid, setUserUid] = useState(null); // Nuevo estado para guardar el UID del usuario
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Listener para el estado de autenticación
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // 1. Guardar el UID del usuario autenticado
+        setUserUid(user.uid);
+
         const userDocRef = doc(db, "usuarios", user.uid);
         const docSnap = await getDoc(userDocRef);
+
         if (docSnap.exists()) {
           setUserRole(docSnap.data().rol);
         } else {
-          setUserRole('cliente'); 
+          // Si no existe en Firestore, por defecto es cliente
+          setUserRole('cliente');
         }
+      } else {
+        // No hay usuario autenticado
+        setUserUid(null);
+        setUserRole(null);
       }
       setLoading(false);
     });
@@ -75,7 +89,7 @@ export default function AppTabs() {
         headerShown: false,
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: "#6E6E6E",
-        tabBarLabelStyle: { 
+        tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: "600",
           marginBottom: 5,
@@ -96,20 +110,35 @@ export default function AppTabs() {
         tabBarIcon: ({ color, size, focused }) => {
           let iconName;
           const tabInfo = tabsToRender.find(tab => tab.name === route.name);
-          
+
           if (tabInfo) {
             iconName = focused ? tabInfo.iconFocused : tabInfo.iconInactive;
           } else {
             iconName = 'ellipse-outline';
           }
-          
+
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
-      {tabsToRender.map((tab) => (
-        <Tab.Screen key={tab.name} name={tab.name} component={tab.component} />
-      ))}
+      {tabsToRender.map((tab) => {
+        let initialParams = {};
+
+        // 2. Lógica CRÍTICA: Inyectar el UID si la pestaña es "Perfil" y el rol es 'prestador'
+        // Esto resuelve el error de "Cannot read property 'uid' of undefined"
+        if (tab.name === "Perfil" && userRole === 'prestador' && userUid) {
+          initialParams = { uid: userUid };
+        }
+
+        return (
+          <Tab.Screen
+            key={tab.name}
+            name={tab.name}
+            component={tab.component}
+            initialParams={initialParams} // Inyecta el UID en la ruta del Perfil Profesional
+          />
+        );
+      })}
     </Tab.Navigator>
   );
 }
