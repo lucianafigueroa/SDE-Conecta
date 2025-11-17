@@ -230,7 +230,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#e5e5ea",
     borderBottomLeftRadius: 5,
   },
-  messageText: { fontSize: 16 },
+  messageText: {
+  fontSize: 18,
+  paddingHorizontal: 2, // ⬅️ NUEVO: da espacio a la última letra
+},
 
   // 👉 ÚNICA MODIFICACIÓN
   inputContainer: {
