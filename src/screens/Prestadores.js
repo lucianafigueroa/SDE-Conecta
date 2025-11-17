@@ -25,9 +25,6 @@ const fotosPerfil = {
   fotoNicolas: require("../assets/images/fotoNicolas.jpg"),
 };
 
-// ------------------------------
-// * COMPONENTE TARJETA PRESTADOR
-// ------------------------------
 const ProviderCard = ({ item, navigation, user }) => (
   <TouchableOpacity
     style={styles.providerCard}
@@ -44,20 +41,26 @@ const ProviderCard = ({ item, navigation, user }) => (
   </TouchableOpacity>
 );
 
-export default function Prestadores({ navigation }) {
+export default function Prestadores({ navigation, route }) {
   useScreenFocusLogger();
   const { user } = useAuth();
+
+  const categoriaInicial = route?.params?.categoria || "Todos";
 
   const [profesiones, setProfesiones] = useState([]);
   const [prestadores, setPrestadores] = useState([]);
 
-  const [categoriaActiva, setCategoriaActiva] = useState("Todos");
+  const [categoriaActiva, setCategoriaActiva] = useState(categoriaInicial);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
 
-  // --------------------------------
-  // * CARGAR PROFESIONES + PRESTADORES
-  // --------------------------------
+  // Actualiza categoría si se navega desde InicioCliente
+  useEffect(() => {
+    if (route?.params?.categoria) {
+      setCategoriaActiva(route.params.categoria);
+    }
+  }, [route?.params?.categoria]);
+
   useEffect(() => {
     const cargarDatos = async () => {
       try {
@@ -80,9 +83,6 @@ export default function Prestadores({ navigation }) {
     cargarDatos();
   }, []);
 
-  // --------------------------
-  // * FILTRO COMBINADO
-  // --------------------------
   const prestadoresFiltrados = prestadores.filter((p) => {
     const coincideCategoria =
       categoriaActiva === "Todos" ||
@@ -105,12 +105,10 @@ export default function Prestadores({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* TÍTULO */}
       <View style={styles.headerBackground}>
         <Text style={styles.title}>Prestadores</Text>
       </View>
 
-      {/* BUSCADOR */}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Buscar prestador o categoría"
@@ -122,7 +120,6 @@ export default function Prestadores({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* CATEGORÍAS */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -167,7 +164,7 @@ export default function Prestadores({ navigation }) {
         </ScrollView>
 
         <FlatList
-          key={"grid2"}                       // 👈 fuerza re-render para evitar el error
+          key={"grid2"}
           data={prestadoresFiltrados}
           keyExtractor={(item) => item.id}
           numColumns={2}
@@ -178,15 +175,11 @@ export default function Prestadores({ navigation }) {
             <ProviderCard item={item} navigation={navigation} user={user} />
           )}
         />
-
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// ------------------------------
-// * ESTILOS
-// ------------------------------
 const CARD_WIDTH = width * 0.42;
 
 const styles = StyleSheet.create({
@@ -213,10 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     elevation: 4,
   },
-  searchInput: {
-    fontSize: 16,
-    color: "#333",
-  },
+  searchInput: { fontSize: 16, color: "#333" },
 
   categoryScroll: {
     paddingHorizontal: 20,
@@ -240,7 +230,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // → Cada fila del grid
   row: {
     justifyContent: "space-between",
     marginBottom: 20,
