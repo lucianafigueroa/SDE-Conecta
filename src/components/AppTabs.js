@@ -11,7 +11,7 @@ import InicioCliente from "../screens/InicioCliente";
 import Prestadores from "../screens/Prestadores";
 import Calificaciones from "../screens/Calificaciones";
 import MiPerfil from "../screens/MiPerfil";
-import Chat from "../screens/Chat";
+
 
 // Pantallas de Profesional
 import InicioProfesional from "../screens/InicioProfesional";
@@ -19,13 +19,15 @@ import RegistrarServicio from "../screens/RegistrarServicio";
 import Citas from "../screens/Citas";
 import MiPerfilProfesional from "../screens/MiPerfilProfesional";
 
+import ChatList from "../screens/ChatList"; 
+
 const Tab = createBottomTabNavigator();
 
 // Definición de las pestañas para Clientes
 const customerTabs = [
   { name: "Inicio", component: InicioCliente, iconFocused: "home", iconInactive: "home-outline" },
   { name: "Prestadores", component: Prestadores, iconFocused: "search", iconInactive: "search-outline" },
-  { name: "Chat", component: Chat, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
+  { name: "Chat", component: ChatList, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
   { name: "Perfil", component: MiPerfil, iconFocused: "person-circle", iconInactive: "person-circle-outline" },
 ];
 
@@ -33,7 +35,7 @@ const customerTabs = [
 const professionalTabs = [
   { name: "Inicio", component: InicioProfesional, iconFocused: "home", iconInactive: "home-outline" },
   { name: "Citas", component: Citas, iconFocused: "calendar", iconInactive: "calendar-outline" },
-  { name: "Chat", component: Chat, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
+  { name: "Chat", component: ChatList, iconFocused: "chatbubbles", iconInactive: "chatbubbles-outline" },
   // Usamos la pantalla de Perfil Profesional para el rol 'prestador'
   { name: "Perfil", component: MiPerfilProfesional, iconFocused: "person-circle", iconInactive: "person-circle-outline" },
   // Se quitó RegistrarServicio como pestaña principal, si se usa, debe ser un botón.

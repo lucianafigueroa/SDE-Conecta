@@ -242,7 +242,7 @@ export default function VerPerfil({ navigation, route }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.bottomButton, styles.orangeButton]}
-          onPress={() => navigation.navigate("ChatIndividual", { prestador, user })}
+          onPress={() => navigation.navigate("Chat", { prestador, user })}
         >
           <Text style={styles.bottomButtonText}>Contactarse</Text>
         </TouchableOpacity>

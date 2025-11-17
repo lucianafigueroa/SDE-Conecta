@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function ServiciosProfesional({ navigation, route }) {
+  useScreenFocusLogger();
   const { fotos, prestador } = route.params;
 
   return (

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function DetalleServicio({ navigation, route }) {
+  useScreenFocusLogger();
   const { servicio, prestador } = route.params;
 
   return (
